@@ -71,7 +71,7 @@ public class ExportTask extends Thread {
         try{
             //初始化File导出路径
             if(!isExternal){
-                File export_path=new File(SPUtil.getInternalSavePath(context));
+                File export_path=new File(SPUtil.getInternalSavePath());
                 if(!export_path.exists()){
                     export_path.mkdirs();
                 }
@@ -99,7 +99,7 @@ public class ExportTask extends Thread {
                     if(isExternal) {
                         DocumentFile documentFile = OutputUtil.getWritingDocumentFileForAppItem(context,item,"apk",i+1);
                         this.currentWritingFile=new FileItem(context,documentFile);
-                        this.currentWritingPath=SPUtil.getDisplayingExportPath(context)+"/"+documentFile.getName();
+                        this.currentWritingPath=SPUtil.getInternalSavePath()+"/"+documentFile.getName();
                         outputStream= OutputUtil.getOutputStreamForDocumentFile(context,documentFile);
                     }
                     else {
@@ -173,7 +173,7 @@ public class ExportTask extends Thread {
                     if(isExternal){
                         DocumentFile documentFile= OutputUtil.getWritingDocumentFileForAppItem(context,item,SPUtil.getCompressingExtensionName(context),i+1);
                         this.currentWritingFile=new FileItem(context,documentFile);
-                        this.currentWritingPath=SPUtil.getDisplayingExportPath(context)+"/"+documentFile.getName();
+                        this.currentWritingPath=SPUtil.getInternalSavePath()+"/"+documentFile.getName();
                         outputStream= OutputUtil.getOutputStreamForDocumentFile(context,documentFile);
                     }
                     else {

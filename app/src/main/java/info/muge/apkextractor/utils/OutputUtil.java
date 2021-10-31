@@ -20,9 +20,7 @@ public class OutputUtil {
      * @param extension "apk"或者"zip"
      */
     public static @NonNull String getAbsoluteWritePath(@NonNull Context context, @NonNull AppItem item, @NonNull String extension, int sequence_number){
-        SharedPreferences settings= SPUtil.getGlobalSharedPreferences(context);
-        return settings.getString(Constants.PREFERENCE_SAVE_PATH, Constants.PREFERENCE_SAVE_PATH_DEFAULT)
-                +"/"+getWriteFileNameForAppItem(context,item,extension,sequence_number);
+        return SPUtil.getInternalSavePath() +"/"+getWriteFileNameForAppItem(context,item,extension,sequence_number);
     }
 
     public static @Nullable DocumentFile getWritingDocumentFileForAppItem(@NonNull Context context,@NonNull AppItem appItem,@NonNull String extension,int sequence_number) throws Exception{
@@ -33,14 +31,7 @@ public class OutputUtil {
         return parent.createFile(extension.toLowerCase().equals("apk")?"application/vnd.android.package-archive":"application/x-zip-compressed",writingFileName);
     }
 
-    /*public static @Nullable DocumentFile getWritingDocumentFileForFileName(@NonNull Context context,@NonNull String fileName) throws Exception{
-        DocumentFile parent=getExportPathDocumentFile(context);
-        DocumentFile documentFile=parent.findFile(fileName);
-        if(documentFile!=null&&documentFile.exists())documentFile.delete();
-        return parent.createFile(EnvironmentUtil.getFileExtensionName(fileName).equalsIgnoreCase("apk")?
-                "application/vnd.android.package-archive":"application/x-zip-compressed",
-                fileName);
-    }*/
+
 
     /**
      * 创建一个按照命名规则命名的写入documentFile的输出流
@@ -56,7 +47,7 @@ public class OutputUtil {
      * 获取导出根目录的documentFile
      */
     public static DocumentFile getExportPathDocumentFile(@NonNull Context context) throws Exception{
-        String segments= SPUtil.getSaveSegment(context);
+        String segments= SPUtil.getInternalSavePath();
         return DocumentFileUtil.getDocumentFileBySegments(DocumentFile.fromTreeUri(context,Uri.parse(SPUtil.getExternalStorageUri(context))),segments);
     }
 

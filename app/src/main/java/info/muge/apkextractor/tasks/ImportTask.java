@@ -87,15 +87,15 @@ public class ImportTask extends Thread {
                                         .createFile("application/vnd.android.package-archive", writeFileName);
                                 outputStream=OutputUtil.getOutputStreamForDocumentFile(context
                                         ,writeDocumentFile);
-                                currentWritePath=SPUtil.getDisplayingExportPath(context)+"/"+writeFileName;
+                                currentWritePath=SPUtil.getInternalSavePath()+"/"+writeFileName;
                                 currentWrtingFileItem=new FileItem(context,writeDocumentFile);
                                 apkUri=writeDocumentFile.getUri();
                             }else{
-                                String writePath=SPUtil.getInternalSavePath(context)+"/"+ getApkFileNameWithNum(fileName);
+                                String writePath=SPUtil.getInternalSavePath()+"/"+ getApkFileNameWithNum(fileName);
                                 File writeFile=new File(writePath);
                                 while (writeFile.exists()){
                                     apk_num++;
-                                    writeFile=new File(SPUtil.getInternalSavePath(context)+"/"+ getApkFileNameWithNum(fileName));
+                                    writeFile=new File(SPUtil.getInternalSavePath()+"/"+ getApkFileNameWithNum(fileName));
                                 }
                                 outputStream=new FileOutputStream(writeFile);
                                 currentWritePath=writeFile.getAbsolutePath();

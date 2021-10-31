@@ -26,6 +26,7 @@
                 android:id="@+id/main_tablayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:tabTextAppearance="@style/MyTabTextAppearance"
                 app:tabIndicatorColor="@color/colorTabIndicator"/>
         </com.google.android.material.appbar.AppBarLayout>

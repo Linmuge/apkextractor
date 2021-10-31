@@ -1,11 +1,9 @@
 package info.muge.apkextractor.activities;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -13,13 +11,6 @@ import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.PermissionChecker;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.KeyEvent;
@@ -29,6 +20,20 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.material.snackbar.Snackbar;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import info.muge.apkextractor.Constants;
 import info.muge.apkextractor.Global;
@@ -45,15 +50,8 @@ import info.muge.apkextractor.utils.OutputUtil;
 import info.muge.apkextractor.utils.SPUtil;
 import info.muge.apkextractor.utils.StorageUtil;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 public class AppDetailActivity extends BaseActivity implements View.OnClickListener{
     private AppItem appItem;
-    private CheckBox cb_data,cb_obb;
     private final BroadcastReceiver uninstall_receiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -87,8 +85,6 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(appItem.getAppName());
 
-        cb_data=findViewById(R.id.app_detail_export_data);
-        cb_obb=findViewById(R.id.app_detail_export_obb);
 
         PackageInfo packageInfo=appItem.getPackageInfo();
 
@@ -102,7 +98,7 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         ((TextView)findViewById(R.id.app_detail_size)).setText(Formatter.formatFileSize(this,appItem.getSize()));
         ((TextView)findViewById(R.id.app_detail_install_time)).setText(SimpleDateFormat.getDateTimeInstance().format(new Date(packageInfo.firstInstallTime)));
         ((TextView)findViewById(R.id.app_detail_update_time)).setText(SimpleDateFormat.getDateTimeInstance().format(new Date(packageInfo.lastUpdateTime)));
-        ((TextView)findViewById(R.id.app_detail_minimum_api)).setText(Build.VERSION.SDK_INT>=24?String.valueOf(packageInfo.applicationInfo.minSdkVersion):getResources().getString(R.string.word_unknown));
+        ((TextView)findViewById(R.id.app_detail_minimum_api)).setText(String.valueOf(packageInfo.applicationInfo.minSdkVersion));
         ((TextView)findViewById(R.id.app_detail_target_api)).setText(String.valueOf(packageInfo.applicationInfo.targetSdkVersion));
         ((TextView)findViewById(R.id.app_detail_is_system_app)).setText(getResources().getString((appItem.getPackageInfo().applicationInfo.flags& ApplicationInfo.FLAG_SYSTEM)>0?R.string.word_yes:R.string.word_no));
         ((TextView)findViewById(R.id.app_detail_path_value)).setText(appItem.getPackageInfo().applicationInfo.sourceDir);
@@ -110,7 +106,6 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         ((TextView)findViewById(R.id.app_detail_uid)).setText(String.valueOf(appItem.getPackageInfo().applicationInfo.uid));
         ((TextView)findViewById(R.id.app_detail_launcher_value)).setText(appItem.getLaunchingClass());
 
-        getDataObbSizeAndFillView();
 
         new GetPackageInfoViewTask(this, appItem.getPackageInfo(), appItem.getStaticReceiversBundle(), (AssemblyView) findViewById(R.id.app_detail_assembly), new GetPackageInfoViewTask.CompletedCallback() {
             @Override
@@ -180,27 +175,6 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         }catch (Exception e){e.printStackTrace();}
     }
 
-    private void getDataObbSizeAndFillView(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final long data= FileUtil.getFileOrFolderSize(new File(StorageUtil.getMainExternalStoragePath()+"/android/data/"+appItem.getPackageName()));
-                final long obb= FileUtil.getFileOrFolderSize(new File(StorageUtil.getMainExternalStoragePath()+"/android/obb/"+appItem.getPackageName()));
-                Global.handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        findViewById(R.id.app_detail_export_progress_bar).setVisibility(View.GONE);
-                        cb_data.setText("Data:"+Formatter.formatFileSize(AppDetailActivity.this,data));
-                        cb_obb.setText("Obb:"+Formatter.formatFileSize(AppDetailActivity.this,obb));
-                        cb_data.setEnabled(data>0);
-                        cb_obb.setEnabled(obb>0);
-                        findViewById(R.id.app_detail_export_checkboxes).setVisibility(View.VISIBLE);
-                    }
-                });
-            }
-        }).start();
-    }
-
     @Override
     public void onClick(View v){
         switch (v.getId()){
@@ -214,12 +188,8 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
             }
             break;
             case R.id.app_detail_export_area:{
-                if(Build.VERSION.SDK_INT>=23&&PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                    Global.showRequestingWritePermissionSnackBar(this);
-                    return;
-                }
-                final List<AppItem>single_list=getSingleItemArrayList(true);
+
+                final List<AppItem>single_list=getSingleItemArrayList();
                 final AppItem item=single_list.get(0);
                 Global.checkAndExportCertainAppItemsToSetPathWithoutShare(this,single_list , false,new Global.ExportTaskFinishedListener() {
                     @Override
@@ -228,15 +198,12 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
                             new AlertDialog.Builder(AppDetailActivity.this)
                                     .setTitle(getResources().getString(R.string.exception_title))
                                     .setMessage(getResources().getString(R.string.exception_message)+error_message)
-                                    .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {}
-                                    })
+                                    .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (dialog, which) -> {})
                                     .show();
                             return;
                         }
                         ToastManager.showToast(AppDetailActivity.this,getResources().getString(R.string.toast_export_complete)+" "
-                                +SPUtil.getDisplayingExportPath(AppDetailActivity.this)+"/"
+                                + SPUtil.getDisplayingExportPath()
                                 +OutputUtil.getWriteFileNameForAppItem(AppDetailActivity.this,single_list.get(0),(item.exportData||item.exportObb)?
                                 SPUtil.getCompressingExtensionName(AppDetailActivity.this):"apk",1),Toast.LENGTH_SHORT);
                     }
@@ -244,12 +211,8 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
             }
             break;
             case R.id.app_detail_share_area:{
-                if(Build.VERSION.SDK_INT>=23&&PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                    Global.showRequestingWritePermissionSnackBar(this);
-                    return;
-                }
-                Global.shareCertainAppsByItems(this,getSingleItemArrayList(false));
+
+                Global.shareCertainAppsByItems(this,getSingleItemArrayList());
             }
             break;
             case R.id.app_detail_detail_area:{
@@ -366,13 +329,10 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
     /**
      * 构造包含单个副本AppItem的ArrayList
      */
-    private @NonNull ArrayList<AppItem>getSingleItemArrayList(boolean put_checkbox_value){
+    private @NonNull ArrayList<AppItem>getSingleItemArrayList(){
         ArrayList<AppItem>list=new ArrayList<>();
         AppItem item=new AppItem(appItem,false,false);
-        if(put_checkbox_value){
-            item.exportData=cb_data.isChecked();
-            item.exportObb=cb_obb.isChecked();
-        }
+
         list.add(item);
         return list;
     }

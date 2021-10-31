@@ -37,7 +37,6 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
         switch (position){
             default:break;
             case 0:return activity.getResources().getString(R.string.main_page_export);
-            case 1:return activity.getResources().getString(R.string.main_page_import);
         }
         return "";
     }

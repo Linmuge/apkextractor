@@ -13,6 +13,5 @@
     <color name="colorFirstAttention">#ffffff</color>
     <color name="colorSelectedBackground">#026B02</color>
     <color name="colorSystemAppTitleColor">#FFB6C1</color>
-    <color name="colorSharingDialogBack">#333333</color>
     <color name="color_popup_window">#bb999999</color>
 </resources>

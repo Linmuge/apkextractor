@@ -44,18 +44,6 @@ public class DocumentFileUtil {
         return builder.toString();
     }
 
-    /**
-     * 测试是否有写入外置存储的权限
-     */
-    public static boolean canWrite2ExternalStorage(@NonNull Context context){
-        SharedPreferences settings= SPUtil.getGlobalSharedPreferences(context);
-        String uri_value=settings.getString(Constants.PREFERENCE_SAVE_PATH_URI,"");
-        if("".equals(uri_value))return false;
-        try{
-            return DocumentFile.fromTreeUri(context,Uri.parse(uri_value)).canWrite();
-        }catch (Exception e){e.printStackTrace();}
-        return false;
-    }
 
     /**
      * 获取一个documentFile用于展示的路径

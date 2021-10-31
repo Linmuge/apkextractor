@@ -25,13 +25,12 @@ import info.muge.apkextractor.tasks.GetImportLengthAndDuplicateInfoTask;
 import info.muge.apkextractor.tasks.ImportTask;
 import info.muge.apkextractor.ui.DataObbDialog;
 import info.muge.apkextractor.ui.ExportingDialog;
-import info.muge.apkextractor.ui.ImportingDataObbDialog;
 import info.muge.apkextractor.ui.ImportingDialog;
-import info.muge.apkextractor.ui.ShareSelectionDialog;
 import info.muge.apkextractor.ui.ToastManager;
 import info.muge.apkextractor.utils.DocumentFileUtil;
 import info.muge.apkextractor.utils.OutputUtil;
 import info.muge.apkextractor.utils.SPUtil;
+import info.muge.apkextractor.utils.ViewExtsKt;
 import info.muge.apkextractor.utils.ZipFileUtil;
 
 import java.io.File;
@@ -91,7 +90,7 @@ public class Global {
                                 .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        exportCertainAppItemsToSetPathAndShare(activity, export_list, false,listener);
+                                        exportCertainAppItemsToSetPathAndShare(activity, export_list,listener);
                                     }
                                 })
                                 .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
@@ -101,7 +100,7 @@ public class Global {
                                 .show();
                         return;
                     }
-                    exportCertainAppItemsToSetPathAndShare(activity, export_list, false,listener);
+                    exportCertainAppItemsToSetPathAndShare(activity, export_list,listener);
                 }
             });
             dialog.show();
@@ -114,7 +113,7 @@ public class Global {
                         .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                exportCertainAppItemsToSetPathAndShare(activity, list, false,listener);
+                                exportCertainAppItemsToSetPathAndShare(activity, list,listener);
                             }
                         })
                         .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
@@ -124,16 +123,15 @@ public class Global {
                         .show();
                 return;
             }
-            exportCertainAppItemsToSetPathAndShare(activity, list, false,listener);
+            exportCertainAppItemsToSetPathAndShare(activity, list,listener);
         }
 
     }
 
     /**
      * 导出list集合中的应用，并向activity显示一个dialog，传入接口来监听完成回调（在主线程）
-     * @param if_share 完成后是否执行分享操作
      */
-    private static void exportCertainAppItemsToSetPathAndShare(@NonNull final Activity activity, @NonNull List<AppItem>export_list, final boolean if_share, @Nullable final ExportTaskFinishedListener listener){
+    private static void exportCertainAppItemsToSetPathAndShare(@NonNull final Activity activity, @NonNull List<AppItem>export_list, @Nullable final ExportTaskFinishedListener listener){
         final ExportingDialog dialog=new ExportingDialog(activity);
         final ExportTask task=new ExportTask(activity,export_list,null);
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_export_stop), new DialogInterface.OnClickListener() {
@@ -171,9 +169,7 @@ public class Global {
             public void onExportTaskFinished(List<FileItem> fileItems, String error_message) {
                 dialog.cancel();
                 if(listener!=null)listener.onFinished(error_message);
-                if(if_share){
-                    new ShareSelectionDialog(activity,fileItems).show();
-                }
+
             }
         });
         task.start();
@@ -248,69 +244,9 @@ public class Global {
      * @param items 传入AppItem的副本，data obb为false
      */
     public static void shareCertainAppsByItems(@NonNull final Activity activity,@NonNull final List<AppItem>items){
-        if(items.size()==0)return;
-        boolean ifNeedExport= SPUtil.getGlobalSharedPreferences(activity)
-                .getInt(Constants.PREFERENCE_SHAREMODE,Constants.PREFERENCE_SHAREMODE_DEFAULT)==Constants.SHARE_MODE_AFTER_EXTRACT;
-        if(ifNeedExport){
-            DataObbDialog dialog=new DataObbDialog(activity, items, new DataObbDialog.DialogDataObbConfirmedCallback() {
-                @Override
-                public void onDialogDataObbConfirmed(@NonNull final List<AppItem> export_list) {
-                    String dulplicated_info=getDuplicatedFileInfo(activity,export_list);
-                    final ExportTaskFinishedListener exportTaskFinishedListener=new ExportTaskFinishedListener() {
-                        @Override
-                        public void onFinished(@NonNull String error_message) {
-                            if(!error_message.trim().equals("")){
-                                new AlertDialog.Builder(activity)
-                                        .setTitle(activity.getResources().getString(R.string.exception_title))
-                                        .setMessage(activity.getResources().getString(R.string.exception_message)+error_message)
-                                        .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {}
-                                        })
-                                        .show();
-                                return;
-                            }
-                            ToastManager.showToast(activity,activity.getResources().getString(R.string.toast_export_complete)+ SPUtil.getDisplayingExportPath(activity), Toast.LENGTH_SHORT);
-                        }
-                    };
-                    if(!dulplicated_info.trim().equals("")){
-                        new AlertDialog.Builder(activity)
-                                .setTitle(activity.getResources().getString(R.string.dialog_duplicate_title))
-                                .setMessage(activity.getResources().getString(R.string.dialog_duplicate_msg)+dulplicated_info)
-                                .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        exportCertainAppItemsToSetPathAndShare(activity, export_list, true,exportTaskFinishedListener);
-                                    }
-                                })
-                                .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {}
-                                })
-                                .show();
-                        return;
-                    }
-                    exportCertainAppItemsToSetPathAndShare(activity, export_list, true,exportTaskFinishedListener);
-                }
-            });
-            dialog.show();
-        }else {
-            ArrayList<FileItem>arrayList=new ArrayList<>();
-            for(AppItem item:items){
-                arrayList.add(new FileItem(new File(item.getSourcePath())));
-            }
-            new ShareSelectionDialog(activity,arrayList).show();
-        }
+        ViewExtsKt.toast("分享应用List");
     }
 
-    public static void showImportingDataObbDialog(@NonNull final Activity activity, @NonNull List<ImportItem>importItems,@Nullable final ImportTaskFinishedCallback callback){
-        new ImportingDataObbDialog(activity, importItems, new ImportingDataObbDialog.ImportDialogDataObbConfirmedCallback() {
-            @Override
-            public void onImportingDataObbConfirmed(@NonNull final List<ImportItem> importItems2, @NonNull List<ZipFileUtil.ZipFileInfo> zipFileInfos) {
-                showCheckingDuplicationDialogAndStartImporting(activity,importItems2,zipFileInfos,callback);
-            }
-        }).show();
-    }
 
     /**
      * 展示查重对话框，启动导入流程
@@ -412,11 +348,7 @@ public class Global {
     }
 
     public static void shareImportItems(@NonNull Activity activity,@NonNull List<ImportItem>importItems){
-        ArrayList<FileItem>arrayList=new ArrayList<>();
-        for(ImportItem importItem:importItems){
-            arrayList.add(importItem.getFileItem());
-        }
-        new ShareSelectionDialog(activity,arrayList).show();
+        ViewExtsKt.toast("分享应用");
     }
 
     /**

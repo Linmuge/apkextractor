@@ -31,6 +31,7 @@ import info.muge.apkextractor.ui.ExportRuleDialog;
 import info.muge.apkextractor.ui.ToastManager;
 import info.muge.apkextractor.utils.EnvironmentUtil;
 import info.muge.apkextractor.utils.SPUtil;
+import info.muge.apkextractor.utils.ViewExtsKt;
 
 public class SettingActivity extends BaseActivity implements View.OnClickListener{
 
@@ -52,17 +53,13 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         try{
             getSupportActionBar().setTitle(getResources().getString(R.string.action_settings));
         }catch (Exception e){e.printStackTrace();}
-        findViewById(R.id.settings_share_mode_area).setOnClickListener(this);
         findViewById(R.id.settings_night_mode_area).setOnClickListener(this);
         findViewById(R.id.settings_loading_options_area).setOnClickListener(this);
         findViewById(R.id.settings_rules_area).setOnClickListener(this);
         findViewById(R.id.settings_path_area).setOnClickListener(this);
         findViewById(R.id.settings_about_area).setOnClickListener(this);
         findViewById(R.id.settings_language_area).setOnClickListener(this);
-        findViewById(R.id.settings_port_number_area).setOnClickListener(this);
         findViewById(R.id.settings_device_name_area).setOnClickListener(this);
-        findViewById(R.id.settings_extension_area).setOnClickListener(this);
-        findViewById(R.id.settings_package_scope_area).setOnClickListener(this);
         findViewById(R.id.settings_package_name_separator_area).setOnClickListener(this);
         refreshSettingValues();
 
@@ -77,36 +74,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         final SharedPreferences.Editor editor=settings.edit();
         switch (v.getId()){
             default:break;
-            case R.id.settings_share_mode_area:{
-                View dialogView= LayoutInflater.from(this).inflate(R.layout.dialog_share_mode,null);
-                int mode=settings.getInt(Constants.PREFERENCE_SHAREMODE,Constants.PREFERENCE_SHAREMODE_DEFAULT);
-                ((RadioButton)dialogView.findViewById(R.id.share_mode_direct_ra)).setChecked(mode==Constants.SHARE_MODE_DIRECT);
-                ((RadioButton)dialogView.findViewById(R.id.share_mode_after_extract_ra)).setChecked(mode==Constants.SHARE_MODE_AFTER_EXTRACT);
-                final AlertDialog dialog=new AlertDialog.Builder(this)
-                        .setTitle(getResources().getString(R.string.activity_settings_share_mode))
-                        .setView(dialogView)
-                        .show();
-                dialogView.findViewById(R.id.share_mode_direct).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.cancel();
-                        editor.putInt(Constants.PREFERENCE_SHAREMODE,Constants.SHARE_MODE_DIRECT);
-                        editor.apply();
-                        refreshSettingValues();
-                    }
-                });
-                dialogView.findViewById(R.id.share_mode_after_extract).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.cancel();
-                        editor.putInt(Constants.PREFERENCE_SHAREMODE,Constants.SHARE_MODE_AFTER_EXTRACT);
-                        editor.apply();
-                        refreshSettingValues();
-                    }
-                });
-
-            }
-            break;
             case R.id.settings_night_mode_area:{
                 View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_night_mode,null);
                 int night_mode=settings.getInt(Constants.PREFERENCE_NIGHT_MODE,Constants.PREFERENCE_NIGHT_MODE_DEFAULT);
@@ -204,28 +171,18 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             }
             break;
             case R.id.settings_path_area:{
-                if(Build.VERSION.SDK_INT>=23&&PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                    Global.showRequestingWritePermissionSnackBar(this);
-                    return;
-                }
-                startActivityForResult(new Intent(this,FolderSelectorActivity.class),REQUEST_CODE_SET_PATH);
+                ViewExtsKt.toast("暂不支持修改");
             }
             break;
             case R.id.settings_about_area:{
                 View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
-                dialogView.findViewById(R.id.layout_about_donate).setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        try{
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://qr.alipay.com/FKX08041Y09ZGT6ZT91FA5")));
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-
+                dialogView.findViewById(R.id.layout_about_donate).setOnClickListener(v1 -> {
+                    try{
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://qr.alipay.com/FKX08041Y09ZGT6ZT91FA5")));
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
+
                 });
                 new AlertDialog.Builder(this)
                         .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
@@ -280,47 +237,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 });
             }
             break;
-            case R.id.settings_port_number_area:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_port_number,null);
-                final AlertDialog dialog=new AlertDialog.Builder(this)
-                        .setTitle(getResources().getString(R.string.activity_settings_port_number))
-                        .setView(dialogView)
-                        .setPositiveButton(getResources().getString(R.string.dialog_button_confirm),null)
-                        .setNegativeButton(getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {}
-                        })
-                        .create();
-                final EditText editText=dialogView.findViewById(R.id.dialog_port_edit);
-                editText.setText(String.valueOf(SPUtil.getPortNumber(this)));
-                dialog.show();
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String value=editText.getText().toString().trim();
-                        try{
-                            if(TextUtils.isEmpty(value)){
-                                ToastManager.showToast(SettingActivity.this,getResources().getString(R.string.activity_settings_port_unknown),Toast.LENGTH_SHORT);
-                                return;
-                            }
-                            final int port=Integer.parseInt(value);
-                            if(port<1024||port>65535){
-                                ToastManager.showToast(SettingActivity.this,getResources().getString(R.string.activity_settings_port_invalid),Toast.LENGTH_SHORT);
-                                return;
-                            }
-                            editor.putInt(Constants.PREFERENCE_NET_PORT,port);
-                            editor.apply();
-                            dialog.cancel();
-                            refreshSettingValues();
-                        }catch (Exception e){
-                            e.printStackTrace();
-                            ToastManager.showToast(SettingActivity.this,e.toString(), Toast.LENGTH_SHORT);
-                            return;
-                        }
-                    }
-                });
-            }
-            break;
+
             case R.id.settings_device_name_area:{
                 View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_device_name,null);
                 final EditText editText=dialogView.findViewById(R.id.dialog_device_name_edit);
@@ -347,48 +264,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                         editor.apply();
                         dialog.cancel();
                         refreshSettingValues();
-                    }
-                });
-            }
-            break;
-            case R.id.settings_extension_area:{
-                new CompressExtensionDialog(this, SPUtil.getCompressingExtensionName(this),
-                        new CompressExtensionDialog.OnConfirmedCallback() {
-                            @Override
-                            public void onExtensionConfirmed(@NonNull String extension) {
-                                editor.putString(Constants.PREFERENCE_COMPRESSING_EXTENSION, extension).apply();
-                                refreshSettingValues();
-                            }
-                        }).show();
-            }
-            break;
-            case R.id.settings_package_scope_area:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_package_scope,null);
-                int value=settings.getInt(Constants.PREFERENCE_PACKAGE_SCOPE,Constants.PREFERENCE_PACKAGE_SCOPE_DEFAULT);
-                ((RadioButton)dialogView.findViewById(R.id.package_scope_all_ra)).setChecked(value==Constants.PACKAGE_SCOPE_ALL);
-                ((RadioButton)dialogView.findViewById(R.id.package_scope_exporting_path_ra)).setChecked(value==Constants.PACKAGE_SCOPE_EXPORTING_PATH);
-                final AlertDialog dialog=new AlertDialog.Builder(this)
-                        .setTitle(getResources().getString(R.string.activity_settings_package_scope))
-                        .setView(dialogView)
-                        .show();
-                dialogView.findViewById(R.id.package_scope_all).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        editor.putInt(Constants.PREFERENCE_PACKAGE_SCOPE,Constants.PACKAGE_SCOPE_ALL);
-                        editor.apply();
-                        dialog.cancel();
-                        refreshSettingValues();
-                        sendBroadcast(new Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST));
-                    }
-                });
-                dialogView.findViewById(R.id.package_scope_exporting_path).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        editor.putInt(Constants.PREFERENCE_PACKAGE_SCOPE,Constants.PACKAGE_SCOPE_EXPORTING_PATH);
-                        editor.apply();
-                        dialog.cancel();
-                        refreshSettingValues();
-                        sendBroadcast(new Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST));
                     }
                 });
             }
@@ -433,12 +308,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
 
     private void refreshSettingValues(){
         if(settings==null)return;
-        //SharedPreferences.Editor editor=settings.edit();
-        ((TextView)findViewById(R.id.settings_path_value)).setText(SPUtil.getDisplayingExportPath(this));
-        ((TextView)findViewById(R.id.settings_share_mode_value)).setText(
-                getResources().getString(
-                        settings.getInt(Constants.PREFERENCE_SHAREMODE,Constants.PREFERENCE_SHAREMODE_DEFAULT)==Constants.SHARE_MODE_DIRECT?
-                        R.string.share_mode_direct:R.string.share_mode_export));
+        ((TextView)findViewById(R.id.settings_path_value)).setText(SPUtil.getDisplayingExportPath());
         String night_mode_value="";
         switch (settings.getInt(Constants.PREFERENCE_NIGHT_MODE,Constants.PREFERENCE_NIGHT_MODE_DEFAULT)){
             default:break;
@@ -490,22 +360,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             case Constants.LANGUAGE_ENGLISH:language_value=getResources().getString(R.string.language_english);break;
         }
         ((TextView)findViewById(R.id.settings_language_value)).setText(language_value);
-        ((TextView)findViewById(R.id.settings_port_number_value)).setText(String.valueOf(SPUtil.getPortNumber(this)));
         ((TextView)findViewById(R.id.settings_device_name_value)).setText(SPUtil.getDeviceName(this));
-        ((TextView)findViewById(R.id.settings_extension_value)).setText(SPUtil.getCompressingExtensionName(this));
-        final int value_package_scope=settings.getInt(Constants.PREFERENCE_PACKAGE_SCOPE,Constants.PREFERENCE_PACKAGE_SCOPE_DEFAULT);
-        TextView tv_package_scope=findViewById(R.id.settings_package_scope_value);
-        switch (value_package_scope){
-            default:break;
-            case Constants.PACKAGE_SCOPE_ALL:{
-                tv_package_scope.setText(getResources().getString(R.string.package_scope_all));
-            }
-            break;
-            case Constants.PACKAGE_SCOPE_EXPORTING_PATH:{
-                tv_package_scope.setText(getResources().getString(R.string.package_scope_exporting_path));
-            }
-            break;
-        }
+
         ((TextView)findViewById(R.id.settings_package_name_separator_value)).setText(settings.getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT));
     }
 

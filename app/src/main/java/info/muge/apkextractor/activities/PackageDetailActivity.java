@@ -61,11 +61,11 @@ public class PackageDetailActivity extends BaseActivity implements View.OnClickL
                 return;
             }
             importItem=new ImportItem(this,new FileItem(this, uri));
-            if("apk".equalsIgnoreCase(EnvironmentUtil.getFileExtensionName(importItem.getFileItem().getName()))){
+            /*if("apk".equalsIgnoreCase(EnvironmentUtil.getFileExtensionName(importItem.getFileItem().getName()))){
                 ToastManager.showToast(this,getResources().getString(R.string.activity_package_detail_apk_attention),Toast.LENGTH_SHORT);
                 finish();
                 return;
-            }
+            }*/
         }else{
             try{
                 //importItem= Global.item_list.get(getIntent().getIntExtra(EXTRA_IMPORT_ITEM_POSITION,-1));
@@ -259,11 +259,6 @@ public class PackageDetailActivity extends BaseActivity implements View.OnClickL
                     }
                     if(!cb_data.isChecked()&&!cb_obb.isChecked()&&!cb_apk.isChecked()){
                         Snackbar.make(findViewById(android.R.id.content),getResources().getString(R.string.activity_detail_nothing_checked),Snackbar.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if(Build.VERSION.SDK_INT>=23&&PermissionChecker.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                        ToastManager.showToast(this,getResources().getString(R.string.permission_write),Toast.LENGTH_SHORT);
                         return;
                     }
                     ImportItem importItem1=new ImportItem(importItem,cb_data.isChecked(),cb_obb.isChecked(),cb_apk.isChecked());

@@ -256,11 +256,6 @@ public class AppFragment extends Fragment implements View.OnClickListener, Refre
             }
             break;
             case R.id.main_export:{
-                if(Build.VERSION.SDK_INT>=23&& PermissionChecker.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                    Global.showRequestingWritePermissionSnackBar(getActivity());
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                    return;
-                }
                 if(adapter==null)return;
                 final ArrayList<AppItem> arrayList=new ArrayList<>(adapter.getSelectedItems());
                 Global.checkAndExportCertainAppItemsToSetPathWithoutShare(getActivity(), arrayList, true,new Global.ExportTaskFinishedListener() {
@@ -278,7 +273,7 @@ public class AppFragment extends Fragment implements View.OnClickListener, Refre
                                     .show();
                         }else{
                             ToastManager.showToast(getActivity(),getResources().getString(R.string.toast_export_complete)+ " "
-                                    +SPUtil.getDisplayingExportPath(getActivity()), Toast.LENGTH_SHORT);
+                                    +SPUtil.getDisplayingExportPath(), Toast.LENGTH_SHORT);
                         }
                         closeMultiSelectMode();
                         refreshAvailableStorage();
@@ -287,11 +282,6 @@ public class AppFragment extends Fragment implements View.OnClickListener, Refre
             }
             break;
             case R.id.main_share:{
-                if(Build.VERSION.SDK_INT>=23&&PermissionChecker.checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                    Global.showRequestingWritePermissionSnackBar(getActivity());
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                    return;
-                }
                 if(adapter==null)return;
                 final ArrayList<AppItem>arrayList=new ArrayList<>(adapter.getSelectedItems());
                 //closeMultiSelectMode();

@@ -2,6 +2,7 @@ package info.muge.apkextractor.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,21 +13,14 @@ import info.muge.apkextractor.R;
 
 public class SPUtil {
 
-    public static String getDisplayingExportPath(@NonNull Context context){
-        if(getIsSaved2ExternalStorage(context)){
-            String segment=getSaveSegment(context);
-            if(segment==null)segment="";
-            return context.getResources().getString(R.string.external_storage)+"/"+segment;
-        }else return getInternalSavePath(context);
+    public static String getDisplayingExportPath(){
+        return "内置存储/Download/AppKit/";
     }
     /**
      * 获取当前应用导出的内置主路径
      * @return 应用导出内置路径，最后没有文件分隔符，例如 /storage/emulated/0
      */
-    public static String getInternalSavePath(@NonNull Context context){
-        try{
-            return getGlobalSharedPreferences(context).getString(Constants.PREFERENCE_SAVE_PATH, Constants.PREFERENCE_SAVE_PATH_DEFAULT);
-        }catch (Exception e){e.printStackTrace();}
+    public static String getInternalSavePath(){
         return Constants.PREFERENCE_SAVE_PATH_DEFAULT;
     }
 
@@ -49,17 +43,7 @@ public class SPUtil {
      * 获取外置存储的uri值
      */
     public static String getExternalStorageUri(@NonNull Context context){
-        return getGlobalSharedPreferences(context).getString(Constants.PREFERENCE_SAVE_PATH_URI,"");
-    }
-
-    /**
-     * 获取存储到外置存储的路径片段
-     */
-    public static @Nullable
-    String getSaveSegment(@NonNull Context context){
-        String value=getGlobalSharedPreferences(context).getString(Constants.PREFERENCE_SAVE_PATH_SEGMENT,"");
-        if(TextUtils.isEmpty(value))return null;
-        return value;
+        return Uri.parse(Constants.PREFERENCE_SAVE_PATH_DEFAULT).toString();
     }
 
     /**

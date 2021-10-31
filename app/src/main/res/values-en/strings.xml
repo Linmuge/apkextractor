@@ -6,11 +6,6 @@
     <string name="action_view">View mode</string>
     <string name="action_confirm">Confirm</string>
     <string name="action_cancel">@android:string/cancel</string>
-    <string name="action_new_folder">New folder</string>
-    <string name="action_name_ascend">Ascending by name(A→Z)</string>
-    <string name="action_name_descend">Descending by name(Z→A)</string>
-    <string name="action_help">help</string>
-    <string name="nav_file_receive">Receive Files</string>
     <string name="nav_about">About</string>
     <string name="dialog_loading_title">Loading</string>
     <string name="dialog_sort_appitem_title">Sort by(APP)</string>
@@ -22,16 +17,13 @@
     <string name="main_card_show_system_app">Show system apps</string>
     <string name="main_card_remaining_storage">Remaining space</string>
     <string name="bottom_export">export</string>
-    <string name="bottom_import">import</string>
     <string name="select_all_change">sel/des</string>
     <string name="bottom_share">Share</string>
     <string name="bottom_more">more</string>
-    <string name="bottom_delete">delete</string>
     <string name="more_copy_package_names">copy package names</string>
     <string name="more_file_rename">Rename</string>
     <string name="hint_file_rename">Type in file name or variables</string>
     <string name="main_page_export">Applications</string>
-    <string name="main_page_import">Packages</string>
 
     <string name="activity_package_detail">Install by APK Kit</string>
     <string name="activity_package_detail_blank">None valid data found, please try to re-open</string>
@@ -80,34 +72,12 @@
 
     <string name="activity_settings_title">Settings</string>
     <string name="activity_settings_path">Exporting path</string>
-    <string name="activity_settings_package_scope">Package scope</string>
     <string name="activity_settings_rules">Exporting rules</string>
-    <string name="activity_settings_share_mode">Sharing mode</string>
     <string name="activity_settings_night_mode">Night mode</string>
     <string name="activity_settings_loading_options">Loading options</string>
     <string name="activity_settings_about">About</string>
 
     <string name="activity_folder_selector_title">Selecting path</string>
-    <string name="activity_folder_selector_select_storage">Selecting storage</string>
-    <string name="activity_folder_selector_item_internal">Main storage</string>
-    <string name="activity_folder_selector_item_external">External storage</string>
-    <string name="activity_folder_selector_item_others">Choosing another storage</string>
-    <string name="activity_folder_selector_blank_folder">No folders to show</string>
-    <string name="activity_folder_selector_external_title">External storage</string>
-    <string name="activity_folder_selector_external_message">Select an external storage at the left side, then directly click \"select\".</string>
-    <string name="activity_folder_selector_external_error">It is not selected to a root path of an external storage, ensure you have selected an external
-     storage at the left side then directly clicked "select"</string>
-    <string name="activity_attention_select_folder">Please select a folder</string>
-
-    <string name="share_mode_direct">Share directly</string>
-    <string name="share_mode_direct_att">Sharing the source apk file directly without exporting, but can not rename the file, or share zip packages with data or obb</string>
-    <string name="share_mode_export">Share after exporting</string>
-    <string name="share_mode_export_att">Exporting the files to the set path by the naming rules and then share them, but will spend more storage space</string>
-
-    <string name="package_scope_all">All</string>
-    <string name="package_scope_all_des">All ranges of the storage，and will scan external storage if granted, may take more time</string>
-    <string name="package_scope_exporting_path">Only exporting path</string>
-    <string name="package_scope_exporting_path_des">Only scan the packages in the exporting path</string>
 
     <string name="night_mode_enabled">enabled</string>
     <string name="night_mode_disabled">disabled</string>
@@ -118,12 +88,6 @@
     <string name="dialog_export_msg_apk">Copying to :</string>
     <string name="dialog_export_zip">Compressing :</string>
     <string name="dialog_export_stop">stop</string>
-
-    <string name="dialog_import_invalid_zip_title">No valid files found</string>
-    <string name="dialog_import_invalid_zip_message">There is no valid files found in this zip file.</string>
-
-    <string name="dialog_import_contains_apk_title">Attention</string>
-    <string name="dialog_import_contains_apk_message">Only zip files can be selected, please deselect all apk files then retry</string>
 
     <string name="dialog_import_duplicate_title">Files already exist</string>
     <string name="dialog_import_duplicate_message">File(s) listed below are already existed in the main storage, confirm to overwrite it(them)?\n\n</string>
@@ -153,15 +117,8 @@
     <string name="dialog_data_obb_message">The app(s) selected contain(s) data or obb in the external storage, check the following options
         will package them to a zip file</string>
 
-    <string name="dialog_import_data_obb_title">Importing compressed  file</string>
-    <string name="dialog_import_data_obb_att">The listed bellow are found in this(those) compressed file(s), check data or obb and then will decompress them
-    to the main storage with the path of /android/data or /android/obb, check apk will decompress it to the export path</string>
-
     <string name="dialog_button_confirm">Confirm</string>
     <string name="dialog_button_cancel">Cancel</string>
-    <string name="dialog_button_accept">accept</string>
-    <string name="dialog_button_deny">deny</string>
-    <string name="dialog_button_share_this_app">share this app</string>
 
     <string name="share_title">Share</string>
 
@@ -220,53 +177,13 @@
     <string name="dialog_filename_rename_warn_no_variables">no unique variable(?A), errors may occur during renaming files!</string>
     <string name="dialog_filename_rename_warn_no_variables_confirm">(Click again to continue forcibly) no unique variable(?A), errors may occur during renaming files!</string>
     <string name="dialog_filename_confirm">Click again to continue</string>
-    <string name="dialog_filename_failure">Errors occurred while renaming the following file with the following error message:\n\n</string>
 
-    <string name="activity_send_title">Sending Files</string>
     <string name="activity_send_by_title">Sending by APK Kit</string>
-    <string name="dialog_send_title">Sending Files</string>
-    <string name="dialog_send_att_head">Now sending:</string>
-    <string name="toast_sending_complete">File sending complete</string>
-    <string name="dialog_send_request_head1">waiting for </string>
-    <string name="dialog_send_request_head2"> \'s reply&#8230;</string>
 
     <string name="activity_receive_title">Receive Files</string>
-    <string name="activity_receive_att">Running logs</string>
-    <string name="dialog_file_receive_title">File receiving request</string>
-    <string name="dialog_file_receive_device_name">Device name:</string>
-    <string name="dialog_file_receive_ip">IP address:</string>
-    <string name="dialog_file_receive_files_info">Info of the files are bellow:</string>
-    <string name="dialog_file_receiving_title">Receiving files</string>
-    <string name="dialog_file_receiving_att">receiving:</string>
-
-    <string name="activity_send_no_device_att1">No device found</string>
-    <string name="activity_send_no_device_att2"><u>look for help?</u></string>
-    <string name="receive_log_ip">IP Address:</string>
-    <string name="receive_log_port">port number:</string>
-    <string name="receive_log_send_online_broadcast">sending online message to:</string>
-    <string name="receive_log_send_refuse_broadcast">sending refuse receiving file message to:</string>
-    <string name="receive_log_send_stop_broadcast">sending stop receiving files message to:</string>
-    <string name="receive_log_send_offline_broadcast">sending offline message to:</string>
-    <string name="receive_log_received_answer_request">received online answering request message:</string>
-    <string name="receive_log_received_file_request">received receiving file request message:</string>
-    <string name="receive_log_received_send_cancel">received sending files canceled message:</string>
-    <string name="receive_log_received_transfer_interrupt">received sending files interrupted message:</string>
-    <string name="receive_log_starting_receiving_files">Starting to receive file #N, path: #P, length: #L</string>
-    <string name="receive_log_receiving_file_exception">Occurs exception while receiving file #N, exception info ：\n</string>
-    <string name="receive_log_receiving_files_completed">Receiving files completed</string>
-
-    <string name="help_send">
-        Let the other side install APK Kit, then connect to a same WiFi network , or connect to this devices\'s AP ,then run APK Kit with selecting the "Receive File"
-         item on the left side of the main panel.\n\n
-        Specially attention, if you have set the port number manually, the port number must be same to the other side or it can not detect the devices.
-    </string>
-
-    <string name="dialog_share_selection_self">by local net</string>
-    <string name="dialog_share_selection_system">by system interface</string>
 
     <string name="snack_bar_clipboard">has been copied to clipboard</string>
     <string name="snack_bar_no_app_selected">Please select any apps to copy</string>
-    <string name="toast_mkdirs_error">Initializing exporting path failed, please check</string>
 
     <string name="external_storage">External storage</string>
 
@@ -275,7 +192,6 @@
     <string name="hint_compress_custom">type in custom extension name</string>
 
     <string name="text_hint_searchview">searching info</string>
-    <string name="text_hint_edittext">type in something</string>
 
     <string name="zip_level_att">compressing level</string>
     <string name="zip_level_default">default</string>
@@ -285,7 +201,6 @@
     <string name="zip_level_high">high</string>
 
     <string name="file_invalid_name">the file name contains illegal character(s)</string>
-    <string name="file_blank_name">the file name can not be empty</string>
 
 
     <string name="unit_item">item(s)</string>
@@ -300,10 +215,8 @@
     <string name="word_none">none</string>
     <string name="word_stop">stop</string>
     <string name="word_content_blank">No contents</string>
-    <string name="word_ap_mode">AP Mode</string>
     <string name="word_custom">custom</string>
     <string name="att_loading">Loading&#8230;</string>
-    <string name="att_scanning">Scanning&#160;</string>
     <string name="att_checking_duplication">Checking duplication files&#8230;</string>
 
     <string name="language_follow_system">follow system</string>
@@ -315,49 +228,14 @@
         mxremail@qq.com \n\n
         Donate:
         </string>
-    <string name="activity_receive_refresh"><u>Have not been seen?(retry)</u></string>
-    <string name="activity_send_file_info_head">sending file info</string>
     <string name="activity_settings_device_name">Device name</string>
-    <string name="activity_settings_port_invalid">Please type in a number between 1024 to 65535</string>
-    <string name="activity_settings_port_number">port number</string>
-    <string name="activity_settings_port_number_attention">At most circumstances, it is no need to edit the port number manually unless the port number of 6565 is in use by other apps.\n\n
-        The port number must be same as the other side while sharing files through local network or it can not detect the devices.</string>
-    <string name="activity_settings_port_number_hint">type in the port number(default 6565)</string>
-    <string name="dialog_no_network_message">No network connection, please check</string>
-    <string name="dialog_no_network_title">No network</string>
-    <string name="dialog_receive_error_message">There are some errors occurred while receiving files.Error infos are listed bellow.\n\n</string>
-    <string name="dialog_receive_error_title">Error</string>
-    <string name="dialog_send_error_message">There are some errors occurred while sending files.The error infos are listed bellow.\n\n</string>
-    <string name="dialog_send_error_title">Error</string>
     <string name="dialog_settings_device_name_head">Type a name to show to the sending side while sharing files through local network.</string>
     <string name="dialog_settings_package_name_split_head">Enter the delimited content when batch copying the application package names</string>
     <string name="dialog_settings_device_name_hint">type in a name</string>
     <string name="dialog_settings_package_name_split">type in separator</string>
     <string name="activity_settings_package_name_separator">Pkg Name Separator</string>
     <string name="dialog_settings_device_name_invalid">type in a name</string>
-    <string name="help_receive">
-        Let the sending side device install APK Kit(Build 8 or higher version) and connect to the same wifi network, or let yourself connect to the ap wireless of the sending side, then let the sending side
-        select the apps,  packages or files to share ,click through local net, and the sending side will see the device of your side.\n\n
-        If this device is connected to the sending side\'s ap, try to check \"ap mode\"\n\n
-        After the sending site selected the device to send, the receiving side will see the file receiving request message.The files will be saved to the exporting path.If there is a same named file, the file will
-        automatically be renamed itself by adding number suffix.You can see the received files of apk or compressed files by the package panel of this app or other format files by other file explorers.
-
-    </string>
-    <string name="info_bind_port_error">error to bind to the port number, please check if other apps are in use and retry, or change to another port number.</string>
-    <string name="info_udp_too_long">The file info message is too long, try to select less files and retry.</string>
-    <string name="info_share_uri_invalid">It is not supported to share files through this way again</string>
-    <string name="info_no_files_to_send">no valid file info found</string>
-    <string name="receive_log_self_ip">Native IP:</string>
-    <string name="toast_receive_interrupt">Receiving file terminated by the other side</string>
-    <string name="toast_receive_refuse">The other side refused to receive the file</string>
-    <string name="toast_receiving_complete">File receiving completed, please turn to the package panel or exporting path to check.</string>
-    <string name="toast_send_canceled">The other side canceled sending the file</string>
-    <string name="toast_send_interrupt">The other side terminated sending the file</string>
-    <string name="word_error">error</string>
     <string name="word_keep_screen_on">keep screen on</string>
-    <string name="activity_settings_port_unknown">invalid number</string>
-    <string name="action_ap">AP settings</string>
-    <string name="action_file_info">File info</string>
     <string name="dialog_compress_extension_empty">type in a valid extension name</string>
     <string name="activity_settings_extension">Compressed ExtName</string>
     <string name="dialog_compress_extension_att">*this option only changes the extension of the compressed exporting files, but will not change the content of zip itself</string>

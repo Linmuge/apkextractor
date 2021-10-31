@@ -1,26 +1,11 @@
 package info.muge.apkextractor.activities;
 
-import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.PermissionChecker;
-import androidx.viewpager.widget.ViewPager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,15 +14,26 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.PermissionChecker;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.tabs.TabLayout;
+
 import info.muge.apkextractor.Constants;
-import info.muge.apkextractor.Global;
 import info.muge.apkextractor.R;
 import info.muge.apkextractor.adapters.MyPagerAdapter;
 import info.muge.apkextractor.fragments.AppFragment;
-import info.muge.apkextractor.fragments.ImportFragment;
 import info.muge.apkextractor.fragments.OperationCallback;
 import info.muge.apkextractor.ui.AppItemSortConfigDialog;
-import info.muge.apkextractor.ui.ImportItemSortConfigDialog;
 import info.muge.apkextractor.ui.SortConfigDialogCallback;
 import info.muge.apkextractor.utils.EnvironmentUtil;
 import info.muge.apkextractor.utils.SPUtil;
@@ -46,7 +42,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
 , NavigationView.OnNavigationItemSelectedListener , OperationCallback {
 
     private final AppFragment appFragment=new AppFragment();
-    private final ImportFragment importFragment=new ImportFragment();
 
     private int currentSelection=0;
     private boolean isSearchMode=false;
@@ -83,7 +78,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         ViewPager viewPager = findViewById(R.id.main_viewpager);
 
         appFragment.setOperationCallback(this);
-        importFragment.setOperationCallback(this);
 
         View view=LayoutInflater.from(this).inflate(R.layout.actionbar_search,null);
         final View cancelView=view.findViewById(R.id.actionbar_main_cancel);
@@ -101,19 +95,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
                 cancelView.setVisibility(s.length()>0?View.VISIBLE:View.INVISIBLE);
                 if(!isSearchMode)return;
                 appFragment.updateSearchModeKeywords(s.toString());
-                importFragment.updateSearchModeKeywords(s.toString());
             }
         });
         cancelView.setOnClickListener(v -> edit_search.setText(""));
         getSupportActionBar().setCustomView(view);
 
-        viewPager.setAdapter(new MyPagerAdapter(this,getSupportFragmentManager(),appFragment,importFragment));
+        viewPager.setAdapter(new MyPagerAdapter(this,getSupportFragmentManager(),appFragment));
         tabLayout.setupWithViewPager(viewPager,true);
         viewPager.addOnPageChangeListener(this);
 
-        if(PermissionChecker.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED){
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-        }
     }
 
     @Override
@@ -188,12 +178,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
                 editor.putInt(Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE,result_app);
                 editor.apply();
                 appFragment.setViewMode(result_app);
-            }else if(currentSelection==1){
-                final int mode_pak=settings.getInt(Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_IMPORT,Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_IMPORT_DEFAULT);
-                final int result_pak=mode_pak==0?1:0;
-                editor.putInt(Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_IMPORT,result_pak);
-                editor.apply();
-                importFragment.setViewMode(result_pak);
             }
         }
 
@@ -206,14 +190,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
                     }
                 });
                 appItemSortConfigDialog.show();
-            }else if(currentSelection==1){
-                ImportItemSortConfigDialog importItemSortConfigDialog=new ImportItemSortConfigDialog(this, new SortConfigDialogCallback() {
-                    @Override
-                    public void onOptionSelected(int value) {
-                       importFragment.sortGlobalListAndRefresh(value);
-                    }
-                });
-                importItemSortConfigDialog.show();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -224,15 +200,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         drawerLayout.closeDrawers();
         switch (menuItem.getItemId()){
             default:break;
-            case R.id.nav_receive:{
-                if(Build.VERSION.SDK_INT>=23&&PermissionChecker.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PermissionChecker.PERMISSION_GRANTED){
-                    Global.showRequestingWritePermissionSnackBar(this);
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},0);
-                    return false;
-                }
-                startActivityForResult(new Intent(this,FileReceiveActivity.class),REQUEST_CODE_RECEIVING_FILES);
-            }
-            break;
+
             case R.id.nav_settings:{
                 startActivityForResult(new Intent(this,SettingActivity.class),REQUEST_CODE_SETTINGS);
             }
@@ -297,7 +265,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         setActionbarDisplayCustomView(true);
         setMenuVisible(false);
         appFragment.setSearchMode(true);
-        importFragment.setSearchMode(true);
         EnvironmentUtil.showInputMethod(edit_search);
     }
 
@@ -307,7 +274,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         edit_search.setText("");
         setActionbarDisplayCustomView(false);
         appFragment.setSearchMode(false);
-        importFragment.setSearchMode(false);
         EnvironmentUtil.hideInputMethod(this);
     }
 
@@ -325,7 +291,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
     }
 
     private void checkAndExit(){
-        if(drawerLayout.isDrawerOpen(Gravity.START)){
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
             drawerLayout.closeDrawers();
             return;
         }
@@ -334,13 +300,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
             case 0:{
                 if(appFragment.isMultiSelectMode()){
                     appFragment.closeMultiSelectMode();
-                    return;
-                }
-            }
-            break;
-            case 1:{
-                if(importFragment.isMultiSelectMode()){
-                    importFragment.closeMultiSelectMode();
                     return;
                 }
             }

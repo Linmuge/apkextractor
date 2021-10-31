@@ -84,44 +84,6 @@
                         android:textColor="@color/colorHighLightText"
                         android:textSize="15sp"
                         android:text="@string/activity_detail_export"/>
-                    <LinearLayout
-                        android:id="@+id/app_detail_export_checkboxes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="15dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_toLeftOf="@+id/app_detail_export_att"
-                        android:layout_marginLeft="10dp"
-                        android:visibility="gone">
-                        <CheckBox
-                            android:id="@+id/app_detail_export_data"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
-                            android:textSize="12sp"
-                            android:singleLine="true"
-                            android:textColor="@color/color_text_normal"
-                            android:text="Data"/>
-                        <CheckBox
-                            android:id="@+id/app_detail_export_obb"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="12sp"
-                            android:singleLine="true"
-                            android:textColor="@color/color_text_normal"
-                            android:text="Obb"/>
-                    </LinearLayout>
-                    <ProgressBar
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:id="@+id/app_detail_export_progress_bar"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="40dp"
-                        style="?android:attr/progressBarStyleSmall"
-                        android:visibility="visible"/>
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -148,7 +110,7 @@
                         android:layout_marginLeft="15dp"
                         android:textColor="@color/colorHighLightText"
                         android:textSize="14sp"
-                        android:text="@string/activity_detail_share"/>
+                        android:text="向App分享提供信息自动填写"/>
                 </RelativeLayout>
 
                 <RelativeLayout

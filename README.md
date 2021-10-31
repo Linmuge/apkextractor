@@ -1,7 +1,7 @@
-# APK工具箱
+# APP工具箱
 
 [原仓库链接](https://github.com/ghmxr/apkextractor)
-这是一个Android平台快速查询、导出(提取)或者分享本地已安装APP的小工具，
+这是一个Android平台快速查询、导出(提取)本地已安装APP的小工具，
 本应用支持导出内容为：
         *.apk
 

@@ -49,18 +49,18 @@ public class RefreshImportListTask extends Thread{
         }else if(package_scope_value==Constants.PACKAGE_SCOPE_EXPORTING_PATH){
             if(SPUtil.getIsSaved2ExternalStorage(context)){
                 try {
-                    fileItem=new FileItem(context, Uri.parse(SPUtil.getExternalStorageUri(context)), SPUtil.getSaveSegment(context));
+                    fileItem=new FileItem(context, Uri.parse(SPUtil.getExternalStorageUri(context)), SPUtil.getInternalSavePath());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }else{
-                fileItem=new FileItem(SPUtil.getInternalSavePath(context));
+                fileItem=new FileItem(SPUtil.getInternalSavePath());
             }
         }
         try{
             arrayList.addAll(getAllImportItemsFromPath(fileItem));
             if(!TextUtils.isEmpty(SPUtil.getExternalStorageUri(context))&&package_scope_value==Constants.PACKAGE_SCOPE_ALL){
-                arrayList.addAll(getAllImportItemsFromPath(new FileItem(context, Uri.parse(SPUtil.getExternalStorageUri(context)), SPUtil.getSaveSegment(context))));
+                arrayList.addAll(getAllImportItemsFromPath(new FileItem(context, Uri.parse(SPUtil.getExternalStorageUri(context)), SPUtil.getInternalSavePath())));
             }
             ImportItem.sort_config=SPUtil.getGlobalSharedPreferences(context).getInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,0);
             Collections.sort(arrayList);

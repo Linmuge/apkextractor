@@ -4,8 +4,8 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 31
-    def versionCode1 = 2
-    def versionName1 = "1.0.1"
+    def versionCode1 = 4
+    def versionName1 = "1.0.2"
     defaultConfig {
         applicationId "info.muge.apkextractor"
         minSdkVersion 24
