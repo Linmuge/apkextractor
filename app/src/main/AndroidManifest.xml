@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.github.ghmxr.apkextractor">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="info.muge.apkextractor">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
     <application
-        android:name=".MyApplication"
+        android:name="info.muge.apkextractor.MyApplication"
         android:allowBackup="true"
         android:icon="@drawable/icon_launcher"
         android:roundIcon="@mipmap/ic_launcher"
@@ -13,27 +17,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.MainActivity"
+            android:name="info.muge.apkextractor.activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.AppDetailActivity"
+        <activity android:name="info.muge.apkextractor.activities.AppDetailActivity"
             android:label="Detail"
             android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".activities.SettingActivity"
+        <activity android:name="info.muge.apkextractor.activities.SettingActivity"
             android:label="@string/activity_settings_title"
             android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".activities.FolderSelectorActivity"
+        <activity android:name="info.muge.apkextractor.activities.FolderSelectorActivity"
             android:label="@string/activity_folder_selector_title"
             android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".activities.FileSendActivity"
+        <activity android:name="info.muge.apkextractor.activities.FileSendActivity"
             android:theme="@style/CommonTheme"
-            android:label="@string/activity_send_by_title">
+            android:label="@string/activity_send_by_title"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <action android:name="android.intent.action.SEND_MULTIPLE"/>
@@ -41,13 +47,15 @@
                 <data android:mimeType="*/*"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activities.FileReceiveActivity"
+        <activity android:name="info.muge.apkextractor.activities.FileReceiveActivity"
             android:theme="@style/CommonTheme"
             android:label="@string/activity_receive_title"/>
-        <activity android:name=".activities.PackageDetailActivity"
+        <activity android:name="info.muge.apkextractor.activities.PackageDetailActivity"
             android:label="@string/activity_package_detail"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
+            <intent-filter android:scheme="http"
+                tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="*/*"/>
@@ -55,8 +63,8 @@
         </activity>
 
         <provider
-            android:authorities="com.github.ghmxr.apkextractor.FileProvider"
-            android:name="android.support.v4.content.FileProvider"
+            android:authorities="info.muge.apkextractor.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:grantUriPermissions="true"
             android:exported="false">
             <meta-data

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAccent">#3090FD</color>
 
-    <color name="colorTitle">#3498db</color>
-    <color name="colorTitleDark">#2387ca</color>
+    <color name="colorTitle">#3090FD</color>
+    <color name="colorTitleDark">#3090FD</color>
 
     <color name="colorCardArea">#ffffff</color>
     <color name="colorMainBottomCard">#e7ffffff</color>

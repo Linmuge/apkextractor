@@ -3,15 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/content_swipe">
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/content_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <RelativeLayout
         android:id="@+id/loading"
         android:layout_width="match_parent"
@@ -41,10 +41,10 @@
             android:gravity="center_horizontal"
             android:maxLines="5"
             android:ellipsize="middle"
-            tools:text="正在扫描 /storage/emulated/0/Backup/com.github.ghmxr.apkextractor-12.apk
-            正在扫描 /storage/emulated/0/Backup/com.github.ghmxr.apkextractor-12.apk
-            正在扫描 /storage/emulated/0/Backup/com.github.ghmxr.apkextractor-12.apk
-            正在扫描 /storage/emulated/0/Backup/com.github.ghmxr.apkextractor-12.apk"/>
+            tools:text="正在扫描 /storage/emulated/0/Backup/info.muge.apkextractor-12.apk
+            正在扫描 /storage/emulated/0/Backup/info.muge.apkextractor-12.apk
+            正在扫描 /storage/emulated/0/Backup/info.muge.apkextractor-12.apk
+            正在扫描 /storage/emulated/0/Backup/info.muge.apkextractor-12.apk"/>
     </RelativeLayout>
     <LinearLayout
         android:layout_width="wrap_content"

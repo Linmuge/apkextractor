@@ -308,19 +308,7 @@
 
     <string name="language_follow_system">follow system</string>
 
-    <string name="dialog_about_message">\n(Translated by machine)This is a small tool for Android platform to quickly query, export (extract) or share locally installed apps.
-        It supports to package the data and OBB data in the external storage of the corresponding app into a ZIP format compressed file
-        (mainly for some game applications containing data and OBB data). At the same time, it supports the import of ZIP format compression package containing
-        data and OBB data to the device. The application supports the export and import of data, and the contents of OBB data compression package are:\n\n
-
-		Android/data/\n
-		Android/obb/\n
-		*.apk\n\n
-
-Through the sharing function of this app, you can share the app or installation package to the other party. The LAN sharing function of this application
-        supports the sharing of any file in the local external storage at the same time. When sharing through the file manager or other applications,
-        select this application to send it directly to the other party, and the files received by the receiving end will be saved to the export path.\n\n
-
+    <string name="dialog_about_message">\n(Translated by machine)This is a small tool for the Android platform to quickly query the locally installed APP.\n
         Open source:\n
          https://github.com/ghmxr/apkextractor \n\n
         MailBox: \n
