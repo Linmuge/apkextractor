@@ -2,6 +2,10 @@
 <resources>
     <color name="colorAccent">#3090FD</color>
 
+    <color name="color1">#3090FD</color>
+    <color name="color2">#F4433C</color>
+    <color name="color3">#FFBC32</color>
+    <color name="color4">#0AA858</color>
     <color name="colorTitle">#3090FD</color>
     <color name="colorTitleDark">#3090FD</color>
 
@@ -17,7 +21,33 @@
     <color name="colorFirstAttention">#0068ea</color>
     <color name="colorTabIndicator">#ffffff</color>
 
+    <color name="standardBgColor">#F6F6F6</color>
     <color name="colorSelectedBackground">#90EE90</color>
     <color name="colorSystemAppTitleColor">#FF4500</color>
     <color name="color_popup_window">#bb000000</color>
+    <color name="standardHintColor">#666666</color>
+    <color name="titleViewBgColor">#ffffff</color>
+    <color name="standardTextColor">#111111</color>
+    <color name="titleViewBgColorp50">#80FFFFFF</color>
+    <color name="coloraa">#AAAAAA</color>
+    <!--ThemeActivity-->
+    <color name="ThemeActivity_themeTextColor">#FFFFFF</color>
+
+
+    <!--MainActivity-->
+    <!--Tab-->
+    <color name="MainActivity_TabUnSelectedColor1">#666666</color>
+    <color name="MainActivity_TabUnSelectedColor2">#333333</color>
+    <color name="MainActivity_TabUnSelectedTextColor">#666666</color>
+
+    <!--ItemAppV2-->
+    <color name="ItemAppV2_IconBorder">#e5e5e5</color>
+    <!--
+        深色模式
+        #111111 → #eeeeee
+        #666666 → #cccccc
+        #aaaaaa → #aaaaaa
+        #f6f6f6 →#333333
+        #e5e5e5 →333333
+    -->
 </resources>

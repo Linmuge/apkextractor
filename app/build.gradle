@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 31
-    def versionCode1 = 4
-    def versionName1 = "1.0.2"
+    compileSdkVersion 32
+    def versionCode1 = 5
+    def versionName1 = "1.0.3"
     defaultConfig {
-        applicationId "info.muge.apkextractor"
+        applicationId "info.muge.appshare"
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode versionCode1
         versionName versionName1
         archivesBaseName = "apkkit-"+versionName1+"("+versionCode1+")"
@@ -50,9 +50,9 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'com.google.android.material:material:1.6.0-alpha01'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'

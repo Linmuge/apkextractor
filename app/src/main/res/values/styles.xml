@@ -1,7 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
+    <style name="AppTheme" parent="Theme.Material3.DayNight">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorTitle</item>
         <item name="colorPrimaryDark">@color/colorTitleDark</item>
@@ -13,7 +13,16 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="CommonTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <!--更新样式-->
+    <style name="updateDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_10dp</item>
+        <item name="android:windowMinWidthMinor">300dp</item>
+        <item name="android:windowMinWidthMajor">300dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="windowFixedWidthMinor">300dp</item>
+    </style>
+    <style name="CommonTheme" parent="Theme.Material3.Dark">
         <item name="colorPrimary">@color/colorTitle</item>
         <item name="colorPrimaryDark">@color/colorTitleDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -31,5 +40,14 @@
     <style name="MyTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>
     </style>
-
+    <style name="BaseDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_10dp</item>
+        <item name="android:background">@drawable/bg_10dp</item>
+        <item name="android:backgroundTint">@color/titleViewBgColor</item>
+        <item name="android:windowMinWidthMinor">350dp</item>
+        <item name="windowFixedWidthMinor">350dp</item>
+        <item name="android:shadowColor">@color/standardHintColor</item>
+        <item name="android:outlineAmbientShadowColor" tools:targetApi="p">@color/standardHintColor</item>
+        <item name="android:outlineSpotShadowColor" tools:targetApi="p">@color/standardHintColor</item>
+    </style>
 </resources>

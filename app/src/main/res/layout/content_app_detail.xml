@@ -93,6 +93,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:onClick="onClick"
+                    android:visibility="gone"
                     android:background="?attr/selectableItemBackground">
                     <ImageView
                         android:id="@+id/app_detail_share_icon"
@@ -102,15 +103,16 @@
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="10dp"
                         android:src="@drawable/icon_share"/>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_toRightOf="@+id/app_detail_share_icon"
                         android:layout_marginLeft="15dp"
+                        android:layout_toRightOf="@+id/app_detail_share_icon"
+                        android:text="向牧歌App工具箱提供信息自动填写"
                         android:textColor="@color/colorHighLightText"
-                        android:textSize="14sp"
-                        android:text="向App分享提供信息自动填写"/>
+                        android:textSize="14sp" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -709,7 +711,7 @@
             android:visibility="gone"
             tools:visibility="visible"/>
 
-        <info.muge.apkextractor.ui.SignatureView
+        <info.muge.appshare.ui.SignatureView
             android:id="@+id/app_detail_signature"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -915,7 +917,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <info.muge.apkextractor.ui.AssemblyView
+        <info.muge.appshare.ui.AssemblyView
             android:id="@+id/app_detail_assembly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

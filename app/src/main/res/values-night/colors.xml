@@ -14,4 +14,21 @@
     <color name="colorSelectedBackground">#026B02</color>
     <color name="colorSystemAppTitleColor">#FFB6C1</color>
     <color name="color_popup_window">#bb999999</color>
+    <!--2.0-->
+    <color name="standardBgColor">#333333</color>
+    <color name="standardHintColor">#cccccc</color>
+    <color name="titleViewBgColor">#000000</color>
+    <color name="standardTextColor">#eeeeee</color>
+    <color name="titleViewBgColorp50">#80000000</color>
+
+    <!--ThemeActivity-->
+    <color name="ThemeActivity_themeTextColor">#000000</color>
+
+    <!--MainActivity-->
+    <!--Tab-->
+    <color name="MainActivity_TabUnSelectedColor1">#666666</color>
+    <color name="MainActivity_TabUnSelectedColor2">#333333</color>
+    <color name="MainActivity_TabUnSelectedTextColor">#666666</color>
+    <!--ItemAppV2-->
+    <color name="ItemAppV2_IconBorder">#333333</color>
 </resources>

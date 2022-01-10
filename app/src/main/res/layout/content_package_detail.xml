@@ -553,7 +553,7 @@
             android:visibility="gone"
             tools:visibility="visible"/>
 
-        <info.muge.apkextractor.ui.SignatureView
+        <info.muge.appshare.ui.SignatureView
             android:id="@+id/package_detail_signature"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -759,7 +759,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <info.muge.apkextractor.ui.AssemblyView
+        <info.muge.appshare.ui.AssemblyView
             android:id="@+id/package_detail_assemble"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

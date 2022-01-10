@@ -13,6 +13,7 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="240dp"
+            android:background="?attr/colorPrimary"
             app:contentScrim="@color/colorTitle"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
@@ -29,7 +30,7 @@
                     android:layout_gravity="center"
                     tools:src="@mipmap/ic_launcher"
                     android:transitionName="icon"/>
-                <info.muge.apkextractor.ui.AutoMarqueeTextView
+                <info.muge.appshare.ui.AutoMarqueeTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/app_detail_name"

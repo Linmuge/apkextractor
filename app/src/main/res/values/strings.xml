@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">APP工具箱</string>
+    <string name="app_name" translatable="false">牧歌App工具箱</string>
     <string name="action_settings">设置</string>
     <string name="action_search">搜索</string>
     <string name="action_sort">排序</string>
@@ -117,7 +117,7 @@
 
     <string name="exception_title">提示</string>
     <string name="exception_message">下列文件导出异常，可能的异常包括存储空间不足，源文件被删除，写入路径不合法，或者没有写入权限等。\n异常信息如下：\n\n</string>
-    
+
     <string name="dialog_duplicate_title">重复文件</string>
     <string name="dialog_duplicate_msg">发现下列重复文件，是否覆盖？\n\n</string>
 
@@ -239,9 +239,12 @@
 
 
         开源地址:\n
-         https://github.com/Linmuge/apkextractor \n\n
+         https://github.com/Linmuge/appshare \n\n
         邮箱: \n
         1206083231@qq.com \n\n
-        打赏作者：
+        隐私政策:\n
+        https://link.appshare.muge.info/appkit/privacy.html\n\n
+        注册协议:\n
+        https://link.appshare.muge.info/appkit/user.html\n\n
         </string>
 </resources>

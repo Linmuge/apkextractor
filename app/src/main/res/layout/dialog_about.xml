@@ -16,14 +16,6 @@
             android:autoLink="all"
             android:textSize="13sp"
             android:text="@string/dialog_about_message"/>
-        <ImageView
-            android:id="@+id/layout_about_donate"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginBottom="20dp"
-            android:clickable="true"
-            android:src="@drawable/icon_alipay"/>
+
     </LinearLayout>
 </ScrollView>

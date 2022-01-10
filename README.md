@@ -1,6 +1,6 @@
-# APP工具箱
+# 牧歌App工具箱
 
-[原仓库链接](https://github.com/ghmxr/apkextractor)
+[原仓库链接](https://github.com/ghmxr/appshare)
 这是一个Android平台快速查询、导出(提取)本地已安装APP的小工具，
 本应用支持导出内容为：
         *.apk
