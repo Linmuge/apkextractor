@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/detail_signature_root"
@@ -49,10 +49,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_iss"
@@ -83,10 +79,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_serial"
@@ -117,10 +109,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_start"
@@ -151,10 +139,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_end"
@@ -186,10 +170,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_md5"
@@ -220,10 +200,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_sha1"
@@ -254,10 +230,6 @@
                 android:textSize="12sp"
                 tools:text="28"/>
         </LinearLayout>
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/colorDividingLine"/>
 
         <LinearLayout
             android:id="@+id/detail_signature_sha256"
@@ -289,4 +261,4 @@
                 tools:text="28"/>
         </LinearLayout>
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

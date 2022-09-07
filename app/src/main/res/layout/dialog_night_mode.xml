@@ -9,7 +9,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/night_mode_enabled_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/night_mode_disabled_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/night_mode_auto_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -93,7 +93,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/night_mode_follow_system_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

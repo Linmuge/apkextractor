@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/detail_card_permissions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -13,7 +13,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        app:cardElevation="1dp"
         app:cardCornerRadius="5dp"
         app:cardBackgroundColor="@color/colorCardArea"
         android:visibility="gone"
@@ -58,9 +57,9 @@
                 android:id="@+id/detail_permission"
                 android:visibility="gone"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/detail_card_activities"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -68,7 +67,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        app:cardElevation="1dp"
         app:cardCornerRadius="5dp"
         app:cardBackgroundColor="@color/colorCardArea"
         android:visibility="gone"
@@ -113,9 +111,9 @@
                 android:id="@+id/detail_activity"
                 android:visibility="gone"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/detail_card_services"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -123,7 +121,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        app:cardElevation="1dp"
         app:cardCornerRadius="5dp"
         app:cardBackgroundColor="@color/colorCardArea"
         android:visibility="gone"
@@ -168,9 +165,9 @@
                 android:id="@+id/detail_service"
                 android:visibility="gone"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/detail_card_receivers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -178,7 +175,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        app:cardElevation="1dp"
         app:cardCornerRadius="5dp"
         app:cardBackgroundColor="@color/colorCardArea"
         android:visibility="gone"
@@ -223,9 +219,9 @@
                 android:id="@+id/detail_receiver"
                 android:visibility="gone"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/detail_card_providers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -233,7 +229,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        app:cardElevation="1dp"
         app:cardCornerRadius="5dp"
         app:cardBackgroundColor="@color/colorCardArea"
         android:visibility="gone"
@@ -278,9 +273,9 @@
                 android:id="@+id/detail_provider"
                 android:visibility="gone"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/detail_card_static_loaders"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -288,7 +283,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        app:cardElevation="1dp"
         app:cardCornerRadius="5dp"
         app:cardBackgroundColor="@color/colorCardArea"
         android:visibility="gone"
@@ -333,5 +327,5 @@
                 android:id="@+id/detail_static_loader"
                 android:visibility="gone"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorAccent">#3090FD</color>
+    <color name="colorAccent">#4285F4</color>
 
-    <color name="color1">#3090FD</color>
+    <color name="color1">#4285F4</color>
     <color name="color2">#F4433C</color>
     <color name="color3">#FFBC32</color>
     <color name="color4">#0AA858</color>
-    <color name="colorTitle">#3090FD</color>
-    <color name="colorTitleDark">#3090FD</color>
+    <color name="colorTitle">#4285F4</color>
+    <color name="colorTitleDark">#4285F4</color>
 
     <color name="colorCardArea">#ffffff</color>
     <color name="colorMainBottomCard">#e7ffffff</color>
@@ -22,7 +22,7 @@
     <color name="colorTabIndicator">#ffffff</color>
 
     <color name="standardBgColor">#F6F6F6</color>
-    <color name="colorSelectedBackground">#90EE90</color>
+    <color name="colorSelectedBackground">#4285F4</color>
     <color name="colorSystemAppTitleColor">#FF4500</color>
     <color name="color_popup_window">#bb000000</color>
     <color name="standardHintColor">#666666</color>

@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 32
-    def versionCode1 = 5
-    def versionName1 = "1.0.3"
+    compileSdkVersion 33
+    def versionCode1 = 7
+    def versionName1 = "1.0.5"
     defaultConfig {
         applicationId "info.muge.appshare"
         minSdkVersion 24
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode versionCode1
         versionName versionName1
         archivesBaseName = "apkkit-"+versionName1+"("+versionCode1+")"
@@ -31,11 +31,11 @@ android {
         dataBinding  true
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
 
     sourceSets{
@@ -50,15 +50,15 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
-    implementation 'com.google.android.material:material:1.6.0-alpha01'
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.8.0-alpha01'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'com.belerweb:pinyin4j:2.5.1'
-    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "androidx.core:core-ktx:1.8.0"
+    implementation 'com.blankj:utilcodex:1.31.0'
 
 }
 repositories {

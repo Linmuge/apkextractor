@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.PermissionChecker;
 import androidx.core.view.GravityCompat;
@@ -25,6 +26,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
@@ -39,15 +41,12 @@ import info.muge.appshare.utils.EnvironmentUtil;
 import info.muge.appshare.utils.SPUtil;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener,ViewPager.OnPageChangeListener, CompoundButton.OnCheckedChangeListener
-, NavigationView.OnNavigationItemSelectedListener , OperationCallback {
+ , OperationCallback {
 
     private final AppFragment appFragment=new AppFragment();
 
     private int currentSelection=0;
     private boolean isSearchMode=false;
-    private EditText edit_search;
-    private Menu menu;
-    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,49 +56,41 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         setSupportActionBar(toolbar);
 
         try{
-            getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+            getSupportActionBar()
+                    .setTitle(getResources().getString(R.string.app_name));
         }catch (Exception e){e.printStackTrace();}
-
-        drawerLayout=findViewById(R.id.main_drawer);
-        ActionBarDrawerToggle actionBarDrawerToggle=new ActionBarDrawerToggle(this,drawerLayout,toolbar,0,0){
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                EnvironmentUtil.hideInputMethod(MainActivity.this);
-            }
-        };
-        drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
-
-        NavigationView navigationView=findViewById(R.id.main_navigation);
-        navigationView.setNavigationItemSelectedListener(this);
 
         TabLayout tabLayout = findViewById(R.id.main_tablayout);
         ViewPager viewPager = findViewById(R.id.main_viewpager);
 
         appFragment.setOperationCallback(this);
 
-        View view=LayoutInflater.from(this).inflate(R.layout.actionbar_search,null);
-        final View cancelView=view.findViewById(R.id.actionbar_main_cancel);
-        edit_search=view.findViewById(R.id.actionbar_main_edit);
-        edit_search.addTextChangedListener(new TextWatcher() {
+        SearchView searchView = findViewById(R.id.searchview);
+        searchView.setOnSearchClickListener(view -> {
+            openSearchMode();
+        });
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(s==null)return;
-                cancelView.setVisibility(s.length()>0?View.VISIBLE:View.INVISIBLE);
-                if(!isSearchMode)return;
-                appFragment.updateSearchModeKeywords(s.toString());
+            public boolean onQueryTextChange(String newText) {
+                if (isSearchMode){
+                    if (newText.isBlank()){
+                        appFragment.setSearchMode(false);
+                    }else {
+                        appFragment.updateSearchModeKeywords(newText.toString());
+                    }
+                }
+                return true;
             }
         });
-        cancelView.setOnClickListener(v -> edit_search.setText(""));
-        getSupportActionBar().setCustomView(view);
-
+        searchView.setOnCloseListener(() -> {
+            closeSearchMode();
+            return false;
+        });
         viewPager.setAdapter(new MyPagerAdapter(this,getSupportFragmentManager(),appFragment));
         tabLayout.setupWithViewPager(viewPager,true);
         viewPager.addOnPageChangeListener(this);
@@ -146,8 +137,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        this.menu=menu;
-        //setIconEnable(menu,true);
         return true;
     }
 
@@ -157,16 +146,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-
-        if(id==android.R.id.home){
-            checkAndExit();
-        }
-
-        if(id==R.id.action_search){
-            openSearchMode();
-        }
 
         if(id==R.id.action_view){
             if(isSearchMode)return false;
@@ -192,40 +171,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
                 appItemSortConfigDialog.show();
             }
         }
+        if(id==R.id.action_settings){
+            startActivityForResult(new Intent(this,SettingActivity.class),REQUEST_CODE_SETTINGS);
+
+        }
+        if(id==R.id.action_about){
+            View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
+                    .setIcon(R.mipmap.ic_launcher_round)
+                    .setCancelable(true)
+                    .setView(dialogView)
+                    .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (arg0, arg1) -> {}).show();
+        }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        drawerLayout.closeDrawers();
-        switch (menuItem.getItemId()){
-            default:break;
-
-            case R.id.nav_settings:{
-                startActivityForResult(new Intent(this,SettingActivity.class),REQUEST_CODE_SETTINGS);
-            }
-            break;
-            case R.id.nav_about:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
-                new AlertDialog.Builder(this)
-                        .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
-                        .setIcon(R.mipmap.ic_launcher_round)
-                        .setCancelable(true)
-                        .setView(dialogView)
-                        .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (arg0, arg1) -> {}).show();
-            }
-            break;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode==KeyEvent.KEYCODE_BACK){
-            checkAndExit();
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     private static final int REQUEST_CODE_SETTINGS=0;
@@ -233,18 +192,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
-            default:break;
-            case REQUEST_CODE_SETTINGS:{
-                if(resultCode==RESULT_OK){
-                    //recreate();
+        switch (requestCode) {
+            default:
+                break;
+            case REQUEST_CODE_SETTINGS: {
+                if (resultCode == RESULT_OK) {
                     finish();
-                    startActivity(new Intent(this,MainActivity.class));
+                    startActivity(new Intent(this, MainActivity.class));
                 }
             }
             break;
-            case REQUEST_CODE_RECEIVING_FILES:{
-                if(resultCode==RESULT_OK){
+            case REQUEST_CODE_RECEIVING_FILES: {
+                if (resultCode == RESULT_OK) {
                     sendBroadcast(new Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST));
                 }
             }
@@ -254,53 +213,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
 
     private void openSearchMode(){
         isSearchMode=true;
-        setActionbarDisplayCustomView(true);
-        setMenuVisible(false);
         appFragment.setSearchMode(true);
-        EnvironmentUtil.showInputMethod(edit_search);
     }
 
     private void closeSearchMode(){
         isSearchMode=false;
-        setMenuVisible(true);
-        edit_search.setText("");
-        setActionbarDisplayCustomView(false);
         appFragment.setSearchMode(false);
-        EnvironmentUtil.hideInputMethod(this);
     }
 
-    private void setMenuVisible(boolean b){
-        if(menu==null)return;
-        for(int i=0;i<menu.size();i++){
-            menu.getItem(i).setVisible(b);
-        }
-    }
-
-    private void setActionbarDisplayCustomView(boolean b){
-        try{
-            getSupportActionBar().setDisplayShowCustomEnabled(b);
-        }catch (Exception e){e.printStackTrace();}
-    }
-
-    private void checkAndExit(){
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            drawerLayout.closeDrawers();
-            return;
-        }
-        switch(currentSelection){
-            default:break;
-            case 0:{
-                if(appFragment.isMultiSelectMode()){
-                    appFragment.closeMultiSelectMode();
-                    return;
-                }
-            }
-            break;
-        }
-        if(isSearchMode){
-            closeSearchMode();
-            return;
-        }
-        finish();
-    }
 }

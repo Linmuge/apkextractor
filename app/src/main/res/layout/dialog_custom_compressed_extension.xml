@@ -11,14 +11,14 @@
         android:layout_marginTop="10dp"
         android:textColor="@color/colorFirstAttention"
         android:text="@string/dialog_compress_extension_att"/>
-    <RadioButton
+    <com.google.android.material.radiobutton.MaterialRadioButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/compress_zip"
         android:textSize="16sp"
         android:layout_margin="10dp"
         android:text="@string/word_zip"/>
-    <RadioButton
+    <com.google.android.material.radiobutton.MaterialRadioButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/compress_xapk"
@@ -32,7 +32,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="5dp"
         android:gravity="center_vertical">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/compress_custom"

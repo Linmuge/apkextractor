@@ -19,20 +19,20 @@
             android:textSize="14sp"
             android:textColor="@color/color_text_normal"
             tools:text="@string/dialog_data_obb_message"/>
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/dialog_checkbox_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             tools:text="Data"/>
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/dialog_checkbox_obb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="10dp"
             tools:text="Obb"/>
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/dialog_checkbox_apk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

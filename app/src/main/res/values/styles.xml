@@ -6,13 +6,23 @@
         <item name="colorPrimary">@color/colorTitle</item>
         <item name="colorPrimaryDark">@color/colorTitleDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/titleViewBgColor</item>
+        <item name="materialCardViewStyle">@style/materialCardViewStyle</item>
+        <item name="android:navigationBarColor">@color/titleViewBgColor</item>
     </style>
 
+    <style name="materialCardViewStyle" parent="Widget.Material3.CardView.Filled">
+        <item name="cardElevation">0dp</item>
+        <item name="cardMaxElevation">0dp</item>
+    </style>
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
+    <!--更新样式-->
+    <style name="materialDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
+    </style>
     <!--更新样式-->
     <style name="updateDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
         <item name="android:windowBackground">@drawable/bg_10dp</item>
@@ -22,7 +32,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="windowFixedWidthMinor">300dp</item>
     </style>
-    <style name="CommonTheme" parent="Theme.Material3.Dark">
+    <style name="CommonTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/colorTitle</item>
         <item name="colorPrimaryDark">@color/colorTitleDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -33,14 +43,14 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 
     <style name="MyTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>
     </style>
-    <style name="BaseDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+    <style name="BaseDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
         <item name="android:windowBackground">@drawable/bg_10dp</item>
         <item name="android:background">@drawable/bg_10dp</item>
         <item name="android:backgroundTint">@color/titleViewBgColor</item>

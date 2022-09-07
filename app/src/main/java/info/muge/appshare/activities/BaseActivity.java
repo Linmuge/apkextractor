@@ -1,10 +1,15 @@
 package info.muge.appshare.activities;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import android.util.DisplayMetrics;
+
+import com.blankj.utilcode.util.BarUtils;
 
 import info.muge.appshare.Constants;
 import info.muge.appshare.utils.SPUtil;

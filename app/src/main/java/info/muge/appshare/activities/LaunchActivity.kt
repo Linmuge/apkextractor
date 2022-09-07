@@ -28,6 +28,7 @@ class LaunchActivity : AppCompatActivity() {
             showPrivacyDialog()
         }else{
             startActivity<MainActivity>()
+            finish()
         }
 
     }

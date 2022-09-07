@@ -57,7 +57,7 @@ public class RecyclerViewAdapter<T extends DisplayItem> extends RecyclerView.Ada
         viewHolder.title.setTextColor(activity.getResources().getColor((item.isRedMarked()?
                 R.color.colorSystemAppTitleColor:R.color.colorHighLightText)));
         try {
-            viewHolder.title.setText(EnvironmentUtil.getSpannableString(String.valueOf(item.getTitle()),highlightKeyword,Color.parseColor("#3090FD")));
+            viewHolder.title.setText(EnvironmentUtil.getSpannableString(String.valueOf(item.getTitle()),highlightKeyword,Color.parseColor("#4285F4")));
         } catch (Exception e) {
             e.printStackTrace();
             viewHolder.title.setText(String.valueOf(item.getTitle()));
@@ -65,7 +65,7 @@ public class RecyclerViewAdapter<T extends DisplayItem> extends RecyclerView.Ada
         viewHolder.icon.setImageDrawable(item.getIconDrawable());
         if(viewHolder.getViewType()==0){
             try {
-                viewHolder.description.setText(EnvironmentUtil.getSpannableString(item.getDescription(),highlightKeyword,Color.parseColor("#3090FD")));
+                viewHolder.description.setText(EnvironmentUtil.getSpannableString(item.getDescription(),highlightKeyword,Color.parseColor("#4285F4")));
             } catch (Exception e) {
                 e.printStackTrace();
                 viewHolder.description.setText(String.valueOf(item.getDescription()));

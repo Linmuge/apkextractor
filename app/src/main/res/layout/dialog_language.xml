@@ -9,7 +9,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/language_follow_system_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/language_chinese_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground">
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/language_english_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

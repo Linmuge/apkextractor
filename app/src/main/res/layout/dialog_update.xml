@@ -52,7 +52,7 @@
         android:layout_marginBottom="20dp"
         android:layout_marginEnd="7dp"
         app:layout_constraintEnd_toStartOf="@id/tvUpdate"
-        android:text="不同意并退出"/>
+        android:text="拒绝并退出"/>
     <info.muge.appshare.ui.ArcButton
         android:id="@+id/tvUpdate"
         android:layout_width="0dp"

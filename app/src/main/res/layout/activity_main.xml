@@ -16,12 +16,18 @@
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                app:popupTheme="@style/AppTheme.PopupOverlay" >
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"/>
+            </com.google.android.material.appbar.MaterialToolbar>
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/main_tablayout"
                 android:layout_width="match_parent"
@@ -38,12 +44,4 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/main_navigation"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/nav_main_header"
-        app:elevation="5dp"
-        app:menu="@menu/menu_main_navigation"/>
 </androidx.drawerlayout.widget.DrawerLayout>

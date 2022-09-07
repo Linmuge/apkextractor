@@ -17,7 +17,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -25,7 +25,6 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             app:cardBackgroundColor="@color/colorCardArea"
-            app:cardElevation="1dp"
             app:cardCornerRadius="5dp">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -77,7 +76,7 @@
                             android:layout_height="wrap_content"
                             android:columnCount="2"
                             android:layout_marginLeft="20dp">
-                            <CheckBox
+                            <com.google.android.material.checkbox.MaterialCheckBox
                                 android:id="@+id/package_detail_data"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -86,7 +85,7 @@
                                 android:singleLine="true"
                                 android:textColor="@color/color_text_normal"
                                 android:text="Data"/>
-                            <CheckBox
+                            <com.google.android.material.checkbox.MaterialCheckBox
                                 android:id="@+id/package_detail_obb"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -94,7 +93,7 @@
                                 android:singleLine="true"
                                 android:textColor="@color/color_text_normal"
                                 android:text="Obb"/>
-                            <CheckBox
+                            <com.google.android.material.checkbox.MaterialCheckBox
                                 android:id="@+id/package_detail_apk"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -179,16 +178,15 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
-            app:cardElevation="1dp"
             app:cardCornerRadius="5dp"
             app:cardBackgroundColor="@color/colorCardArea">
             <LinearLayout
@@ -539,7 +537,7 @@
                 </RelativeLayout>
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/package_detail_signature_head"
@@ -579,7 +577,7 @@
             android:visibility="gone"
             android:text="@string/activity_detail_hash_head"/>
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/package_detail_hash"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -588,7 +586,6 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:visibility="gone"
-            app:cardElevation="1dp"
             app:cardCornerRadius="5dp"
             app:cardBackgroundColor="@color/colorCardArea">
             <LinearLayout
@@ -757,7 +754,7 @@
                         style="?android:attr/progressBarStyleSmall"/>
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <info.muge.appshare.ui.AssemblyView
             android:id="@+id/package_detail_assemble"

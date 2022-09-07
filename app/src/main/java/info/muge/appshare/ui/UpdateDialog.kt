@@ -73,7 +73,7 @@ private fun Activity.getView():View{
 
         span.setSpan(
 
-            ForegroundColorSpan(Color.parseColor("#3090FD")),
+            ForegroundColorSpan(Color.parseColor("#4285F4")),
 
             0,
 
@@ -105,7 +105,7 @@ private fun Activity.getView():View{
 
         span.setSpan(
 
-            ForegroundColorSpan(Color.parseColor("#3090FD")),
+            ForegroundColorSpan(Color.parseColor("#4285F4")),
 
             0,
 

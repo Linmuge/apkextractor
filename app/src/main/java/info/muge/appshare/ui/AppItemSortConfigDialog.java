@@ -20,7 +20,7 @@ public class AppItemSortConfigDialog extends AlertDialog implements View.OnClick
     private SortConfigDialogCallback callback;
 
     public AppItemSortConfigDialog(@NonNull Context context, @Nullable SortConfigDialogCallback callback) {
-        super(context);
+        super(context,R.style.materialDialog);
         this.callback=callback;
 
         settings= SPUtil.getGlobalSharedPreferences(context);
