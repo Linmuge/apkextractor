@@ -18,8 +18,8 @@
             android:id="@+id/dialog_package_name_split_edit"
             android:singleLine="true"
             android:hint="@string/dialog_settings_package_name_split"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginTop="20dp"/>
     </LinearLayout>
 </ScrollView>

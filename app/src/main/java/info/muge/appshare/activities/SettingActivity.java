@@ -20,6 +20,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import info.muge.appshare.R;
 import info.muge.appshare.Constants;
 import info.muge.appshare.ui.ExportRuleDialog;
@@ -73,9 +75,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 int night_mode=settings.getInt(Constants.PREFERENCE_NIGHT_MODE,Constants.PREFERENCE_NIGHT_MODE_DEFAULT);
                 ((RadioButton)dialogView.findViewById(R.id.night_mode_enabled_ra)).setChecked(night_mode== AppCompatDelegate.MODE_NIGHT_YES);
                 ((RadioButton)dialogView.findViewById(R.id.night_mode_disabled_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_NO);
-                ((RadioButton)dialogView.findViewById(R.id.night_mode_auto_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_AUTO);
                 ((RadioButton)dialogView.findViewById(R.id.night_mode_follow_system_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                final AlertDialog dialog=new AlertDialog.Builder(this)
+                final AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                         .setTitle(getResources().getString(R.string.activity_settings_night_mode))
                         .setView(dialogView)
                         .show();
@@ -95,15 +96,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                         editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_NO);
                         editor.apply();
                         refreshNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    }
-                });
-                dialogView.findViewById(R.id.night_mode_auto).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.cancel();
-                        editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_AUTO);
-                        editor.apply();
-                        refreshNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
                     }
                 });
                 dialogView.findViewById(R.id.night_mode_follow_system).setOnClickListener(new View.OnClickListener() {
@@ -135,7 +127,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 cb_hash.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_FILE_HASH,Constants.PREFERENCE_LOAD_FILE_HASH_DEFAULT));
                 cb_service.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_SERVICES,Constants.PREFERENCE_LOAD_SERVICES_DEFAULT));
                 cb_provider.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,Constants.PREFERENCE_LOAD_PROVIDERS_DEFAULT));
-                new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.activity_settings_loading_options))
+                new MaterialAlertDialogBuilder(this).setTitle(getResources().getString(R.string.activity_settings_loading_options))
                         .setView(dialogView)
                         .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
                             @Override
@@ -161,7 +153,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             }
             break;
             case R.id.settings_rules_area:{
-                new ExportRuleDialog(this).show();
+                new ExportRuleDialog(this,R.style.materialDialog).show();
             }
             break;
             case R.id.settings_path_area:{
@@ -171,7 +163,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             case R.id.settings_about_area:{
                 View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
 
-                new AlertDialog.Builder(this)
+                new MaterialAlertDialogBuilder(this)
                         .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
                         .setIcon(R.mipmap.ic_launcher_round)
                         .setCancelable(true)
@@ -188,7 +180,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 ((RadioButton)dialogView.findViewById(R.id.language_follow_system_ra)).setChecked(value==Constants.LANGUAGE_FOLLOW_SYSTEM);
                 ((RadioButton)dialogView.findViewById(R.id.language_chinese_ra)).setChecked(value==Constants.LANGUAGE_CHINESE);
                 ((RadioButton)dialogView.findViewById(R.id.language_english_ra)).setChecked(value==Constants.LANGUAGE_ENGLISH);
-                final AlertDialog dialog=new AlertDialog.Builder(this)
+                final AlertDialog dialog=new MaterialAlertDialogBuilder(this)
                         .setTitle(getResources().getString(R.string.activity_settings_language))
                         .setView(dialogView)
                         .show();
@@ -228,7 +220,7 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_package_name_split,null);
                 final EditText editText=dialogView.findViewById(R.id.dialog_package_name_split_edit);
                 editText.setText(settings.getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT));
-               new AlertDialog.Builder(this)
+               new MaterialAlertDialogBuilder(this)
                         .setTitle(getResources().getString(R.string.activity_settings_package_name_separator))
                         .setView(dialogView)
                         .setPositiveButton(getResources().getString(R.string.action_confirm), new DialogInterface.OnClickListener() {
@@ -270,7 +262,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
             default:break;
             case AppCompatDelegate.MODE_NIGHT_YES:night_mode_value=getResources().getString(R.string.night_mode_enabled);break;
             case AppCompatDelegate.MODE_NIGHT_NO:night_mode_value=getResources().getString(R.string.night_mode_disabled);break;
-            case AppCompatDelegate.MODE_NIGHT_AUTO:night_mode_value=getResources().getString(R.string.night_mode_auto);break;
             case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:night_mode_value=getResources().getString(R.string.night_mode_follow_system);break;
         }
         ((TextView)findViewById(R.id.settings_night_mode_value)).setText(night_mode_value);

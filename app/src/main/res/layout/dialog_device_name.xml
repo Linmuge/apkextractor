@@ -19,8 +19,8 @@
             android:singleLine="true"
             android:maxLength="30"
             android:hint="@string/dialog_settings_device_name_hint"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginTop="20dp"/>
     </LinearLayout>
 </ScrollView>

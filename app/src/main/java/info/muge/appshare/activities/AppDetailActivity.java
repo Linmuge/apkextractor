@@ -227,17 +227,6 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
                 }
             }
             break;
-            case R.id.app_detail_delete_area:{
-                try{
-                    Intent uninstall_intent = new Intent();
-                    uninstall_intent.setAction(Intent.ACTION_DELETE);
-                    uninstall_intent.setData(Uri.parse("package:"+appItem.getPackageName()));
-                    startActivity(uninstall_intent);
-                }catch (Exception e){
-                    ToastManager.showToast(AppDetailActivity.this,e.toString(),Toast.LENGTH_SHORT);
-                }
-            }
-            break;
 
             case R.id.app_detail_package_name_area:{
                 clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_package_name)).getText().toString());

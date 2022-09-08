@@ -56,7 +56,6 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     private lateinit var tv_multi_select_head: TextView
     private lateinit var btn_select_all: Button
     private lateinit var btn_export: Button
-    private lateinit var btn_share: Button
     private lateinit var btn_more: Button
     private var popupWindow: PopupWindow? = null
     private var isScrollable = false
@@ -141,7 +140,6 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         tv_multi_select_head = mainSelectNumSize
         btn_select_all = mainSelectAll
         btn_export = mainExport
-        btn_share = mainShare
         btn_more = mainMore
         val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.pp_more, null)
         val more_copy_package_names =
@@ -186,7 +184,6 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         swipeRefreshLayout!!.setColorSchemeColors(requireActivity().resources.getColor(R.color.colorTitle))
         btn_select_all!!.setOnClickListener(this)
         btn_export!!.setOnClickListener(this)
-        btn_share!!.setOnClickListener(this)
         btn_more!!.setOnClickListener(this)
         recyclerView!!.addOnScrollListener(onScrollListener)
         swipeRefreshLayout!!.setOnRefreshListener(OnRefreshListener {
@@ -258,20 +255,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                         refreshAvailableStorage()
                     })
             }
-            R.id.main_share -> {
-                if (adapter == null) return
-                val arrayList = ArrayList(
-                    adapter!!.selectedItems
-                )
-                //closeMultiSelectMode();
-                Global.shareCertainAppsByItems(requireActivity(), arrayList)
-            }
             R.id.main_more -> {
-                val values =
-                    EnvironmentUtil.calculatePopWindowPos(btn_more, popupWindow!!.contentView)
-                popupWindow!!.showAtLocation(v, 0, values[0], values[1])
-            }
-            R.id.popup_copy_package_name -> {
                 val appItemList = adapter!!.selectedItems
                 if (appItemList.size == 0) {
                     Snackbar.make(
@@ -328,8 +312,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         viewGroup_no_content!!.visibility = if (appList.size == 0) View.VISIBLE else View.GONE
         swipeRefreshLayout!!.isRefreshing = false
         swipeRefreshLayout!!.isEnabled = true
-        /*int mode= SPUtil.getGlobalSharedPreferences(getActivity()).getInt(Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE
-                ,Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_DEFAULT);*/adapter = RecyclerViewAdapter(
+        adapter = RecyclerViewAdapter(
             requireActivity(),
             recyclerView!!,
             appList,
@@ -365,13 +348,16 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
 
     override fun onMultiSelectItemChanged(selected_items: List<AppItem>, length: Long) {
         if (activity == null) return
-        tv_multi_select_head.text =
-            selected_items.size.toString() + resources.getString(R.string.unit_item) + "/" + Formatter.formatFileSize(
-                activity,
-                length
-            )
-        btn_export.isEnabled = selected_items.size > 0
-        btn_share.isEnabled = selected_items.size > 0
+        if (selected_items.isEmpty()){
+            closeMultiSelectMode()
+        }else{
+            tv_multi_select_head.text =
+                selected_items.size.toString() + resources.getString(R.string.unit_item) + "/" + Formatter.formatFileSize(
+                    activity,
+                    length
+                )
+            btn_export.isEnabled = selected_items.size > 0
+        }
     }
 
     override fun onMultiSelectModeOpened() {

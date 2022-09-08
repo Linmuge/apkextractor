@@ -220,5 +220,29 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         isSearchMode=false;
         appFragment.setSearchMode(false);
     }
-
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            checkAndExit();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+    private void checkAndExit(){
+        switch(currentSelection){
+            default:break;
+            case 0:{
+                if(appFragment.isMultiSelectMode()){
+                    appFragment.closeMultiSelectMode();
+                    return;
+                }
+            }
+            break;
+        }
+        if(isSearchMode){
+            closeSearchMode();
+            return;
+        }
+        finish();
+    }
 }

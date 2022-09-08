@@ -103,7 +103,6 @@
             ((TextView)findViewById(R.id.package_detail_path)).setText(importItem.getFileItem().getPath());
             if(importItem.getFileItem().isShareUriInstance()){
                 findViewById(R.id.package_detail_last_modified_area).setVisibility(View.GONE);
-                //findViewById(R.id.package_detail_size_dividing).setVisibility(View.GONE);
                 findViewById(R.id.package_detail_delete_area).setVisibility(View.GONE);
             }
             if(importItem.getImportType()==ImportItem.ImportType.ZIP){
@@ -281,12 +280,6 @@
                             }
                         });
                     }
-                }
-                break;
-                case R.id.package_detail_share_area:{
-                    final ArrayList<ImportItem>importItems=new ArrayList<>();
-                    importItems.add(importItem);
-                    Global.shareImportItems(this,importItems);
                 }
                 break;
                 case R.id.package_detail_delete_area:{

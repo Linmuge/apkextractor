@@ -108,7 +108,7 @@ public class Constants {
     public static final int LANGUAGE_ENGLISH=2;
     public static final int PREFERENCE_LANGUAGE_DEFAULT=LANGUAGE_FOLLOW_SYSTEM;
 
-    public static final int PREFERENCE_NIGHT_MODE_DEFAULT= AppCompatDelegate.MODE_NIGHT_NO;
+    public static final int PREFERENCE_NIGHT_MODE_DEFAULT= AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 
     public static final boolean PREFERENCE_LOAD_PERMISSIONS_DEFAULT=true;
     public static final boolean PREFERENCE_LOAD_ACTIVITIES_DEFAULT=true;

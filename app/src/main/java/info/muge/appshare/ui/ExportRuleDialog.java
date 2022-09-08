@@ -33,8 +33,8 @@ public class ExportRuleDialog extends AlertDialog implements View.OnClickListene
     /**
      * 编辑导出规则的UI，确定后会保存至SharedPreferences中
      */
-    public ExportRuleDialog(Context context){
-        super(context);
+    public ExportRuleDialog(Context context,int style){
+        super(context,style);
 
         settings= SPUtil.getGlobalSharedPreferences(context);
 

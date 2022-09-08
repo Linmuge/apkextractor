@@ -20,11 +20,11 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
             android:layout_marginBottom="15dp"
             app:cardElevation="10dp"
-            app:cardCornerRadius="0dp"
+            app:cardCornerRadius="8dp"
             app:cardBackgroundColor="@color/colorMainBottomCard"
             tools:visibility="gone">
 
@@ -43,8 +43,8 @@
                         android:id="@+id/main_storage_remain"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="20dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="20dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -58,8 +58,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="10dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="10dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:enabled="false"
@@ -78,13 +78,13 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
             android:layout_marginBottom="15dp"
             android:visibility="gone"
             app:cardElevation="10dp"
-            app:cardCornerRadius="0dp"
-            app:cardBackgroundColor="@color/colorMainBottomCard"
+            app:cardCornerRadius="8dp"
+            app:cardBackgroundColor="@color/titleViewBgColor"
             tools:visibility="visible">
 
             <RelativeLayout
@@ -138,20 +138,6 @@
                         android:ellipsize="end" />
 
                     <Button
-                        android:id="@+id/main_share"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog"
-                        android:layout_centerVertical="true"
-                        android:textSize="13sp"
-                        android:singleLine="true"
-                        android:text="@string/bottom_share"
-                        android:clickable="true"
-                        android:textColor="@color/standardTextColor"
-                        android:focusable="true"
-                        android:ellipsize="end" />
-
-                    <Button
                         android:id="@+id/main_more"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -159,7 +145,7 @@
                         android:layout_centerVertical="true"
                         android:textSize="13sp"
                         android:singleLine="true"
-                        android:text="@string/bottom_more"
+                        android:text="复制包名"
                         android:textColor="@color/standardTextColor"
                         android:clickable="true"
                         android:focusable="true"

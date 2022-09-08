@@ -13,8 +13,9 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="240dp"
-            android:background="?attr/colorPrimary"
-            app:contentScrim="@color/colorTitle"
+            android:background="@drawable/bg_10dp_bottom"
+            android:backgroundTint="?attr/colorPrimary"
+            app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <LinearLayout
@@ -35,8 +36,8 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/app_detail_name"
                     android:layout_marginTop="15dp"
-                    android:layout_marginLeft="80dp"
-                    android:layout_marginRight="80dp"
+                    android:layout_marginStart="80dp"
+                    android:layout_marginEnd="80dp"
                     android:layout_gravity="center_horizontal"
                     android:textSize="18sp"
                     android:textColor="@color/colorHighLightTextDarkBackground"
@@ -64,7 +65,8 @@
         android:id="@+id/toolbar_app_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorTitle"
+        android:background="@drawable/bg_10dp_bottom"
+        android:backgroundTint="?attr/colorPrimary"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -20,8 +20,8 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             app:cardBackgroundColor="@color/colorCardArea"
@@ -42,16 +42,16 @@
                         android:id="@+id/app_detail_run_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:src="@drawable/icon_play"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/app_detail_run_icon"
-                        android:layout_marginLeft="15dp"
+                        android:layout_marginStart="15dp"
                         android:textColor="@color/colorHighLightText"
                         android:textSize="15sp"
                         android:text="@string/activity_detail_run"/>
@@ -69,9 +69,9 @@
                         android:id="@+id/app_detail_export_icon"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:src="@drawable/icon_download"/>
                     <TextView
                         android:id="@+id/app_detail_export_att"
@@ -79,7 +79,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/app_detail_export_icon"
-                        android:layout_marginLeft="20dp"
+                        android:layout_marginStart="20dp"
                         android:textColor="@color/colorHighLightText"
                         android:textSize="15sp"
                         android:text="@string/activity_detail_export"/>
@@ -98,16 +98,16 @@
                         android:id="@+id/app_detail_share_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:src="@drawable/icon_share"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="15dp"
+                        android:layout_marginStart="15dp"
                         android:layout_toRightOf="@+id/app_detail_share_icon"
                         android:text="向牧歌App工具箱提供信息自动填写"
                         android:textColor="@color/colorHighLightText"
@@ -126,16 +126,16 @@
                         android:id="@+id/app_detail_detail_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:src="@drawable/icon_info"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/app_detail_detail_icon"
-                        android:layout_marginLeft="15dp"
+                        android:layout_marginStart="15dp"
                         android:textColor="@color/colorHighLightText"
                         android:textSize="14sp"
                         android:text="@string/activity_detail_system_detail"/>
@@ -153,49 +153,21 @@
                         android:id="@+id/app_detail_market_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:src="@drawable/icon_market"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="15dp"
+                        android:layout_marginStart="15dp"
                         android:layout_toRightOf="@+id/app_detail_market_icon"
                         android:text="@string/activity_detail_market"
                         android:textColor="@color/colorHighLightText"
                         android:textSize="14sp" />
                 </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/app_detail_delete_area"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:onClick="onClick"
-                    android:background="?attr/selectableItemBackground">
-                    <ImageView
-                        android:id="@+id/app_detail_delete_icon"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:src="@drawable/icon_delete"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toRightOf="@+id/app_detail_delete_icon"
-                        android:layout_marginLeft="15dp"
-                        android:textColor="@color/colorHighLightText"
-                        android:textSize="14sp"
-                        android:text="@string/activity_detail_uninstall"/>
-                </RelativeLayout>
-
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -203,8 +175,8 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             app:cardCornerRadius="5dp"
@@ -226,8 +198,8 @@
                         android:id="@+id/app_detail_package_name_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -241,8 +213,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_package_name_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="com.example"/>
                 </RelativeLayout>
@@ -259,8 +231,8 @@
                         android:id="@+id/app_detail_version_name_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -274,8 +246,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_version_name_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="1.0"/>
                 </RelativeLayout>
@@ -292,8 +264,8 @@
                         android:id="@+id/app_detail_version_code_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -307,8 +279,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_version_code_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="10"/>
                 </RelativeLayout>
@@ -326,9 +298,9 @@
                         android:id="@+id/app_detail_size_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:text="@string/activity_detail_package_size"
@@ -341,8 +313,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_size_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="100MB"/>
                 </RelativeLayout>
@@ -359,8 +331,8 @@
                         android:id="@+id/app_detail_install_time_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -374,8 +346,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_install_time_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="2019/01/01/19:00:10"/>
                 </RelativeLayout>
@@ -392,8 +364,8 @@
                         android:id="@+id/app_detail_update_time_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -407,8 +379,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_update_time_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="2019/01/01/19:00:10"/>
                 </RelativeLayout>
@@ -425,8 +397,8 @@
                         android:id="@+id/app_detail_installer_name_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -440,8 +412,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_installer_name_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="文件管理器"/>
                 </RelativeLayout>
@@ -458,8 +430,8 @@
                         android:id="@+id/app_detail_minimum_api_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -473,8 +445,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_minimum_api_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="14"/>
                 </RelativeLayout>
@@ -491,8 +463,8 @@
                         android:id="@+id/app_detail_target_api_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -506,8 +478,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_target_api_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="28"/>
                 </RelativeLayout>
@@ -524,8 +496,8 @@
                         android:id="@+id/app_detail_is_system_app_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -539,8 +511,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_is_system_app_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="@string/word_no"/>
                 </RelativeLayout>
@@ -557,8 +529,8 @@
                         android:id="@+id/app_detail_uid_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -572,8 +544,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_uid_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="1001"/>
                 </RelativeLayout>
@@ -590,8 +562,8 @@
                         android:id="@+id/app_detail_path_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -605,8 +577,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_path_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="@string/word_no"/>
                 </RelativeLayout>
@@ -624,8 +596,8 @@
                         android:id="@+id/app_detail_launcher_att"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerVertical="true"
@@ -639,8 +611,8 @@
                         android:gravity="end"
                         android:layout_toRightOf="@+id/app_detail_launcher_att"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp"
                         android:textSize="12sp"
                         tools:text="MainActivity"/>
                 </RelativeLayout>
@@ -653,7 +625,7 @@
             android:id="@+id/app_detail_signature_att"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="13dp"
+            android:layout_marginStart="13dp"
             android:layout_marginTop="10dp"
             android:textColor="@color/color_text_normal"
             android:textSize="15sp"
@@ -679,7 +651,7 @@
             android:id="@+id/app_detail_hash_att"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="13dp"
+            android:layout_marginStart="13dp"
             android:layout_marginTop="10dp"
             android:textColor="@color/color_text_normal"
             android:textSize="15sp"
@@ -691,8 +663,8 @@
             android:id="@+id/app_detail_hash"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:visibility="gone"
@@ -716,7 +688,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:textSize="14sp"
@@ -726,8 +698,8 @@
                         android:id="@+id/detail_hash_md5_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginBottom="3dp"
                         android:textSize="12sp"
                         android:visibility="gone"
@@ -736,7 +708,7 @@
                         android:id="@+id/detail_hash_md5_pg"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginBottom="5dp"
                         style="?android:attr/progressBarStyleSmall"/>
                 </LinearLayout>
@@ -753,7 +725,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:textSize="14sp"
@@ -763,8 +735,8 @@
                         android:id="@+id/detail_hash_sha1_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginBottom="3dp"
                         android:textSize="12sp"
                         android:visibility="gone"
@@ -773,7 +745,7 @@
                         android:id="@+id/detail_hash_sha1_pg"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginBottom="5dp"
                         style="?android:attr/progressBarStyleSmall"/>
                 </LinearLayout>
@@ -790,7 +762,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:textSize="14sp"
@@ -800,8 +772,8 @@
                         android:id="@+id/detail_hash_sha256_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginBottom="3dp"
                         android:textSize="12sp"
                         android:visibility="gone"
@@ -810,7 +782,7 @@
                         android:id="@+id/detail_hash_sha256_pg"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginBottom="5dp"
                         style="?android:attr/progressBarStyleSmall"/>
                 </LinearLayout>
@@ -827,7 +799,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="10dp"
                         android:textSize="14sp"
@@ -837,8 +809,8 @@
                         android:id="@+id/detail_hash_crc32_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_marginBottom="3dp"
                         android:textSize="12sp"
                         android:visibility="gone"
@@ -847,7 +819,7 @@
                         android:id="@+id/detail_hash_crc32_pg"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
                         android:layout_marginBottom="5dp"
                         style="?android:attr/progressBarStyleSmall"/>
                 </LinearLayout>

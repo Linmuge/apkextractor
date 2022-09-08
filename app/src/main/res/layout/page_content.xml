@@ -33,8 +33,8 @@
                 android:id="@+id/loading_pg"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
                 style="?android:attr/progressBarStyleHorizontal" />
 
             <TextView
@@ -44,8 +44,8 @@
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/loading_pg"
                 android:layout_marginTop="30dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
                 android:textColor="@color/colorHighLightText"
                 android:textSize="18sp"
                 android:text="@string/att_loading"

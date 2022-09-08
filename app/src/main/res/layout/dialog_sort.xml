@@ -13,8 +13,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_default"/>
 
         <com.google.android.material.radiobutton.MaterialRadioButton
@@ -23,8 +23,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_ascending_name"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_descending_appname"
@@ -32,8 +32,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_descending_name"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_ascending_package_name"
@@ -41,8 +41,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_ascending_package_name"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_descending_package_name"
@@ -50,8 +50,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_descending_package_name"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_ascending_appsize"
@@ -59,8 +59,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_ascending_size"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_descending_appsize"
@@ -68,8 +68,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_descending_size"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_ascending_date"
@@ -77,8 +77,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_ascending_date"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_descending_date"
@@ -86,8 +86,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_descending_date"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_ascending_install_date"
@@ -95,8 +95,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_ascending_install_date"/>
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sort_ra_descending_install_date"
@@ -104,8 +104,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:text="@string/dialog_sort_descending_install_date"/>
     </LinearLayout>
 

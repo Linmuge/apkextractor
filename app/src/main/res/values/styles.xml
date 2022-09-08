@@ -9,6 +9,11 @@
         <item name="android:windowBackground">@color/titleViewBgColor</item>
         <item name="materialCardViewStyle">@style/materialCardViewStyle</item>
         <item name="android:navigationBarColor">@color/titleViewBgColor</item>
+        <item name="materialAlertDialogTheme">@style/materialDialog</item>
+        <item name="android:alertDialogTheme">@style/materialDialog</item>
+        <item name="android:alertDialogStyle">@style/materialDialog</item>
+        <item name="alertDialogStyle">@style/materialDialog</item>
+        <item name="alertDialogTheme">@style/materialDialog</item>
     </style>
 
     <style name="materialCardViewStyle" parent="Widget.Material3.CardView.Filled">
@@ -22,6 +27,8 @@
 
     <!--更新样式-->
     <style name="materialDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
+        <item name="android:backgroundTint">@color/titleViewBgColor</item>
+        <item name="android:background">@drawable/bg_10dp</item>
     </style>
     <!--更新样式-->
     <style name="updateDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
