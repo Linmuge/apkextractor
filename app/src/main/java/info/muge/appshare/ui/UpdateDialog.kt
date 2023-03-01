@@ -118,7 +118,7 @@ private fun Activity.getView():View{
         spanBuilder.append(span)
 
 
-        spanBuilder.append(" 的全部内容，同意后开始使用我们的产品\n若选择不同意，将无法使用我们的产品和服务，并会退出应用")
+        spanBuilder.append(" 的全部内容，同意后开始使用我们的产品\n若选择不同意，将无法使用我们的产品和服务，并会退出应用\n以下是我们使用的唯一一条权限\nandroid.permission.QUERY_ALL_PACKAGES\n此条权限仅用来查询本机已安装应用列表，且只存储在本地")
 // 赋值给TextView
 
         tvDesc.movementMethod = LinkMovementMethod.getInstance()

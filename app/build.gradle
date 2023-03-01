@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 33
-    def versionCode1 = 7
-    def versionName1 = "1.0.5"
+    compileSdk 33
+    def versionCode1 = 8
+    def versionName1 = "1.0.6"
     defaultConfig {
         applicationId "info.muge.appshare"
-        minSdkVersion 24
-        targetSdkVersion 33
+        minSdk 24
+        targetSdk 33
         versionCode versionCode1
         versionName versionName1
         archivesBaseName = "apkkit-"+versionName1+"("+versionCode1+")"
@@ -47,18 +47,19 @@ android {
         checkReleaseBuilds false
         abortOnError false
     }
+    namespace 'info.muge.appshare'
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.android.material:material:1.8.0-alpha01'
+    implementation 'com.google.android.material:material:1.9.0-alpha02'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'com.belerweb:pinyin4j:2.5.1'
-    implementation "androidx.core:core-ktx:1.8.0"
-    implementation 'com.blankj:utilcodex:1.31.0'
+    implementation "androidx.core:core-ktx:1.9.0"
+    implementation 'com.blankj:utilcodex:1.31.1'
 
 }
 repositories {

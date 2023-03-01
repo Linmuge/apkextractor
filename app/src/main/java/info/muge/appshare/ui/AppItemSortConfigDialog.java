@@ -14,7 +14,7 @@ import info.muge.appshare.Constants;
 import info.muge.appshare.R;
 import info.muge.appshare.utils.SPUtil;
 
-public class AppItemSortConfigDialog extends AlertDialog implements View.OnClickListener{
+public class AppItemSortConfigDialog extends AlertDialog{
 
     private SharedPreferences settings;
     private SortConfigDialogCallback callback;
@@ -54,79 +54,98 @@ public class AppItemSortConfigDialog extends AlertDialog implements View.OnClick
         ra_package_name_ascend.setChecked(sort==9);
         ra_package_name_descend.setChecked(sort==10);
 
-        ra_default.setOnClickListener(this);
-        ra_name_ascend.setOnClickListener(this);
-        ra_name_descend.setOnClickListener(this);
-        ra_size_ascend.setOnClickListener(this);
-        ra_size_descend.setOnClickListener(this);
-        ra_update_time_ascend.setOnClickListener(this);
-        ra_update_time_descend.setOnClickListener(this);
-        ra_install_time_ascend.setOnClickListener(this);
-        ra_install_time_descend.setOnClickListener(this);
-        ra_package_name_ascend.setOnClickListener(this);
-        ra_package_name_descend.setOnClickListener(this);
+        ra_default.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 0;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_name_ascend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 1;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_name_descend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 2;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_size_ascend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 3;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_size_descend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 4;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_update_time_ascend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 5;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_update_time_descend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 6;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_install_time_ascend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 7;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_install_time_descend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 8;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_package_name_ascend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 9;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
+        ra_package_name_descend.setOnClickListener(v->{
+            SharedPreferences.Editor editor=settings.edit();
+            int sort_config = 10;
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config);
+        });
 
         setButton(AlertDialog.BUTTON_NEGATIVE, context.getResources().getString(R.string.dialog_button_cancel), new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
     }
-
-    @Override
-    public void onClick(View v) {
-        int sort_config=0;
-        SharedPreferences.Editor editor=settings.edit();
-        switch (v.getId()){
-            default:break;
-            case R.id.sort_ra_default:{
-                sort_config=0;
-            }
-            break;
-            case R.id.sort_ra_ascending_appname:{
-                sort_config=1;
-            }
-            break;
-            case R.id.sort_ra_descending_appname:{
-                sort_config=2;
-            }
-            break;
-            case R.id.sort_ra_ascending_appsize:{
-                sort_config=3;
-            }
-            break;
-            case R.id.sort_ra_descending_appsize:{
-                sort_config=4;
-            }
-            break;
-            case R.id.sort_ra_ascending_date:{
-                sort_config=5;
-            }
-            break;
-            case R.id.sort_ra_descending_date:{
-                sort_config=6;
-            }
-            break;
-            case R.id.sort_ra_ascending_install_date:{
-                sort_config=7;
-            }
-            break;
-            case R.id.sort_ra_descending_install_date:{
-                sort_config=8;
-            }
-            break;
-            case R.id.sort_ra_ascending_package_name:{
-                sort_config=9;
-            }
-            break;
-            case R.id.sort_ra_descending_package_name:{
-                sort_config=10;
-            }
-            break;
-        }
-        editor.putInt(Constants.PREFERENCE_SORT_CONFIG,sort_config);
-        editor.apply();
-        cancel();
-        if(callback!=null)callback.onOptionSelected(sort_config);
-    }
-
 }

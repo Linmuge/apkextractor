@@ -20,12 +20,15 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.blankj.utilcode.util.BarUtils;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -39,6 +42,7 @@ import info.muge.appshare.ui.AppItemSortConfigDialog;
 import info.muge.appshare.ui.SortConfigDialogCallback;
 import info.muge.appshare.utils.EnvironmentUtil;
 import info.muge.appshare.utils.SPUtil;
+import info.muge.appshare.utils.ViewExtsKt;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener,ViewPager.OnPageChangeListener, CompoundButton.OnCheckedChangeListener
  , OperationCallback {
@@ -53,6 +57,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.post(() -> {
+
+            ViewExtsKt.setHeight(toolbar,BarUtils.getStatusBarHeight()+toolbar.getMeasuredHeight());
+            toolbar.setPaddingRelative(0,BarUtils.getStatusBarHeight(),0,0);
+        });
         setSupportActionBar(toolbar);
 
         try{

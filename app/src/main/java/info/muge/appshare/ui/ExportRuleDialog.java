@@ -21,7 +21,7 @@ import info.muge.appshare.utils.SPUtil;
 
 import java.util.Calendar;
 
-public class ExportRuleDialog extends AlertDialog implements View.OnClickListener,DialogInterface.OnClickListener{
+public class ExportRuleDialog extends AlertDialog{
 
 
     private EditText edit_apk,edit_zip;
@@ -79,7 +79,7 @@ public class ExportRuleDialog extends AlertDialog implements View.OnClickListene
         setTitle(context.getResources().getString(R.string.dialog_filename_title));
         setView(dialogView);
         setButton(AlertDialog.BUTTON_POSITIVE, context.getResources().getString(R.string.dialog_button_confirm), (DialogInterface.OnClickListener)null);
-        setButton(AlertDialog.BUTTON_NEGATIVE,context.getResources().getString(R.string.dialog_button_cancel),this);
+        setButton(AlertDialog.BUTTON_NEGATIVE,context.getResources().getString(R.string.dialog_button_cancel),(DialogInterface.OnClickListener)null);
 
         edit_apk.addTextChangedListener(new TextWatcher(){
 
@@ -122,143 +122,110 @@ public class ExportRuleDialog extends AlertDialog implements View.OnClickListene
 
         });
 
-        dialogView.findViewById(R.id.filename_appname).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_packagename).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_version).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_versioncode).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_connector).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_underline).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_year).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_month).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_day_of_month).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_hour_of_day).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_minute).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_second).setOnClickListener(this);
-        dialogView.findViewById(R.id.filename_sequence_number).setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            default:break;
-            case R.id.filename_appname:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_NAME);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_NAME);
-                }
+        dialogView.findViewById(R.id.filename_appname).setOnClickListener(v -> {
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_NAME);
             }
-            break;
-            case R.id.filename_packagename:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_PACKAGE_NAME);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_PACKAGE_NAME);
-                }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_NAME);
             }
-            break;
-            case R.id.filename_version:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_VERSIONNAME);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_VERSIONNAME);
-                }
+        });
+        dialogView.findViewById(R.id.filename_packagename).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_PACKAGE_NAME);
             }
-            break;
-            case R.id.filename_versioncode:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_VERSIONCODE);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_VERSIONCODE);
-                }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_PACKAGE_NAME);
             }
-            break;
-            case R.id.filename_connector:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(), "-");
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), "-");
-                }
+        });
+        dialogView.findViewById(R.id.filename_version).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_VERSIONNAME);
             }
-            break;
-            case R.id.filename_underline:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(), "_");
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), "_");
-                }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_VERSIONNAME);
             }
-            break;
-            case R.id.filename_year:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_YEAR);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_YEAR);
-                }
+        });
+        dialogView.findViewById(R.id.filename_versioncode).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(), Constants.FONT_APP_VERSIONCODE);
             }
-            break;
-            case R.id.filename_month:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_MONTH);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_MONTH);
-                }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_APP_VERSIONCODE);
             }
-            break;
-            case R.id.filename_day_of_month:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_DAY_OF_MONTH);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_DAY_OF_MONTH);
-                }
+        });
+        dialogView.findViewById(R.id.filename_connector).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(), "-");
             }
-            break;
-            case R.id.filename_hour_of_day:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_HOUR_OF_DAY);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_HOUR_OF_DAY);
-                }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), "-");
             }
-            break;
-            case R.id.filename_minute:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_MINUTE);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_MINUTE);
-                }
+        });
+        dialogView.findViewById(R.id.filename_underline).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(), "_");
             }
-            break;
-            case R.id.filename_second:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_SECOND);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_SECOND);
-                }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), "_");
             }
-            break;
-            case R.id.filename_sequence_number:{
-                if(edit_apk.isFocused()){
-                    edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_AUTO_SEQUENCE_NUMBER);
-                }
-                if(edit_zip.isFocused()){
-                    edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_AUTO_SEQUENCE_NUMBER);
-                }
+        });
+        dialogView.findViewById(R.id.filename_year).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_YEAR);
             }
-            break;
-        }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_YEAR);
+            }
+        });
+        dialogView.findViewById(R.id.filename_month).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_MONTH);
+            }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_MONTH);
+            }
+        });
+        dialogView.findViewById(R.id.filename_day_of_month).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_DAY_OF_MONTH);
+            }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_DAY_OF_MONTH);
+            }
+        });
+        dialogView.findViewById(R.id.filename_hour_of_day).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_HOUR_OF_DAY);
+            }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_HOUR_OF_DAY);
+            }
+        });
+        dialogView.findViewById(R.id.filename_minute).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_MINUTE);
+            }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_MINUTE);
+            }
+        });
+        dialogView.findViewById(R.id.filename_second).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_SECOND);
+            }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_SECOND);
+            }
+        });
+        dialogView.findViewById(R.id.filename_sequence_number).setOnClickListener(v->{
+            if(edit_apk.isFocused()){
+                edit_apk.getText().insert(edit_apk.getSelectionStart(),Constants.FONT_AUTO_SEQUENCE_NUMBER);
+            }
+            if(edit_zip.isFocused()){
+                edit_zip.getText().insert(edit_zip.getSelectionStart(), Constants.FONT_AUTO_SEQUENCE_NUMBER);
+            }
+        });
     }
 
     @Override
@@ -297,8 +264,6 @@ public class ExportRuleDialog extends AlertDialog implements View.OnClickListene
         });
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {}
 
     private String getFormatedExportFileName(String apk, String zip){
         return getContext().getResources().getString(R.string.word_preview)+":\n\nAPK:  "+getReplacedString(apk)+".apk\n\n"

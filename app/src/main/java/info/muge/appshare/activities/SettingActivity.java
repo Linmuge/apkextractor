@@ -20,6 +20,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blankj.utilcode.util.BarUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import info.muge.appshare.R;
@@ -30,7 +31,7 @@ import info.muge.appshare.utils.EnvironmentUtil;
 import info.muge.appshare.utils.SPUtil;
 import info.muge.appshare.utils.ViewExtsKt;
 
-public class SettingActivity extends BaseActivity implements View.OnClickListener{
+public class SettingActivity extends BaseActivity{
 
     private static final String ACTIVITY_RESULT="result";
     private int result_code=RESULT_CANCELED;
@@ -43,20 +44,176 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         super.onCreate(bundle);
         settings= SPUtil.getGlobalSharedPreferences(SettingActivity.this);
         setContentView(R.layout.activity_settings);
-        setSupportActionBar((Toolbar)findViewById(R.id.toolbar_settings));
+
+        Toolbar toolbar = findViewById(R.id.toolbar_settings);
+        toolbar.post(() -> {
+
+            ViewExtsKt.setHeight(toolbar, BarUtils.getStatusBarHeight()+toolbar.getMeasuredHeight());
+            toolbar.setPaddingRelative(0,BarUtils.getStatusBarHeight(),0,0);
+        });
+        setSupportActionBar(toolbar);
         try{
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }catch (Exception e){e.printStackTrace();}
         try{
             getSupportActionBar().setTitle(getResources().getString(R.string.action_settings));
         }catch (Exception e){e.printStackTrace();}
-        findViewById(R.id.settings_night_mode_area).setOnClickListener(this);
-        findViewById(R.id.settings_loading_options_area).setOnClickListener(this);
-        findViewById(R.id.settings_rules_area).setOnClickListener(this);
-        findViewById(R.id.settings_path_area).setOnClickListener(this);
-        findViewById(R.id.settings_about_area).setOnClickListener(this);
-        findViewById(R.id.settings_language_area).setOnClickListener(this);
-        findViewById(R.id.settings_package_name_separator_area).setOnClickListener(this);
+        findViewById(R.id.settings_night_mode_area).setOnClickListener(v->{
+            final SharedPreferences.Editor editor=settings.edit();
+            View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_night_mode,null);
+            int night_mode=settings.getInt(Constants.PREFERENCE_NIGHT_MODE,Constants.PREFERENCE_NIGHT_MODE_DEFAULT);
+            ((RadioButton)dialogView.findViewById(R.id.night_mode_enabled_ra)).setChecked(night_mode== AppCompatDelegate.MODE_NIGHT_YES);
+            ((RadioButton)dialogView.findViewById(R.id.night_mode_disabled_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_NO);
+            ((RadioButton)dialogView.findViewById(R.id.night_mode_follow_system_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            final AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                    .setTitle(getResources().getString(R.string.activity_settings_night_mode))
+                    .setView(dialogView)
+                    .show();
+            dialogView.findViewById(R.id.night_mode_enabled).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                    editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_YES);
+                    editor.apply();
+                    refreshNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+            });
+            dialogView.findViewById(R.id.night_mode_disabled).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                    editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_NO);
+                    editor.apply();
+                    refreshNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
+            });
+            dialogView.findViewById(R.id.night_mode_follow_system).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                    editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    editor.apply();
+                    refreshNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                }
+            });
+        });
+        findViewById(R.id.settings_loading_options_area).setOnClickListener(v->{
+
+            final SharedPreferences.Editor editor=settings.edit();
+            View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_loading_selection,null);
+            final CheckBox cb_permissions=dialogView.findViewById(R.id.loading_permissions);
+            final CheckBox cb_activities=dialogView.findViewById(R.id.loading_activities);
+            final CheckBox cb_receivers=dialogView.findViewById(R.id.loading_receivers);
+            final CheckBox cb_static_loaders=dialogView.findViewById(R.id.loading_static_loaders);
+            final CheckBox cb_signature=dialogView.findViewById(R.id.loading_apk_signature);
+            final CheckBox cb_hash=dialogView.findViewById(R.id.loading_file_hash);
+            final CheckBox cb_service=dialogView.findViewById(R.id.loading_services);
+            final CheckBox cb_provider=dialogView.findViewById(R.id.loading_providers);
+            cb_permissions.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS,Constants.PREFERENCE_LOAD_PERMISSIONS_DEFAULT));
+            cb_activities.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_ACTIVITIES,Constants.PREFERENCE_LOAD_ACTIVITIES_DEFAULT));
+            cb_receivers.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_RECEIVERS,Constants.PREFERENCE_LOAD_RECEIVERS_DEFAULT));
+            cb_static_loaders.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS,Constants.PREFERENCE_LOAD_STATIC_LOADERS_DEFAULT));
+            cb_signature.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_APK_SIGNATURE,Constants.PREFERENCE_LOAD_APK_SIGNATURE_DEFAULT));
+            cb_hash.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_FILE_HASH,Constants.PREFERENCE_LOAD_FILE_HASH_DEFAULT));
+            cb_service.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_SERVICES,Constants.PREFERENCE_LOAD_SERVICES_DEFAULT));
+            cb_provider.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,Constants.PREFERENCE_LOAD_PROVIDERS_DEFAULT));
+            new MaterialAlertDialogBuilder(this).setTitle(getResources().getString(R.string.activity_settings_loading_options))
+                    .setView(dialogView)
+                    .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (dialog, which) -> {
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS,cb_permissions.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_ACTIVITIES,cb_activities.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_RECEIVERS,cb_receivers.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS,cb_static_loaders.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_APK_SIGNATURE,cb_signature.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_FILE_HASH,cb_hash.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_SERVICES,cb_service.isChecked());
+                        editor.putBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,cb_provider.isChecked());
+                        editor.apply();
+                        refreshSettingValues();
+                        setResult(RESULT_OK);
+                    })
+                    .setNegativeButton(getResources().getString(R.string.dialog_button_cancel), (dialog, which) -> {})
+                    .show();
+
+        });
+        findViewById(R.id.settings_rules_area).setOnClickListener(v->{new ExportRuleDialog(this,R.style.materialDialog).show();});
+        findViewById(R.id.settings_path_area).setOnClickListener(v->{ViewExtsKt.toast("暂不支持修改");});
+        findViewById(R.id.settings_about_area).setOnClickListener(v->{
+            View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
+
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
+                    .setIcon(R.mipmap.ic_launcher_round)
+                    .setCancelable(true)
+                    .setView(dialogView)
+                    .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (arg0, arg1) -> {}).show();
+
+        });
+        findViewById(R.id.settings_language_area).setOnClickListener(v->{
+            View dialogView= LayoutInflater.from(this).inflate(R.layout.dialog_language,null);
+            int value=SPUtil.getGlobalSharedPreferences(this).getInt(Constants.PREFERENCE_LANGUAGE,Constants.PREFERENCE_LANGUAGE_DEFAULT);
+            ((RadioButton)dialogView.findViewById(R.id.language_follow_system_ra)).setChecked(value==Constants.LANGUAGE_FOLLOW_SYSTEM);
+            ((RadioButton)dialogView.findViewById(R.id.language_chinese_ra)).setChecked(value==Constants.LANGUAGE_CHINESE);
+            ((RadioButton)dialogView.findViewById(R.id.language_english_ra)).setChecked(value==Constants.LANGUAGE_ENGLISH);
+            final AlertDialog dialog=new MaterialAlertDialogBuilder(this)
+                    .setTitle(getResources().getString(R.string.activity_settings_language))
+                    .setView(dialogView)
+                    .show();
+            dialogView.findViewById(R.id.language_follow_system).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SPUtil.getGlobalSharedPreferences(SettingActivity.this).edit()
+                            .putInt(Constants.PREFERENCE_LANGUAGE,Constants.LANGUAGE_FOLLOW_SYSTEM)
+                            .apply();
+                    dialog.cancel();
+                    refreshLanguageValue();
+                }
+            });
+            dialogView.findViewById(R.id.language_chinese).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SPUtil.getGlobalSharedPreferences(SettingActivity.this).edit()
+                            .putInt(Constants.PREFERENCE_LANGUAGE,Constants.LANGUAGE_CHINESE)
+                            .apply();
+                    dialog.cancel();
+                    refreshLanguageValue();
+                }
+            });
+            dialogView.findViewById(R.id.language_english).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SPUtil.getGlobalSharedPreferences(SettingActivity.this).edit()
+                            .putInt(Constants.PREFERENCE_LANGUAGE,Constants.LANGUAGE_ENGLISH)
+                            .apply();
+                    dialog.cancel();
+                    refreshLanguageValue();
+                }
+            });
+        });
+        findViewById(R.id.settings_package_name_separator_area).setOnClickListener(v->{
+
+            final SharedPreferences.Editor editor=settings.edit();
+            View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_package_name_split,null);
+            final EditText editText=dialogView.findViewById(R.id.dialog_package_name_split_edit);
+            editText.setText(settings.getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT));
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(getResources().getString(R.string.activity_settings_package_name_separator))
+                    .setView(dialogView)
+                    .setPositiveButton(getResources().getString(R.string.action_confirm), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            editor.putString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,editText.getText().toString()).apply();
+                            refreshSettingValues();
+                        }
+                    })
+                    .setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .show();
+        });
         refreshSettingValues();
 
         if(bundle!=null){
@@ -64,183 +221,6 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         }
     }
 
-    @Override
-    public void onClick(View v){
-        if(settings==null)return;
-        final SharedPreferences.Editor editor=settings.edit();
-        switch (v.getId()){
-            default:break;
-            case R.id.settings_night_mode_area:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_night_mode,null);
-                int night_mode=settings.getInt(Constants.PREFERENCE_NIGHT_MODE,Constants.PREFERENCE_NIGHT_MODE_DEFAULT);
-                ((RadioButton)dialogView.findViewById(R.id.night_mode_enabled_ra)).setChecked(night_mode== AppCompatDelegate.MODE_NIGHT_YES);
-                ((RadioButton)dialogView.findViewById(R.id.night_mode_disabled_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_NO);
-                ((RadioButton)dialogView.findViewById(R.id.night_mode_follow_system_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                final AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                        .setTitle(getResources().getString(R.string.activity_settings_night_mode))
-                        .setView(dialogView)
-                        .show();
-                dialogView.findViewById(R.id.night_mode_enabled).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.cancel();
-                        editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_YES);
-                        editor.apply();
-                        refreshNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    }
-                });
-                dialogView.findViewById(R.id.night_mode_disabled).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.cancel();
-                        editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_NO);
-                        editor.apply();
-                        refreshNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    }
-                });
-                dialogView.findViewById(R.id.night_mode_follow_system).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.cancel();
-                        editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                        editor.apply();
-                        refreshNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                    }
-                });
-            }
-            break;
-            case R.id.settings_loading_options_area:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_loading_selection,null);
-                final CheckBox cb_permissions=dialogView.findViewById(R.id.loading_permissions);
-                final CheckBox cb_activities=dialogView.findViewById(R.id.loading_activities);
-                final CheckBox cb_receivers=dialogView.findViewById(R.id.loading_receivers);
-                final CheckBox cb_static_loaders=dialogView.findViewById(R.id.loading_static_loaders);
-                final CheckBox cb_signature=dialogView.findViewById(R.id.loading_apk_signature);
-                final CheckBox cb_hash=dialogView.findViewById(R.id.loading_file_hash);
-                final CheckBox cb_service=dialogView.findViewById(R.id.loading_services);
-                final CheckBox cb_provider=dialogView.findViewById(R.id.loading_providers);
-                cb_permissions.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS,Constants.PREFERENCE_LOAD_PERMISSIONS_DEFAULT));
-                cb_activities.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_ACTIVITIES,Constants.PREFERENCE_LOAD_ACTIVITIES_DEFAULT));
-                cb_receivers.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_RECEIVERS,Constants.PREFERENCE_LOAD_RECEIVERS_DEFAULT));
-                cb_static_loaders.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS,Constants.PREFERENCE_LOAD_STATIC_LOADERS_DEFAULT));
-                cb_signature.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_APK_SIGNATURE,Constants.PREFERENCE_LOAD_APK_SIGNATURE_DEFAULT));
-                cb_hash.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_FILE_HASH,Constants.PREFERENCE_LOAD_FILE_HASH_DEFAULT));
-                cb_service.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_SERVICES,Constants.PREFERENCE_LOAD_SERVICES_DEFAULT));
-                cb_provider.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,Constants.PREFERENCE_LOAD_PROVIDERS_DEFAULT));
-                new MaterialAlertDialogBuilder(this).setTitle(getResources().getString(R.string.activity_settings_loading_options))
-                        .setView(dialogView)
-                        .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS,cb_permissions.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_ACTIVITIES,cb_activities.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_RECEIVERS,cb_receivers.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS,cb_static_loaders.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_APK_SIGNATURE,cb_signature.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_FILE_HASH,cb_hash.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_SERVICES,cb_service.isChecked());
-                                editor.putBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,cb_provider.isChecked());
-                                editor.apply();
-                                refreshSettingValues();
-                                setResult(RESULT_OK);
-                            }
-                        })
-                        .setNegativeButton(getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
-                            @Override public void onClick(DialogInterface dialog, int which) {}
-                        })
-                        .show();
-
-            }
-            break;
-            case R.id.settings_rules_area:{
-                new ExportRuleDialog(this,R.style.materialDialog).show();
-            }
-            break;
-            case R.id.settings_path_area:{
-                ViewExtsKt.toast("暂不支持修改");
-            }
-            break;
-            case R.id.settings_about_area:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
-
-                new MaterialAlertDialogBuilder(this)
-                        .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
-                        .setIcon(R.mipmap.ic_launcher_round)
-                        .setCancelable(true)
-                        .setView(dialogView)
-                        .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                            @Override public void onClick(DialogInterface arg0, int arg1) {}
-                        }).show();
-
-            }
-            break;
-            case R.id.settings_language_area:{
-                View dialogView= LayoutInflater.from(this).inflate(R.layout.dialog_language,null);
-                int value=SPUtil.getGlobalSharedPreferences(this).getInt(Constants.PREFERENCE_LANGUAGE,Constants.PREFERENCE_LANGUAGE_DEFAULT);
-                ((RadioButton)dialogView.findViewById(R.id.language_follow_system_ra)).setChecked(value==Constants.LANGUAGE_FOLLOW_SYSTEM);
-                ((RadioButton)dialogView.findViewById(R.id.language_chinese_ra)).setChecked(value==Constants.LANGUAGE_CHINESE);
-                ((RadioButton)dialogView.findViewById(R.id.language_english_ra)).setChecked(value==Constants.LANGUAGE_ENGLISH);
-                final AlertDialog dialog=new MaterialAlertDialogBuilder(this)
-                        .setTitle(getResources().getString(R.string.activity_settings_language))
-                        .setView(dialogView)
-                        .show();
-                dialogView.findViewById(R.id.language_follow_system).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        SPUtil.getGlobalSharedPreferences(SettingActivity.this).edit()
-                                .putInt(Constants.PREFERENCE_LANGUAGE,Constants.LANGUAGE_FOLLOW_SYSTEM)
-                                .apply();
-                        dialog.cancel();
-                        refreshLanguageValue();
-                    }
-                });
-                dialogView.findViewById(R.id.language_chinese).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        SPUtil.getGlobalSharedPreferences(SettingActivity.this).edit()
-                                .putInt(Constants.PREFERENCE_LANGUAGE,Constants.LANGUAGE_CHINESE)
-                                .apply();
-                        dialog.cancel();
-                        refreshLanguageValue();
-                    }
-                });
-                dialogView.findViewById(R.id.language_english).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        SPUtil.getGlobalSharedPreferences(SettingActivity.this).edit()
-                                .putInt(Constants.PREFERENCE_LANGUAGE,Constants.LANGUAGE_ENGLISH)
-                                .apply();
-                        dialog.cancel();
-                        refreshLanguageValue();
-                    }
-                });
-            }
-            break;
-            case R.id.settings_package_name_separator_area:{
-                View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_package_name_split,null);
-                final EditText editText=dialogView.findViewById(R.id.dialog_package_name_split_edit);
-                editText.setText(settings.getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT));
-               new MaterialAlertDialogBuilder(this)
-                        .setTitle(getResources().getString(R.string.activity_settings_package_name_separator))
-                        .setView(dialogView)
-                        .setPositiveButton(getResources().getString(R.string.action_confirm), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                editor.putString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,editText.getText().toString()).apply();
-                                refreshSettingValues();
-                            }
-                        })
-                        .setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        })
-                       .show();
-            }
-            break;
-        }
-    }
 
     private void refreshNightMode(int value){
         result_code=RESULT_OK;

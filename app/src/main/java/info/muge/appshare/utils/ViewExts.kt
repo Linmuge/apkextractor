@@ -13,6 +13,7 @@ import android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 import android.text.InputFilter
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
@@ -129,5 +130,22 @@ fun EditText.setEditTextInputSpace() {
 
  fun View.vibrate(){
      performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
+}
+fun View.setMargins(start: Int, top: Int, end: Int, bottom: Int) {
+    if (this.layoutParams is ViewGroup.MarginLayoutParams) {
+        val p = this.layoutParams as ViewGroup.MarginLayoutParams
+        p.setMargins(start, top, end, bottom)
+        this.layoutParams = p
+    }
+}
+/**
+ * @param heightAsPx 需要设置的高度,单位为px
+ * @author Gushenge
+ * @version 0.2.0
+ * */
+fun View.setHeight(heightAsPx: Int) {
+    val pp = this.layoutParams
+    pp.height = heightAsPx
+    this.layoutParams = pp
 }
 

@@ -14,7 +14,7 @@ import info.muge.appshare.Constants;
 import info.muge.appshare.R;
 import info.muge.appshare.utils.SPUtil;
 
-public class ImportItemSortConfigDialog extends AlertDialog implements View.OnClickListener{
+public class ImportItemSortConfigDialog extends AlertDialog{
 
     private SortConfigDialogCallback callback;
     private SharedPreferences settings;
@@ -41,58 +41,66 @@ public class ImportItemSortConfigDialog extends AlertDialog implements View.OnCl
         ra_size_descending.setChecked(sort_config==4);
         ra_time_ascending.setChecked(sort_config==5);
         ra_time_descending.setChecked(sort_config==6);
-        ra_default.setOnClickListener(this);
-        ra_name_ascending.setOnClickListener(this);
-        ra_name_descending.setOnClickListener(this);
-        ra_size_ascending.setOnClickListener(this);
-        ra_size_descending.setOnClickListener(this);
-        ra_time_ascending.setOnClickListener(this);
-        ra_time_descending.setOnClickListener(this);
+        ra_default.setOnClickListener(v->{
+            int sort_config1 = 0;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
+        ra_name_ascending.setOnClickListener(v->{
+            int sort_config1 = 1;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
+        ra_name_descending.setOnClickListener(v->{
+            int sort_config1 = 2;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
+        ra_size_ascending.setOnClickListener(v->{
+            int sort_config1 = 3;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
+        ra_size_descending.setOnClickListener(v->{
+            int sort_config1 = 4;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
+        ra_time_ascending.setOnClickListener(v->{
+            int sort_config1 = 5;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
+        ra_time_descending.setOnClickListener(v->{
+            int sort_config1 = 6;
+            SharedPreferences.Editor editor=settings.edit();
+            editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config1);
+            editor.apply();
+            cancel();
+            if(callback!=null)callback.onOptionSelected(sort_config1);
+        });
         setButton(AlertDialog.BUTTON_NEGATIVE, context.getResources().getString(R.string.dialog_button_cancel), new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {}
         });
-    }
-
-    @Override
-    public void onClick(View view){
-        int sort_config=0;
-        switch (view.getId()){
-            default:break;
-            case R.id.sort_ra_default:{
-                sort_config=0;
-            }
-            break;
-            case R.id.sort_ra_ascending_filename:{
-                sort_config=1;
-            }
-            break;
-            case R.id.sort_ra_descending_filename:{
-                sort_config=2;
-            }
-            break;
-            case R.id.sort_ra_ascending_filesize:{
-                sort_config=3;
-            }
-            break;
-            case R.id.sort_ra_descending_filesize:{
-                sort_config=4;
-            }
-            break;
-            case R.id.sort_ra_ascending_modified_time:{
-                sort_config=5;
-            }
-            break;
-            case R.id.sort_ra_descending_modified_time:{
-                sort_config=6;
-            }
-            break;
-        }
-        SharedPreferences.Editor editor=settings.edit();
-        editor.putInt(Constants.PREFERENCE_SORT_CONFIG_IMPORT_ITEMS,sort_config);
-        editor.apply();
-        cancel();
-        if(callback!=null)callback.onOptionSelected(sort_config);
     }
 
 }

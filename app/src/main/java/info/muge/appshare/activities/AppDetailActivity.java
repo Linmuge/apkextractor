@@ -26,6 +26,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
+import com.blankj.utilcode.util.BarUtils;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
@@ -45,6 +46,7 @@ import info.muge.appshare.ui.SignatureView;
 import info.muge.appshare.ui.ToastManager;
 import info.muge.appshare.utils.OutputUtil;
 import info.muge.appshare.utils.SPUtil;
+import info.muge.appshare.utils.ViewExtsKt;
 
 public class AppDetailActivity extends BaseActivity implements View.OnClickListener{
     private AppItem appItem;
@@ -77,7 +79,13 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         }
         setContentView(R.layout.activity_app_detail);
 
-        setSupportActionBar((Toolbar)findViewById(R.id.toolbar_app_detail));
+        Toolbar toolbar = findViewById(R.id.toolbar_app_detail);
+        toolbar.post(() -> {
+
+            ViewExtsKt.setHeight(toolbar, BarUtils.getStatusBarHeight()+toolbar.getMeasuredHeight());
+            toolbar.setPaddingRelative(0,BarUtils.getStatusBarHeight(),0,0);
+        });
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(appItem.getAppName());
 
@@ -173,133 +181,91 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v){
-        switch (v.getId()){
-            default:break;
-            case R.id.app_detail_run_area:{
-                try{
-                    startActivity(getPackageManager().getLaunchIntentForPackage(appItem.getPackageName()));
-                }catch (Exception e){
-                    ToastManager.showToast(AppDetailActivity.this,"应用没有界面,无法运行",Toast.LENGTH_SHORT);
-                }
+        var id = v.getId();
+        if (id == R.id.app_detail_run_area){
+            try{
+                startActivity(getPackageManager().getLaunchIntentForPackage(appItem.getPackageName()));
+            }catch (Exception e){
+                ToastManager.showToast(AppDetailActivity.this,"应用没有界面,无法运行",Toast.LENGTH_SHORT);
             }
-            break;
-            case R.id.app_detail_export_area:{
+        }else  if (id == R.id.app_detail_export_area){
 
-                final List<AppItem>single_list=getSingleItemArrayList();
-                final AppItem item=single_list.get(0);
-                Global.checkAndExportCertainAppItemsToSetPathWithoutShare(this,single_list , false,new Global.ExportTaskFinishedListener() {
-                    @Override
-                    public void onFinished(@NonNull String error_message) {
-                        if(!error_message.trim().equals("")){
-                            new AlertDialog.Builder(AppDetailActivity.this)
-                                    .setTitle(getResources().getString(R.string.exception_title))
-                                    .setMessage(getResources().getString(R.string.exception_message)+error_message)
-                                    .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (dialog, which) -> {})
-                                    .show();
-                            return;
-                        }
-                        ToastManager.showToast(AppDetailActivity.this,getResources().getString(R.string.toast_export_complete)+" "
-                                + SPUtil.getDisplayingExportPath()
-                                +OutputUtil.getWriteFileNameForAppItem(AppDetailActivity.this,single_list.get(0),(item.exportData||item.exportObb)?
-                                SPUtil.getCompressingExtensionName(AppDetailActivity.this):"apk",1),Toast.LENGTH_SHORT);
+            final List<AppItem>single_list=getSingleItemArrayList();
+            final AppItem item=single_list.get(0);
+            Global.checkAndExportCertainAppItemsToSetPathWithoutShare(this,single_list , false,new Global.ExportTaskFinishedListener() {
+                @Override
+                public void onFinished(@NonNull String error_message) {
+                    if(!error_message.trim().equals("")){
+                        new AlertDialog.Builder(AppDetailActivity.this)
+                                .setTitle(getResources().getString(R.string.exception_title))
+                                .setMessage(getResources().getString(R.string.exception_message)+error_message)
+                                .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (dialog, which) -> {})
+                                .show();
+                        return;
                     }
-                });
-            }
-            break;
-            case R.id.app_detail_share_area:{
-
-                Global.shareCertainAppsByItems(this,getSingleItemArrayList());
-            }
-            break;
-            case R.id.app_detail_detail_area:{
-                Intent intent=new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(Uri.fromParts("package", appItem.getPackageName(), null));
-                startActivity(intent);
-            }
-            break;
-            case R.id.app_detail_market_area:{
-                try{
-                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+appItem.getPackageName()));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }catch (Exception e){
-                    ToastManager.showToast(AppDetailActivity.this,e.toString(),Toast.LENGTH_SHORT);
+                    ToastManager.showToast(AppDetailActivity.this,getResources().getString(R.string.toast_export_complete)+" "
+                            + SPUtil.getDisplayingExportPath()
+                            +OutputUtil.getWriteFileNameForAppItem(AppDetailActivity.this,single_list.get(0),(item.exportData||item.exportObb)?
+                            SPUtil.getCompressingExtensionName(AppDetailActivity.this):"apk",1),Toast.LENGTH_SHORT);
                 }
+            });
+        }else  if (id == R.id.app_detail_share_area){
+            Global.shareCertainAppsByItems(this,getSingleItemArrayList());
+        }else  if (id == R.id.app_detail_detail_area){
+            Intent intent=new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.fromParts("package", appItem.getPackageName(), null));
+            startActivity(intent);
+        }else  if (id == R.id.app_detail_market_area){
+            try{
+                Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+appItem.getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }catch (Exception e){
+                ToastManager.showToast(AppDetailActivity.this,e.toString(),Toast.LENGTH_SHORT);
             }
-            break;
+        }else  if (id == R.id.app_detail_package_name_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_package_name)).getText().toString());
+        }else  if (id == R.id.app_detail_version_name_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_version_name)).getText().toString());
+        }else  if (id == R.id.app_detail_version_code_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_version_code)).getText().toString());
+        }else  if (id == R.id.app_detail_size_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_size)).getText().toString());
+        }else  if (id == R.id.app_detail_install_time_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_install_time)).getText().toString());
+        }else  if (id == R.id.app_detail_update_time_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_update_time)).getText().toString());
+        }else  if (id == R.id.app_detail_minimum_api_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_minimum_api)).getText().toString());
+        }else  if (id == R.id.app_detail_target_api_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_target_api)).getText().toString());
+        }else  if (id == R.id.app_detail_is_system_app_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_is_system_app)).getText().toString());
+        }else  if (id == R.id.detail_hash_md5){
+            final String value=((TextView)findViewById(R.id.detail_hash_md5_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_hash_sha1){
+            final String value=((TextView)findViewById(R.id.detail_hash_sha1_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_hash_sha256){
+            final String value=((TextView)findViewById(R.id.detail_hash_sha256_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_hash_crc32){
+            final String value=((TextView)findViewById(R.id.detail_hash_crc32_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.app_detail_path_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_path_value)).getText().toString());
+        }else  if (id == R.id.app_detail_installer_name_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_installer_name_value)).getText().toString());
 
-            case R.id.app_detail_package_name_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_package_name)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_version_name_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_version_name)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_version_code_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_version_code)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_size_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_size)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_install_time_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_install_time)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_update_time_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_update_time)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_minimum_api_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_minimum_api)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_target_api_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_target_api)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_is_system_app_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_is_system_app)).getText().toString());
-            }
-            break;
-            case R.id.detail_hash_md5:{
-                final String value=((TextView)findViewById(R.id.detail_hash_md5_value)).getText().toString();
-                if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
-            }
-            break;
-            case R.id.detail_hash_sha1:{
-                final String value=((TextView)findViewById(R.id.detail_hash_sha1_value)).getText().toString();
-                if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
-            }
-            break;
-            case R.id.detail_hash_sha256:{
-                final String value=((TextView)findViewById(R.id.detail_hash_sha256_value)).getText().toString();
-                if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
-            }
-            break;
-            case R.id.detail_hash_crc32:{
-                final String value=((TextView)findViewById(R.id.detail_hash_crc32_value)).getText().toString();
-                if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
-            }
-            break;
-            case R.id.app_detail_path_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_path_value)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_installer_name_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_installer_name_value)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_uid_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_uid)).getText().toString());
-            }
-            break;
-            case R.id.app_detail_launcher_area:{
-                clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_launcher_value)).getText().toString());
-            }
-            break;
+        }else  if (id == R.id.app_detail_uid_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_uid)).getText().toString());
+
+        }else  if (id == R.id.app_detail_launcher_area){
+            clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_launcher_value)).getText().toString());
+
+        }else{
+            ViewExtsKt.toast("功能未开放");
         }
     }
 

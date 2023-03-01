@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
+import com.blankj.utilcode.util.BarUtils
+import com.blankj.utilcode.util.ViewUtils
 import com.google.android.material.snackbar.Snackbar
 import info.muge.appshare.Constants
 import info.muge.appshare.Global
@@ -38,6 +40,8 @@ import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.StorageUtil
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.checkbox.MaterialCheckBox
+import info.muge.appshare.utils.anko.dp
+import info.muge.appshare.utils.setMargins
 import java.util.*
 
 class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, RefreshInstalledListTaskCallback,
@@ -141,6 +145,9 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         btn_select_all = mainSelectAll
         btn_export = mainExport
         btn_more = mainMore
+
+        card_multi_select.setMargins(25.dp,0,25.dp,15.dp+BarUtils.getNavBarHeight())
+        binding.exportCard.setMargins(25.dp,0,25.dp,15.dp+BarUtils.getNavBarHeight())
         val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.pp_more, null)
         val more_copy_package_names =
             popupView.findViewById<ViewGroup>(R.id.popup_copy_package_name)
@@ -151,6 +158,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
             ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         )
+
         popupWindow!!.setBackgroundDrawable(ColorDrawable(resources.getColor(R.color.color_popup_window)))
         popupWindow!!.isTouchable = true
         popupWindow!!.isOutsideTouchable = true

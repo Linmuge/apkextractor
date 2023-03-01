@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import info.muge.appshare.R;
 
-public class AssemblyView extends LinearLayout implements View.OnClickListener{
+public class AssemblyView extends LinearLayout{
 
     private LinearLayout linearLayout_permission;
     private LinearLayout linearLayout_activity;
@@ -64,90 +64,72 @@ public class AssemblyView extends LinearLayout implements View.OnClickListener{
         service_arrow=findViewById(R.id.detail_service_area_arrow);
         provider_arrow=findViewById(R.id.detail_provider_area_arrow);
 
-        findViewById(R.id.detail_permission_area).setOnClickListener(this);
-        findViewById(R.id.detail_activity_area).setOnClickListener(this);
-        findViewById(R.id.detail_receiver_area).setOnClickListener(this);
-        findViewById(R.id.detail_static_loader_area).setOnClickListener(this);
-        findViewById(R.id.detail_services_area).setOnClickListener(this);
-        findViewById(R.id.detail_provider_area).setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.detail_permission_area:{
-                if(linearLayout_permission.getVisibility()==View.VISIBLE){
-                    permission_arrow.setRotation(0);
-                    linearLayout_permission.setVisibility(View.GONE);
-                    TransitionManager.beginDelayedTransition(this);
-                }else {
-                    findViewById(R.id.detail_permission_area_arrow).setRotation(90);
-                    linearLayout_permission.setVisibility(View.VISIBLE);
-                    TransitionManager.beginDelayedTransition(this);
-                }
+        findViewById(R.id.detail_permission_area).setOnClickListener(v->{
+            if(linearLayout_permission.getVisibility()==View.VISIBLE){
+                permission_arrow.setRotation(0);
+                linearLayout_permission.setVisibility(View.GONE);
+                TransitionManager.beginDelayedTransition(this);
+            }else {
+                findViewById(R.id.detail_permission_area_arrow).setRotation(90);
+                linearLayout_permission.setVisibility(View.VISIBLE);
+                TransitionManager.beginDelayedTransition(this);
             }
-            break;
-            case R.id.detail_activity_area:{
-                if(linearLayout_activity.getVisibility()==View.VISIBLE){
-                    activity_arrow.setRotation(0);
-                    linearLayout_activity.setVisibility(View.GONE);
-                    TransitionManager.beginDelayedTransition(this);
-                }else{
-                    activity_arrow.setRotation(90);
-                    linearLayout_activity.setVisibility(View.VISIBLE);
-                    TransitionManager.beginDelayedTransition(this);
-                }
+        } );
+        findViewById(R.id.detail_activity_area).setOnClickListener(v-> {
+            if(linearLayout_activity.getVisibility()==View.VISIBLE){
+                activity_arrow.setRotation(0);
+                linearLayout_activity.setVisibility(View.GONE);
+                TransitionManager.beginDelayedTransition(this);
+            }else{
+                activity_arrow.setRotation(90);
+                linearLayout_activity.setVisibility(View.VISIBLE);
+                TransitionManager.beginDelayedTransition(this);
             }
-            break;
-            case R.id.detail_receiver_area:{
-                if(linearLayout_receiver.getVisibility()==View.VISIBLE){
-                    receiver_arrow.setRotation(0);
-                    linearLayout_receiver.setVisibility(View.GONE);
-                    TransitionManager.beginDelayedTransition(this);
-                }else{
-                    receiver_arrow.setRotation(90);
-                    linearLayout_receiver.setVisibility(View.VISIBLE);
-                    TransitionManager.beginDelayedTransition(this);
-                }
+        });
+        findViewById(R.id.detail_receiver_area).setOnClickListener(v-> {
+            if(linearLayout_receiver.getVisibility()==View.VISIBLE){
+                receiver_arrow.setRotation(0);
+                linearLayout_receiver.setVisibility(View.GONE);
+                TransitionManager.beginDelayedTransition(this);
+            }else{
+                receiver_arrow.setRotation(90);
+                linearLayout_receiver.setVisibility(View.VISIBLE);
+                TransitionManager.beginDelayedTransition(this);
             }
-            break;
-            case R.id.detail_static_loader_area:{
-                if(linearLayout_loader.getVisibility()==View.VISIBLE){
-                    loader_arrow.setRotation(0);
-                    linearLayout_loader.setVisibility(View.GONE);
-                    TransitionManager.beginDelayedTransition(this);
-                }else{
-                    loader_arrow.setRotation(90);
-                    linearLayout_loader.setVisibility(View.VISIBLE);
-                    TransitionManager.beginDelayedTransition(this);
-                }
+        });
+        findViewById(R.id.detail_static_loader_area).setOnClickListener(v-> {
+            if(linearLayout_loader.getVisibility()==View.VISIBLE){
+                loader_arrow.setRotation(0);
+                linearLayout_loader.setVisibility(View.GONE);
+                TransitionManager.beginDelayedTransition(this);
+            }else{
+                loader_arrow.setRotation(90);
+                linearLayout_loader.setVisibility(View.VISIBLE);
+                TransitionManager.beginDelayedTransition(this);
             }
-            break;
-            case R.id.detail_services_area:{
-                if(linearLayout_service.getVisibility()==View.VISIBLE){
-                    service_arrow.setRotation(0);
-                    linearLayout_service.setVisibility(View.GONE);
-                    TransitionManager.beginDelayedTransition(this);
-                }else{
-                    service_arrow.setRotation(90);
-                    linearLayout_service.setVisibility(View.VISIBLE);
-                    TransitionManager.beginDelayedTransition(this);
-                }
+        });
+        findViewById(R.id.detail_services_area).setOnClickListener(v-> {
+            if(linearLayout_service.getVisibility()==View.VISIBLE){
+                service_arrow.setRotation(0);
+                linearLayout_service.setVisibility(View.GONE);
+                TransitionManager.beginDelayedTransition(this);
+            }else{
+                service_arrow.setRotation(90);
+                linearLayout_service.setVisibility(View.VISIBLE);
+                TransitionManager.beginDelayedTransition(this);
             }
-            break;
-            case R.id.detail_provider_area:{
-                if(linearLayout_provider.getVisibility()==View.VISIBLE){
-                    provider_arrow.setRotation(0);
-                    linearLayout_provider.setVisibility(View.GONE);
-                    TransitionManager.beginDelayedTransition(this);
-                }else{
-                    provider_arrow.setRotation(90);
-                    linearLayout_provider.setVisibility(View.VISIBLE);
-                    TransitionManager.beginDelayedTransition(this);
-                }
+        });
+        findViewById(R.id.detail_provider_area).setOnClickListener(v-> {
+            if(linearLayout_provider.getVisibility()==View.VISIBLE){
+                provider_arrow.setRotation(0);
+                linearLayout_provider.setVisibility(View.GONE);
+                TransitionManager.beginDelayedTransition(this);
+            }else{
+                provider_arrow.setRotation(90);
+                linearLayout_provider.setVisibility(View.VISIBLE);
+                TransitionManager.beginDelayedTransition(this);
             }
-            break;
-        }
+        });
     }
 
     public LinearLayout getLinearLayout_permission() {
