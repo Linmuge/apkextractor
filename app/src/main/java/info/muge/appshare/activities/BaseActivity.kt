@@ -5,9 +5,9 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import com.blankj.utilcode.util.BarUtils
 import info.muge.appshare.Constants
 import info.muge.appshare.utils.SPUtil
 import java.util.Locale
@@ -16,11 +16,6 @@ open abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(bundle: Bundle?) {
         super.onCreate(bundle)
         val window = window
-        BarUtils.setStatusBarLightMode(this, true)
-        BarUtils.transparentStatusBar(this)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.navigationBarColor = Color.parseColor("#01000000")
         setAndRefreshLanguage()
     }
 

@@ -49,7 +49,7 @@ private fun Activity.getView():View{
 
         //拼接字符串
 
-        val spanBuilder = SpannableStringBuilder("感谢您使用牧歌App工具箱\n我们非常重视您的个人信息及隐私保护,在您使用我们的产品前，请您认真阅读  ")
+        val spanBuilder = SpannableStringBuilder("感谢您使用AppShare\n我们非常重视您的个人信息及隐私保护,在您使用我们的产品前，请您认真阅读  ")
 
         /**
 
@@ -118,7 +118,8 @@ private fun Activity.getView():View{
         spanBuilder.append(span)
 
 
-        spanBuilder.append(" 的全部内容，同意后开始使用我们的产品\n若选择不同意，将无法使用我们的产品和服务，并会退出应用\n以下是我们使用的唯一一条权限\nandroid.permission.QUERY_ALL_PACKAGES\n此条权限仅用来查询本机已安装应用列表，且只存储在本地")
+        spanBuilder.append(
+            " 的全部内容，同意后开始使用我们的产品\n若选择不同意，将无法使用我们的产品和服务，并会退出应用\n以下是我们使用的唯一一条权限\nandroid.permission.QUERY_ALL_PACKAGES\n此条权限仅获取本机已安装应用信息用来展示在首页或应用详情页，且只存储在本地")
 // 赋值给TextView
 
         tvDesc.movementMethod = LinkMovementMethod.getInstance()

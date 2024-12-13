@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">牧歌App工具箱</string>
+    <string name="app_name" translatable="false">AppShare</string>
     <string name="action_settings">设置</string>
     <string name="action_search">搜索</string>
     <string name="action_sort">排序</string>
@@ -25,7 +25,7 @@
     <string name="hint_file_rename">输入文件名或变量</string>
     <string name="main_page_export">应用</string>
 
-    <string name="activity_package_detail">使用牧歌App工具箱安装</string>
+    <string name="activity_package_detail">使用AppShare安装</string>
     <string name="activity_package_detail_blank">没有得到有效的文件数据，请重新尝试打开</string>
     <string name="activity_package_detail_apk_attention">请使用其他打包应用来安装APK</string>
     <string name="activity_detail_run">运行</string>

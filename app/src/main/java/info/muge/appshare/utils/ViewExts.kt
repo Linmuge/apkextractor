@@ -81,7 +81,7 @@ fun Activity.saveResource(resourceId: Int, name: String, listener: () -> Unit){
         val uri = resolver.insert(EXTERNAL_CONTENT_URI, values)
         try {
             resolver.openOutputStream(uri!!).use { out ->
-                if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
+                if (!image.compress(Bitmap.CompressFormat.PNG, 100, out!!)) {
                     throw IOException("Failed to compress")
                 }
             }

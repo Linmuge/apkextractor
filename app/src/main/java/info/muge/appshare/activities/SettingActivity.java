@@ -4,23 +4,26 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.ViewCompat;
+
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.blankj.utilcode.util.BarUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import info.muge.appshare.R;
@@ -46,11 +49,6 @@ public class SettingActivity extends BaseActivity{
         setContentView(R.layout.activity_settings);
 
         Toolbar toolbar = findViewById(R.id.toolbar_settings);
-        toolbar.post(() -> {
-
-            ViewExtsKt.setHeight(toolbar, BarUtils.getStatusBarHeight()+toolbar.getMeasuredHeight());
-            toolbar.setPaddingRelative(0,BarUtils.getStatusBarHeight(),0,0);
-        });
         setSupportActionBar(toolbar);
         try{
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

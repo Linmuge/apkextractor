@@ -5,6 +5,9 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="com.android.permission.GET_INSTALLED_APPS"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <application
         android:name=".MyApplication"
@@ -27,7 +30,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:exported="true"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activities.AppDetailActivity"
             android:label="Detail"

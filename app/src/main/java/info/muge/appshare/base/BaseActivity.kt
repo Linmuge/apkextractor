@@ -1,13 +1,10 @@
 package info.muge.appshare.base
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import com.blankj.utilcode.util.BarUtils
-import info.muge.appshare.R
-import info.muge.appshare.utils.resToColor
 import java.lang.reflect.ParameterizedType
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity(), BaseViewBinding<VB>{
@@ -19,10 +16,6 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity(), BaseViewBin
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val window = window
-        BarUtils.setStatusBarLightMode(this,resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK=== Configuration.UI_MODE_NIGHT_NO)
-        BarUtils.transparentStatusBar(this)
-        BarUtils.setStatusBarColor(this,R.color.titleViewBgColor.resToColor(this))
-
         setContentView(binding.root)
 
         binding.initView()

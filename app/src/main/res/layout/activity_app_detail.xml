@@ -12,7 +12,7 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="260dp"
             android:background="@drawable/bg_10dp_bottom"
             android:backgroundTint="?attr/colorPrimary"
             app:contentScrim="?attr/colorPrimary"
@@ -67,6 +67,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_10dp_bottom"
         android:backgroundTint="?attr/colorPrimary"
+        android:fitsSystemWindows="true"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

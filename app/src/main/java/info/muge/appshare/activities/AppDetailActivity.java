@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,8 +26,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.ViewCompat;
 
-import com.blankj.utilcode.util.BarUtils;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
@@ -80,11 +81,7 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_app_detail);
 
         Toolbar toolbar = findViewById(R.id.toolbar_app_detail);
-        toolbar.post(() -> {
 
-            ViewExtsKt.setHeight(toolbar, BarUtils.getStatusBarHeight()+toolbar.getMeasuredHeight());
-            toolbar.setPaddingRelative(0,BarUtils.getStatusBarHeight(),0,0);
-        });
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(appItem.getAppName());
@@ -189,8 +186,7 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
                 ToastManager.showToast(AppDetailActivity.this,"应用没有界面,无法运行",Toast.LENGTH_SHORT);
             }
         }else  if (id == R.id.app_detail_export_area){
-
-            final List<AppItem>single_list=getSingleItemArrayList();
+            final List<AppItem> single_list=getSingleItemArrayList();
             final AppItem item=single_list.get(0);
             Global.checkAndExportCertainAppItemsToSetPathWithoutShare(this,single_list , false,new Global.ExportTaskFinishedListener() {
                 @Override
@@ -205,7 +201,7 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
                     }
                     ToastManager.showToast(AppDetailActivity.this,getResources().getString(R.string.toast_export_complete)+" "
                             + SPUtil.getDisplayingExportPath()
-                            +OutputUtil.getWriteFileNameForAppItem(AppDetailActivity.this,single_list.get(0),(item.exportData||item.exportObb)?
+                            + OutputUtil.getWriteFileNameForAppItem(AppDetailActivity.this,single_list.get(0),(item.exportData||item.exportObb)?
                             SPUtil.getCompressingExtensionName(AppDetailActivity.this):"apk",1),Toast.LENGTH_SHORT);
                 }
             });

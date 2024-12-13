@@ -2,18 +2,16 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.Material3.DayNight">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorTitle</item>
-        <item name="colorPrimaryDark">@color/colorTitleDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/titleViewBgColor</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
         <item name="materialCardViewStyle">@style/materialCardViewStyle</item>
-        <item name="android:navigationBarColor">@color/titleViewBgColor</item>
         <item name="materialAlertDialogTheme">@style/materialDialog</item>
         <item name="android:alertDialogTheme">@style/materialDialog</item>
         <item name="android:alertDialogStyle">@style/materialDialog</item>
         <item name="alertDialogStyle">@style/materialDialog</item>
         <item name="alertDialogTheme">@style/materialDialog</item>
+        <item name="popupMenuBackground">?attr/colorSurface</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:windowTranslucentStatus">false</item>
     </style>
 
     <style name="materialCardViewStyle" parent="Widget.Material3.CardView.Filled">

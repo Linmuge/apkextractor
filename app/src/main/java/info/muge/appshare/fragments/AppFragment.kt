@@ -8,20 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
-import com.blankj.utilcode.util.BarUtils
-import com.blankj.utilcode.util.ViewUtils
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.snackbar.Snackbar
 import info.muge.appshare.Constants
 import info.muge.appshare.Global
-import info.muge.appshare.Global.ExportTaskFinishedListener
 import info.muge.appshare.R
 import info.muge.appshare.activities.AppDetailActivity
 import info.muge.appshare.activities.BaseActivity
@@ -34,12 +33,10 @@ import info.muge.appshare.items.AppItem
 import info.muge.appshare.tasks.RefreshInstalledListTask
 import info.muge.appshare.tasks.RefreshInstalledListTask.RefreshInstalledListTaskCallback
 import info.muge.appshare.tasks.SearchAppItemTask
-import info.muge.appshare.ui.ToastManager
 import info.muge.appshare.utils.EnvironmentUtil
+import info.muge.appshare.utils.PermissionExts
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.StorageUtil
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.checkbox.MaterialCheckBox
 import info.muge.appshare.utils.anko.dp
 import info.muge.appshare.utils.setMargins
 import java.util.*
@@ -145,9 +142,17 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         btn_select_all = mainSelectAll
         btn_export = mainExport
         btn_more = mainMore
+        llPermission.isVisible = !SPUtil.getGlobalSharedPreferences(requireActivity()).getBoolean("show_app", false)
+        btRequestPermission.setOnClickListener{
+            PermissionExts.requestreadInstallApps(requireActivity()) {
+                llPermission.isVisible=false
+                setAndStartRefreshingTask()
+            }
+        }
 
-        card_multi_select.setMargins(25.dp,0,25.dp,15.dp+BarUtils.getNavBarHeight())
-        binding.exportCard.setMargins(25.dp,0,25.dp,15.dp+BarUtils.getNavBarHeight())
+
+        card_multi_select.setMargins(25.dp,0,25.dp,15.dp+45.dp)
+        binding.exportCard.setMargins(25.dp,0,25.dp,15.dp+45.dp)
         val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.pp_more, null)
         val more_copy_package_names =
             popupView.findViewById<ViewGroup>(R.id.popup_copy_package_name)
@@ -238,7 +243,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                 if (adapter != null) adapter!!.setToggleSelectAll()
             }
             R.id.main_export -> {
-                if (adapter == null) return
+                /*if (adapter == null) return
                 val arrayList = ArrayList(
                     adapter!!.selectedItems
                 )
@@ -261,7 +266,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                         }
                         closeMultiSelectMode()
                         refreshAvailableStorage()
-                    })
+                    })*/
             }
             R.id.main_more -> {
                 val appItemList = adapter!!.selectedItems
@@ -469,13 +474,15 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     }
 
     private fun setAndStartRefreshingTask() {
-        if (activity == null) return
-        if (refreshInstalledListTask != null) refreshInstalledListTask!!.setInterrupted()
-        refreshInstalledListTask = RefreshInstalledListTask(requireActivity(), this)
-        swipeRefreshLayout!!.isRefreshing = true
-        recyclerView!!.adapter = null
-        cb_sys!!.isEnabled = false
-        refreshInstalledListTask!!.start()
+        if (SPUtil.getGlobalSharedPreferences(requireActivity()).getBoolean("show_app", false)) {
+            if (activity == null) return
+            if (refreshInstalledListTask != null) refreshInstalledListTask!!.setInterrupted()
+            refreshInstalledListTask = RefreshInstalledListTask(requireActivity(), this)
+            swipeRefreshLayout!!.isRefreshing = true
+            recyclerView!!.adapter = null
+            cb_sys!!.isEnabled = false
+            refreshInstalledListTask!!.start()
+        }
     }
 
     private fun setViewVisibilityWithAnimation(view: View, visibility: Int) {

@@ -2,12 +2,22 @@
 
 buildscript {
     ext {
-        agp_version = '8.1.0-alpha07'
+        agp_version = '8.9.0-alpha05'
     }
-    ext.kotlin_version = '1.8.10'
+    ext.kotlin_version = '2.0.20'
     repositories {
+        maven { url 'https://jitpack.io' }
         google()
-        jcenter()
+        gradlePluginPortal()
+        mavenCentral()
+        maven { url  'https://repo1.maven.org/maven2/'}
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven {
+            url 'https://artifact.bytedance.com/repository/pangle'
+        }
+        maven {
+            url 'https://maven.aliyun.com/nexus/content/repositories/releases/'
+        }
         
     }
     dependencies {
@@ -21,9 +31,18 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url 'https://jitpack.io' }
         google()
-        jcenter()
+        gradlePluginPortal()
         mavenCentral()
+        maven { url  'https://repo1.maven.org/maven2/'}
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven {
+            url 'https://artifact.bytedance.com/repository/pangle'
+        }
+        maven {
+            url 'https://maven.aliyun.com/nexus/content/repositories/releases/'
+        }
         
     }
 }

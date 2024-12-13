@@ -2,35 +2,24 @@ package info.muge.appshare.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
-import com.blankj.utilcode.util.BarUtils;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
 import info.muge.appshare.Constants;
@@ -57,11 +46,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.post(() -> {
 
-            ViewExtsKt.setHeight(toolbar,BarUtils.getStatusBarHeight()+toolbar.getMeasuredHeight());
-            toolbar.setPaddingRelative(0,BarUtils.getStatusBarHeight(),0,0);
-        });
+        /*ViewCompat.setOnApplyWindowInsetsListener(toolbar, (v, insets) -> {
+            ViewExtsKt.setHeight(toolbar, insets.getSystemWindowInsetTop()+toolbar.getMeasuredHeight());
+            v.setPaddingRelative(0, insets.getSystemWindowInsetTop(),0,0);
+            return insets.consumeSystemWindowInsets();
+        });*/
         setSupportActionBar(toolbar);
 
         try{

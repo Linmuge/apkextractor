@@ -87,16 +87,8 @@ public class Global {
                         new AlertDialog.Builder(activity)
                                 .setTitle(activity.getResources().getString(R.string.dialog_duplicate_title))
                                 .setMessage(activity.getResources().getString(R.string.dialog_duplicate_msg)+dulplicated_info)
-                                .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        exportCertainAppItemsToSetPathAndShare(activity, export_list,listener);
-                                    }
-                                })
-                                .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {}
-                                })
+                                .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), (dialog2, which) -> exportCertainAppItemsToSetPathAndShare(activity, export_list,listener))
+                                .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), (dialog1, which) -> {})
                                 .show();
                         return;
                     }
@@ -110,16 +102,8 @@ public class Global {
                 new AlertDialog.Builder(activity)
                         .setTitle(activity.getResources().getString(R.string.dialog_duplicate_title))
                         .setMessage(activity.getResources().getString(R.string.dialog_duplicate_msg)+dulplicated_info)
-                        .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                exportCertainAppItemsToSetPathAndShare(activity, list,listener);
-                            }
-                        })
-                        .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {}
-                        })
+                        .setPositiveButton(activity.getResources().getString(R.string.dialog_button_confirm), (dialog, which) -> exportCertainAppItemsToSetPathAndShare(activity, list,listener))
+                        .setNegativeButton(activity.getResources().getString(R.string.dialog_button_cancel), (dialog, which) -> {})
                         .show();
                 return;
             }
@@ -127,19 +111,15 @@ public class Global {
         }
 
     }
-
     /**
      * 导出list集合中的应用，并向activity显示一个dialog，传入接口来监听完成回调（在主线程）
      */
     private static void exportCertainAppItemsToSetPathAndShare(@NonNull final Activity activity, @NonNull List<AppItem>export_list, @Nullable final ExportTaskFinishedListener listener){
         final ExportingDialog dialog=new ExportingDialog(activity);
         final ExportTask task=new ExportTask(activity,export_list,null);
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_export_stop), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                task.setInterrupted();
-                dialog.cancel();
-            }
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, activity.getResources().getString(R.string.dialog_export_stop), (dialog1, which) -> {
+            task.setInterrupted();
+            dialog1.cancel();
         });
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);

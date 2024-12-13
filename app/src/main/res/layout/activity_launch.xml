@@ -23,7 +23,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivIcon"
         android:textColor="@color/standardTextColor"
-        android:text="牧歌App工具箱"
+        android:text="AppShare"
         android:textSize="16sp"
         android:textStyle="bold"/>
     <RelativeLayout
