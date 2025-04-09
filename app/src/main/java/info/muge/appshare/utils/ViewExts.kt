@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -14,9 +15,12 @@ import android.text.InputFilter
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.fragment.app.FragmentActivity
 import info.muge.appshare.MyApplication
 import java.io.IOException
 import java.util.*
@@ -149,3 +153,38 @@ fun View.setHeight(heightAsPx: Int) {
     this.layoutParams = pp
 }
 
+/**
+ * 设置状态栏图标颜色模式，根据当前主题自动调整
+ */
+fun FragmentActivity.setStatusBarIconColorMode() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // Android 11 (API 30)及以上版本使用WindowInsetsController
+        window.decorView.getWindowInsetsController()?.setSystemBarsAppearance(
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+        )
+    } else {
+        // Android 6.0 (API 23)及以上版本使用SYSTEM_UI_FLAG
+        val decorView: View = getWindow().getDecorView()
+        var flags = decorView.getSystemUiVisibility()
+
+
+        // 获取当前主题是否是夜间模式
+        val nightMode = AppCompatDelegate.getDefaultNightMode()
+        val isNightMode = nightMode == AppCompatDelegate.MODE_NIGHT_YES ||
+                (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                        (getResources().getConfiguration().uiMode and
+                                Configuration.UI_MODE_NIGHT_MASK) ==
+                        Configuration.UI_MODE_NIGHT_YES)
+
+        if (!isNightMode) {
+            // 非夜间模式，使用深色状态栏图标
+            flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        } else {
+            // 夜间模式，使用浅色状态栏图标
+            flags = flags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+        }
+
+        decorView.setSystemUiVisibility(flags)
+    }
+}

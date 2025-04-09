@@ -1,5 +1,7 @@
 package info.muge.appshare.activities;
 
+import static info.muge.appshare.utils.ViewExtsKt.setStatusBarIconColorMode;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,12 +20,14 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import info.muge.appshare.R;
@@ -48,7 +52,10 @@ public class SettingActivity extends BaseActivity{
         settings= SPUtil.getGlobalSharedPreferences(SettingActivity.this);
         setContentView(R.layout.activity_settings);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_settings);
+        // 设置状态栏图标颜色模式
+        setStatusBarIconColorMode(this);
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_settings);
         setSupportActionBar(toolbar);
         try{
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -63,36 +70,27 @@ public class SettingActivity extends BaseActivity{
             ((RadioButton)dialogView.findViewById(R.id.night_mode_enabled_ra)).setChecked(night_mode== AppCompatDelegate.MODE_NIGHT_YES);
             ((RadioButton)dialogView.findViewById(R.id.night_mode_disabled_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_NO);
             ((RadioButton)dialogView.findViewById(R.id.night_mode_follow_system_ra)).setChecked(night_mode==AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-            final AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+            final AlertDialog dialog = new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                     .setTitle(getResources().getString(R.string.activity_settings_night_mode))
                     .setView(dialogView)
                     .show();
-            dialogView.findViewById(R.id.night_mode_enabled).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.cancel();
-                    editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_YES);
-                    editor.apply();
-                    refreshNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                }
+            dialogView.findViewById(R.id.night_mode_enabled).setOnClickListener(v1 -> {
+                dialog.cancel();
+                editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_YES);
+                editor.apply();
+                refreshNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             });
-            dialogView.findViewById(R.id.night_mode_disabled).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.cancel();
-                    editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_NO);
-                    editor.apply();
-                    refreshNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                }
+            dialogView.findViewById(R.id.night_mode_disabled).setOnClickListener(v2 -> {
+                dialog.cancel();
+                editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_NO);
+                editor.apply();
+                refreshNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             });
-            dialogView.findViewById(R.id.night_mode_follow_system).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.cancel();
-                    editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                    editor.apply();
-                    refreshNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                }
+            dialogView.findViewById(R.id.night_mode_follow_system).setOnClickListener(v3 -> {
+                dialog.cancel();
+                editor.putInt(Constants.PREFERENCE_NIGHT_MODE,AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                editor.apply();
+                refreshNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
             });
         });
         findViewById(R.id.settings_loading_options_area).setOnClickListener(v->{
@@ -115,7 +113,8 @@ public class SettingActivity extends BaseActivity{
             cb_hash.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_FILE_HASH,Constants.PREFERENCE_LOAD_FILE_HASH_DEFAULT));
             cb_service.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_SERVICES,Constants.PREFERENCE_LOAD_SERVICES_DEFAULT));
             cb_provider.setChecked(settings.getBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,Constants.PREFERENCE_LOAD_PROVIDERS_DEFAULT));
-            new MaterialAlertDialogBuilder(this).setTitle(getResources().getString(R.string.activity_settings_loading_options))
+            new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
+                    .setTitle(getResources().getString(R.string.activity_settings_loading_options))
                     .setView(dialogView)
                     .setPositiveButton(getResources().getString(R.string.dialog_button_confirm), (dialog, which) -> {
                         editor.putBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS,cb_permissions.isChecked());
@@ -139,7 +138,7 @@ public class SettingActivity extends BaseActivity{
         findViewById(R.id.settings_about_area).setOnClickListener(v->{
             View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
 
-            new MaterialAlertDialogBuilder(this)
+            new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                     .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
                     .setIcon(R.mipmap.ic_launcher_round)
                     .setCancelable(true)
@@ -153,7 +152,7 @@ public class SettingActivity extends BaseActivity{
             ((RadioButton)dialogView.findViewById(R.id.language_follow_system_ra)).setChecked(value==Constants.LANGUAGE_FOLLOW_SYSTEM);
             ((RadioButton)dialogView.findViewById(R.id.language_chinese_ra)).setChecked(value==Constants.LANGUAGE_CHINESE);
             ((RadioButton)dialogView.findViewById(R.id.language_english_ra)).setChecked(value==Constants.LANGUAGE_ENGLISH);
-            final AlertDialog dialog=new MaterialAlertDialogBuilder(this)
+            final AlertDialog dialog=new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                     .setTitle(getResources().getString(R.string.activity_settings_language))
                     .setView(dialogView)
                     .show();
@@ -194,7 +193,7 @@ public class SettingActivity extends BaseActivity{
             View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_package_name_split,null);
             final EditText editText=dialogView.findViewById(R.id.dialog_package_name_split_edit);
             editText.setText(settings.getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT));
-            new MaterialAlertDialogBuilder(this)
+            new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                     .setTitle(getResources().getString(R.string.activity_settings_package_name_separator))
                     .setView(dialogView)
                     .setPositiveButton(getResources().getString(R.string.action_confirm), new DialogInterface.OnClickListener() {

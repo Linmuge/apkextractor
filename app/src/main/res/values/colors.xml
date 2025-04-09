@@ -50,4 +50,11 @@
         #f6f6f6 →#333333
         #e5e5e5 →333333
     -->
+
+    <!-- MD3 Colors -->
+    <color name="md3_card_stroke_color">#E0E0E0</color>
+    <color name="md3_card_background">#FFFFFF</color>
+    <color name="md_theme_primary">?attr/colorPrimary</color>
+    <color name="md_theme_onSurfaceVariant">?attr/colorOnSurfaceVariant</color>
+    <color name="md_theme_surface">?attr/colorSurface</color>
 </resources>

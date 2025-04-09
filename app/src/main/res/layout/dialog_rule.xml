@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/bg_10dp"
-    android:backgroundTint="@color/titleViewBgColor">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="16dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
             android:textSize="15sp"
             android:textColor="@color/colorFirstAttention"
             android:text="@string/dialog_filename_apk_att"/>
@@ -22,14 +21,21 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/filename_apk"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/filename_apk_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/filename_apk_end"
-                android:layout_marginStart="15dp"
-                android:singleLine="true"
-                android:hint="@string/hint_filename_apk"/>
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:hint="@string/hint_filename_apk">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/filename_apk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
             <TextView
                 android:id="@+id/filename_apk_end"
                 android:layout_width="45dp"
@@ -42,6 +48,7 @@
                 android:textColor="@color/colorHighLightText"
                 android:text=".apk"/>
         </RelativeLayout>
+
         <LinearLayout
             android:id="@+id/filename_apk_warn"
             android:layout_width="wrap_content"
@@ -67,8 +74,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="16dp"
             android:textSize="15sp"
             android:textColor="@color/colorFirstAttention"
             android:text="@string/dialog_filename_zip_att"/>
@@ -76,14 +82,20 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/filename_zip"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/filename_zip_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
                 android:layout_toLeftOf="@+id/filename_zip_end"
-                android:singleLine="true"
-                android:hint="@string/hint_filename_zip"/>
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:hint="@string/hint_filename_zip">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/filename_zip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/filename_zip_end"
@@ -96,7 +108,6 @@
                 android:layout_marginEnd="5dp"
                 android:textColor="@color/colorHighLightText"
                 android:text=".zip"/>
-
         </RelativeLayout>
 
         <LinearLayout
@@ -123,153 +134,162 @@
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
 
             <TextView
                 android:id="@+id/zip_level_att"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginStart="10dp"
                 android:gravity="center_vertical"
                 android:layout_centerVertical="true"
                 android:textSize="14sp"
                 android:textColor="@color/colorFirstAttention"
                 android:text="@string/zip_level_att"/>
 
-            <Spinner android:id="@+id/spinner_zip_level"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/zip_level_att"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="15dp"/>
+                android:layout_marginStart="15dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spinner_zip_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="150dp"
+                    android:inputType="none"
+                    android:focusable="false"/>
+            </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
             android:textColor="@color/colorFirstAttention"
             android:text="@string/dialog_filename_variables"/>
 
         <HorizontalScrollView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp">
-            <LinearLayout
+            android:layout_height="wrap_content">
+            <com.google.android.material.chip.ChipGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <Button
+                app:singleLine="true">
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_sequence_number"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_sequence_number"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_connector"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
-                    android:text="-"
-                    tools:ignore="HardcodedText" />
-                <Button
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:text="-" />
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_underline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
-                    android:text="_"
-                    tools:ignore="HardcodedText" />
-                <Button
+                    style="@style/Widget.Material3.Chip.Assist"
+                    android:text="_" />
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_appname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_appname"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_packagename"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_packagename"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_version"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_version"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_versioncode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_versioncode"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_year"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_year"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_month"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_month"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_day_of_month"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_day_of_month"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_hour_of_day"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_hour_of_day"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_minute"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_minute"/>
-                <Button
+
+                <com.google.android.material.chip.Chip
                     android:id="@+id/filename_second"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_margin="5dp"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:text="@string/dialog_filename_button_second"/>
-            </LinearLayout>
+            </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        <TextView
-            android:id="@+id/filename_preview"
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="15dp"
-            android:textSize="15sp"
-            android:textColor="@color/colorFirstAttention"
-            android:text="@string/word_preview"/>
-
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.Material3.CardView.Elevated">
+            
+            <TextView
+                android:id="@+id/filename_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:textSize="15sp"
+                android:textColor="@color/colorFirstAttention"
+                android:text="@string/word_preview"/>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

@@ -1,1 +1,6 @@
-<resources></resources>
+<resources>
+    <dimen name="md3_card_corner_radius">12dp</dimen>
+    <dimen name="md3_card_corner_radius_large">16dp</dimen>
+</resources>
+
+

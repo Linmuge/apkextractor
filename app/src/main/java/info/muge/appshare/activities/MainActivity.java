@@ -175,8 +175,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,V
 
         }
         if(id==R.id.action_about){
+
             View dialogView=LayoutInflater.from(this).inflate(R.layout.dialog_about, null);
-            new MaterialAlertDialogBuilder(this)
+
+            new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                     .setTitle(EnvironmentUtil.getAppName(this)+"("+EnvironmentUtil.getAppVersionName(this)+")")
                     .setIcon(R.mipmap.ic_launcher_round)
                     .setCancelable(true)

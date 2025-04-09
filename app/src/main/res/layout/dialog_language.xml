@@ -1,86 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="8dp">
+    
     <RelativeLayout
         android:id="@+id/language_follow_system"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
+        android:paddingVertical="12dp"
         android:background="?attr/selectableItemBackground">
+        
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/language_follow_system_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginStart="15dp"
-            android:clickable="false"/>
+            android:layout_marginStart="16dp"
+            android:clickable="false"
+            app:buttonTint="?attr/colorPrimary"/>
+            
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/language_follow_system_ra"
+            android:layout_toEndOf="@+id/language_follow_system_ra"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/colorHighLightText"
-            android:textSize="16sp"
+            android:layout_marginStart="16dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
             android:text="@string/language_follow_system"/>
     </RelativeLayout>
+    
     <RelativeLayout
         android:id="@+id/language_chinese"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
+        android:paddingVertical="12dp"
         android:background="?attr/selectableItemBackground">
+        
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/language_chinese_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginStart="15dp"
-            android:clickable="false"/>
+            android:layout_marginStart="16dp"
+            android:clickable="false"
+            app:buttonTint="?attr/colorPrimary"/>
+            
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/language_chinese_ra"
+            android:layout_toEndOf="@+id/language_chinese_ra"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/colorHighLightText"
-            android:textSize="16sp"
+            android:layout_marginStart="16dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
             android:text="@string/language_chinese"/>
     </RelativeLayout>
+    
     <RelativeLayout
         android:id="@+id/language_english"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
+        android:paddingVertical="12dp"
         android:background="?attr/selectableItemBackground">
+        
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/language_english_ra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginStart="15dp"
-            android:clickable="false"/>
+            android:layout_marginStart="16dp"
+            android:clickable="false"
+            app:buttonTint="?attr/colorPrimary"/>
+            
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/language_english_ra"
+            android:layout_toEndOf="@+id/language_english_ra"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/colorHighLightText"
-            android:textSize="16sp"
+            android:layout_marginStart="16dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurface"
             android:text="@string/language_english"/>
     </RelativeLayout>
 </LinearLayout>

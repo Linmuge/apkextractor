@@ -17,6 +17,7 @@ import android.text.format.Formatter;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowInsetsController;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,10 +25,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.ViewCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
@@ -67,7 +70,6 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //appItem=getIntent().getParcelableExtra(EXTRA_PARCELED_APP_ITEM);
         try{
             synchronized (Global.app_list) {
                 appItem=Global.getAppItemByPackageNameFromList(Global.app_list,getIntent().getStringExtra(EXTRA_PACKAGE_NAME));
@@ -80,7 +82,9 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
         }
         setContentView(R.layout.activity_app_detail);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_app_detail);
+        setupStatusBar();
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_app_detail);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -117,6 +121,7 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
 
         if(SPUtil.getGlobalSharedPreferences(this).getBoolean(Constants.PREFERENCE_LOAD_APK_SIGNATURE,Constants.PREFERENCE_LOAD_APK_SIGNATURE_DEFAULT)){
             findViewById(R.id.app_detail_signature_att).setVisibility(View.VISIBLE);
+            findViewById(R.id.app_detail_signature_card).setVisibility(View.VISIBLE);
             findViewById(R.id.app_detail_sign_pg).setVisibility(View.VISIBLE);
             new GetSignatureInfoTask(this, appItem.getPackageInfo(), (SignatureView) findViewById(R.id.app_detail_signature), new GetSignatureInfoTask.CompletedCallback() {
                 @Override
@@ -174,6 +179,21 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
             intentFilter.addDataScheme("package");
             registerReceiver(uninstall_receiver,intentFilter);
         }catch (Exception e){e.printStackTrace();}
+    }
+
+    /**
+     * 设置状态栏亮色模式
+     */
+    private void setupStatusBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            getWindow().getInsetsController().setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
     }
 
     @Override
@@ -253,13 +273,34 @@ public class AppDetailActivity extends BaseActivity implements View.OnClickListe
             clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_path_value)).getText().toString());
         }else  if (id == R.id.app_detail_installer_name_area){
             clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_installer_name_value)).getText().toString());
-
         }else  if (id == R.id.app_detail_uid_area){
             clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_uid)).getText().toString());
-
         }else  if (id == R.id.app_detail_launcher_area){
             clip2ClipboardAndShowSnackbar(((TextView)findViewById(R.id.app_detail_launcher_value)).getText().toString());
-
+        }else  if (id == R.id.detail_signature_sub){
+            final String value=((TextView)findViewById(R.id.detail_signature_sub_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_iss){
+            final String value=((TextView)findViewById(R.id.detail_signature_iss_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_serial){
+            final String value=((TextView)findViewById(R.id.detail_signature_serial_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_start){
+            final String value=((TextView)findViewById(R.id.detail_signature_start_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_end){
+            final String value=((TextView)findViewById(R.id.detail_signature_end_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_md5){
+            final String value=((TextView)findViewById(R.id.detail_signature_md5_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_sha1){
+            final String value=((TextView)findViewById(R.id.detail_signature_sha1_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
+        }else  if (id == R.id.detail_signature_sha256){
+            final String value=((TextView)findViewById(R.id.detail_signature_sha256_value)).getText().toString();
+            if(!TextUtils.isEmpty(value)) clip2ClipboardAndShowSnackbar(value);
         }else{
             ViewExtsKt.toast("功能未开放");
         }

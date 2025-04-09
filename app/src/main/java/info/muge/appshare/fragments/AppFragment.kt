@@ -150,9 +150,18 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
             }
         }
 
+        card_multi_select.shapeAppearanceModel = card_multi_select.shapeAppearanceModel
+            .toBuilder()
+            .setAllCornerSizes(resources.getDimension(R.dimen.md3_card_corner_radius_large)) // 使用更大的圆角
+            .build()
 
-        card_multi_select.setMargins(25.dp,0,25.dp,15.dp+45.dp)
-        binding.exportCard.setMargins(25.dp,0,25.dp,15.dp+45.dp)
+        binding.exportCard.shapeAppearanceModel = binding.exportCard.shapeAppearanceModel
+            .toBuilder()
+            .setAllCornerSizes(resources.getDimension(R.dimen.md3_card_corner_radius_large)) // 使用更大的圆角
+            .build()
+
+        card_multi_select.setMargins(16.dp, 0, 16.dp, 16.dp + 45.dp) // 调整边距
+        binding.exportCard.setMargins(16.dp, 0, 16.dp, 16.dp + 45.dp) // 调整边距
         val popupView = LayoutInflater.from(requireContext()).inflate(R.layout.pp_more, null)
         val more_copy_package_names =
             popupView.findViewById<ViewGroup>(R.id.popup_copy_package_name)
@@ -552,3 +561,4 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         get() = AppFragment()
 
 }
+

@@ -9,18 +9,22 @@
         android:id="@+id/detail_card_permissions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="5dp"
-        app:cardBackgroundColor="@color/colorCardArea"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutline"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         android:visibility="gone"
         tools:visibility="visible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingVertical="6dp">
             <RelativeLayout
                 android:id="@+id/detail_permission_area"
                 android:layout_width="match_parent"
@@ -47,7 +51,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="15dp"
                     android:textSize="16sp"
-                    android:textColor="@color/colorHighLightText"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="权限(0项)"/>
             </RelativeLayout>
             <LinearLayout
@@ -63,18 +67,22 @@
         android:id="@+id/detail_card_activities"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="5dp"
-        app:cardBackgroundColor="@color/colorCardArea"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutline"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         android:visibility="gone"
         tools:visibility="visible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingVertical="6dp">
             <RelativeLayout
                 android:id="@+id/detail_activity_area"
                 android:layout_width="match_parent"
@@ -101,7 +109,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="15dp"
                     android:textSize="16sp"
-                    android:textColor="@color/colorHighLightText"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="Activity(0项)"/>
             </RelativeLayout>
             <LinearLayout
@@ -117,18 +125,22 @@
         android:id="@+id/detail_card_services"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="5dp"
-        app:cardBackgroundColor="@color/colorCardArea"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutline"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         android:visibility="gone"
         tools:visibility="visible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingVertical="6dp">
             <RelativeLayout
                 android:id="@+id/detail_services_area"
                 android:layout_width="match_parent"
@@ -155,7 +167,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="15dp"
                     android:textSize="16sp"
-                    android:textColor="@color/colorHighLightText"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="服务(0项)"/>
             </RelativeLayout>
             <LinearLayout
@@ -171,18 +183,22 @@
         android:id="@+id/detail_card_receivers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="5dp"
-        app:cardBackgroundColor="@color/colorCardArea"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutline"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         android:visibility="gone"
         tools:visibility="visible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingVertical="6dp">
             <RelativeLayout
                 android:id="@+id/detail_receiver_area"
                 android:layout_width="match_parent"
@@ -209,7 +225,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="15dp"
                     android:textSize="16sp"
-                    android:textColor="@color/colorHighLightText"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="广播接收器(0项)"/>
             </RelativeLayout>
             <LinearLayout
@@ -225,18 +241,22 @@
         android:id="@+id/detail_card_providers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="5dp"
-        app:cardBackgroundColor="@color/colorCardArea"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutline"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         android:visibility="gone"
         tools:visibility="visible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingVertical="6dp">
             <RelativeLayout
                 android:id="@+id/detail_provider_area"
                 android:layout_width="match_parent"
@@ -263,7 +283,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="15dp"
                     android:textSize="16sp"
-                    android:textColor="@color/colorHighLightText"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="内容提供者(0项)"/>
             </RelativeLayout>
             <LinearLayout
@@ -279,18 +299,22 @@
         android:id="@+id/detail_card_static_loaders"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="5dp"
-        app:cardBackgroundColor="@color/colorCardArea"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorOutline"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         android:visibility="gone"
         tools:visibility="visible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingVertical="6dp">
             <RelativeLayout
                 android:id="@+id/detail_static_loader_area"
                 android:layout_width="match_parent"
@@ -317,7 +341,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="15dp"
                     android:textSize="16sp"
-                    android:textColor="@color/colorHighLightText"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="自启接收器(0项)"/>
             </RelativeLayout>
             <LinearLayout
