@@ -23,7 +23,7 @@ import info.muge.appshare.Constants
 import info.muge.appshare.Global
 import info.muge.appshare.R
 import info.muge.appshare.activities.AppDetailActivity
-import info.muge.appshare.activities.BaseActivity
+import info.muge.appshare.base.BaseActivity
 import info.muge.appshare.adapters.RecyclerViewAdapter
 import info.muge.appshare.adapters.RecyclerViewAdapter.ListAdapterOperationListener
 import info.muge.appshare.base.BaseFragment
