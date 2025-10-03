@@ -11,11 +11,12 @@ import android.widget.CompoundButton
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayoutMediator
 import info.muge.appshare.Constants
 import info.muge.appshare.R
-import info.muge.appshare.adapters.MyPagerAdapter
+import info.muge.appshare.adapters.MyViewPager2Adapter
 import info.muge.appshare.base.BaseActivity
 import info.muge.appshare.databinding.ActivityMainBinding
 import info.muge.appshare.fragments.AppFragment
@@ -28,16 +29,19 @@ import info.muge.appshare.utils.SPUtil
 /**
  * 主Activity
  * 包含应用列表、搜索功能、设置等
+ *
+ * 已升级到 ViewPager2，提供更好的性能和功能
  */
-class MainActivity : BaseActivity<ActivityMainBinding>(), 
+class MainActivity : BaseActivity<ActivityMainBinding>(),
     View.OnClickListener,
-    ViewPager.OnPageChangeListener,
     CompoundButton.OnCheckedChangeListener,
     OperationCallback {
 
     private val appFragment = AppFragment()
     private var currentSelection = 0
     private var isSearchMode = false
+    private lateinit var pagerAdapter: MyViewPager2Adapter
+    private var tabLayoutMediator: TabLayoutMediator? = null
 
     override fun ActivityMainBinding.initView() {
         // 设置Toolbar
@@ -54,10 +58,31 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         // 设置SearchView
         setupSearchView()
 
-        // 设置ViewPager和TabLayout
-        mainViewpager.adapter = MyPagerAdapter(this@MainActivity, supportFragmentManager, appFragment)
-        mainTablayout.setupWithViewPager(mainViewpager, true)
-        mainViewpager.addOnPageChangeListener(this@MainActivity)
+        // 设置ViewPager2和TabLayout
+        setupViewPager()
+    }
+
+    /**
+     * 设置 ViewPager2 和 TabLayout
+     */
+    private fun ActivityMainBinding.setupViewPager() {
+        // 创建适配器
+        pagerAdapter = MyViewPager2Adapter(this@MainActivity, appFragment)
+        mainViewpager.adapter = pagerAdapter
+
+        // 使用 TabLayoutMediator 连接 TabLayout 和 ViewPager2
+        tabLayoutMediator = TabLayoutMediator(mainTablayout, mainViewpager) { tab, position ->
+            tab.text = pagerAdapter.getPageTitle(position)
+        }
+        tabLayoutMediator?.attach()
+
+        // 注册页面变化回调
+        mainViewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                currentSelection = position
+            }
+        })
     }
 
     /**
@@ -95,14 +120,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         super.onResume()
     }
 
-    // ViewPager.OnPageChangeListener 实现
-    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
-
-    override fun onPageSelected(position: Int) {
-        currentSelection = position
+    override fun onDestroy() {
+        super.onDestroy()
+        // 清理 TabLayoutMediator，避免内存泄漏
+        tabLayoutMediator?.detach()
+        tabLayoutMediator = null
     }
-
-    override fun onPageScrollStateChanged(state: Int) {}
 
     // View.OnClickListener 实现
     override fun onClick(v: View) {}

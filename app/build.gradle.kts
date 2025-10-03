@@ -120,7 +120,12 @@ dependencies {
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.3.0")
     implementation("com.belerweb:pinyin4j:2.5.1")
     implementation("androidx.core:core-ktx:1.17.0")
-    implementation("com.github.getActivity:XXPermissions:26.2")
+    implementation("com.github.getActivity:XXPermissions:26.5")
     implementation("androidx.documentfile:documentfile:1.1.0")
 
+    // ViewPager2 - 现代化的页面滑动组件
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+
+    // BRV - 强大的RecyclerView框架
+    implementation("com.github.liangjingkanji:BRV:1.6.1")
 }

@@ -24,8 +24,9 @@ import info.muge.appshare.Global
 import info.muge.appshare.R
 import info.muge.appshare.activities.AppDetailActivity
 import info.muge.appshare.base.BaseActivity
-import info.muge.appshare.adapters.RecyclerViewAdapter
-import info.muge.appshare.adapters.RecyclerViewAdapter.ListAdapterOperationListener
+import com.drake.brv.BindingAdapter
+import info.muge.appshare.adapters.AppListAdapter
+import info.muge.appshare.adapters.AppListListener
 import info.muge.appshare.base.BaseFragment
 import info.muge.appshare.base.MainChildFragment
 import info.muge.appshare.databinding.PageExportBinding
@@ -42,11 +43,11 @@ import info.muge.appshare.utils.setMargins
 import java.util.*
 
 class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, RefreshInstalledListTaskCallback,
-    ListAdapterOperationListener<AppItem>, SearchAppItemTask.SearchTaskCompletedCallback,
+    AppListListener<AppItem>, SearchAppItemTask.SearchTaskCompletedCallback,
     MainChildFragment {
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var recyclerView: RecyclerView
-    private var adapter: RecyclerViewAdapter<AppItem>? = null
+    private var adapter: AppListAdapter<AppItem>? = null
     private lateinit var loading_content: ViewGroup
     private lateinit var progressBar: ProgressBar
     private lateinit var tv_progress: TextView
@@ -66,7 +67,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     val onScrollListener: RecyclerView.OnScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            val isMultiSelectMode = adapter?.isMultiSelectMode?:false
+            val isMultiSelectMode = adapter?.isMultiSelectMode() ?: false
             if (!recyclerView.canScrollVertically(-1)) {
                 // onScrolledToTop();
             } else if (!recyclerView.canScrollVertically(1)) {
@@ -214,7 +215,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                 swipeRefreshLayout!!.isRefreshing = false
                 return@OnRefreshListener
             }
-            if (adapter != null && adapter!!.isMultiSelectMode) {
+            if (adapter != null && adapter!!.isMultiSelectMode()) {
                 swipeRefreshLayout!!.isRefreshing = false
                 return@OnRefreshListener
             }
@@ -249,7 +250,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         if (activity == null) return
         when (v.id) {
             R.id.main_select_all -> {
-                if (adapter != null) adapter!!.setToggleSelectAll()
+                if (adapter != null) adapter!!.toggleSelectAll()
             }
             R.id.main_export -> {
                 /*if (adapter == null) return
@@ -278,7 +279,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                     })*/
             }
             R.id.main_more -> {
-                val appItemList = adapter!!.selectedItems
+                val appItemList = adapter!!.getSelectedItems()
                 if (appItemList.size == 0) {
                     Snackbar.make(
                         requireActivity().findViewById(android.R.id.content),
@@ -334,32 +335,33 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         viewGroup_no_content!!.visibility = if (appList.size == 0) View.VISIBLE else View.GONE
         swipeRefreshLayout!!.isRefreshing = false
         swipeRefreshLayout!!.isEnabled = true
-        adapter = RecyclerViewAdapter(
-            requireActivity(),
-            recyclerView!!,
-            appList,
-            SPUtil.getGlobalSharedPreferences(requireActivity()).getInt(
-                Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE,
-                Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_DEFAULT
-            ),
-            this
+
+        // 使用BRV配置RecyclerView
+        val viewMode = SPUtil.getGlobalSharedPreferences(requireActivity()).getInt(
+            Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE,
+            Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_DEFAULT
         )
-        recyclerView!!.adapter = adapter
+        adapter = AppListAdapter(requireActivity(), recyclerView!!, viewMode, this)
+        adapter!!.models = appList
+
         cb_sys!!.isEnabled = true
         //if(isSearchMode)adapter.setData(null);
     }
 
     override fun onItemClicked(
         appItem: AppItem,
-        viewHolder: RecyclerViewAdapter.ViewHolder,
+        holder: BindingAdapter.BindingViewHolder,
         position: Int
     ) {
         if (activity == null) return
         val intent = Intent(activity, AppDetailActivity::class.java)
         intent.putExtra(BaseActivity.EXTRA_PACKAGE_NAME, appItem.packageName)
+
+        // 获取icon视图用于共享元素动画
+        val iconView = holder.itemView.findViewById<ImageView>(R.id.item_app_icon)
         val compat = ActivityOptionsCompat.makeSceneTransitionAnimation(
             requireActivity(),
-            Pair(viewHolder.icon, "icon")
+            Pair(iconView, "icon")
         )
         try {
             ActivityCompat.startActivity(requireActivity(), intent, compat.toBundle())
@@ -397,7 +399,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         if (activity == null) return
         if (adapter == null) return
         swipeRefreshLayout!!.isRefreshing = false
-        adapter!!.setData(appItems)
+        adapter!!.models = appItems
         adapter!!.setHighlightKeyword(keyword)
     }
 
@@ -406,7 +408,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     }
 
     val isMultiSelectMode: Boolean
-        get() = adapter != null && adapter!!.isMultiSelectMode
+        get() = adapter != null && adapter!!.isMultiSelectMode()
 
     fun closeMultiSelectMode() {
         if (adapter == null) return
@@ -434,9 +436,9 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         if (adapter == null) return
         adapter!!.setMultiSelectMode(false)
         if (b) {
-            adapter!!.setData(null)
+            adapter!!.models = null
         } else {
-            synchronized(Global.app_list) { adapter!!.setData(Global.app_list) }
+            synchronized(Global.app_list) { adapter!!.models = Global.app_list }
         }
     }
 
@@ -452,7 +454,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         synchronized(Global.app_list) {
             searchAppItemTask = SearchAppItemTask(Global.app_list, key, this)
         }
-        adapter!!.setData(null)
+        adapter!!.models = null
         adapter!!.setMultiSelectMode(false)
         card_multi_select!!.visibility = View.GONE
         swipeRefreshLayout!!.isRefreshing = true
@@ -462,14 +464,14 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     fun sortGlobalListAndRefresh(value: Int) {
         closeMultiSelectMode()
         AppItem.sort_config = value
-        if (adapter != null) adapter!!.setData(null)
+        if (adapter != null) adapter!!.models = null
         swipeRefreshLayout!!.isRefreshing = true
         cb_sys!!.isEnabled = false
         Thread {
             synchronized(Global.app_list) { Collections.sort(Global.app_list) }
             Global.handler.post {
                 if (adapter != null) {
-                    synchronized(Global.app_list) { adapter!!.setData(Global.app_list) }
+                    synchronized(Global.app_list) { adapter!!.models = Global.app_list }
                 }
                 swipeRefreshLayout!!.isRefreshing = false
                 cb_sys!!.isEnabled = true
@@ -480,6 +482,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     fun setViewMode(mode: Int) {
         if (adapter == null) return
         adapter!!.setLayoutManagerAndView(mode)
+        adapter!!.notifyDataSetChanged()
     }
 
     private fun setAndStartRefreshingTask() {
