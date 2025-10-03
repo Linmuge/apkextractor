@@ -8,23 +8,46 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import info.muge.appshare.Constants
+import info.muge.appshare.R
 import info.muge.appshare.utils.SPUtil
+import info.muge.appshare.utils.ThemeUtil
 import java.lang.reflect.ParameterizedType
 import java.util.Locale
 
+/**
+ * Activity 基类
+ * 提供 ViewBinding 支持、语言设置和主题配置
+ */
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity(), BaseViewBinding<VB>{
 
 
     internal val binding: VB by lazy(mode = LazyThreadSafetyMode.NONE) {
         getViewBinding(layoutInflater)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 应用主题（必须在 super.onCreate 之前调用）
+        applyTheme()
+
         super.onCreate(savedInstanceState)
         val window = window
         setContentView(binding.root)
         setAndRefreshLanguage()
 
         binding.initView()
+    }
+
+    /**
+     * 应用主题
+     * 如果设备支持动态取色（Android 12+），使用系统壁纸颜色
+     * 否则使用基于 #4285F4 的 MD3 颜色方案
+     */
+    private fun applyTheme() {
+        if (!ThemeUtil.isDynamicColorAvailable()) {
+            // Android 12 以下使用静态 MD3 主题
+            setTheme(R.style.AppTheme_MD3_NoActionBar)
+        }
+        // Android 12+ 会在 MyApplication 中自动应用动态取色
     }
 
 

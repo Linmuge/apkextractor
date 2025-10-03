@@ -68,10 +68,21 @@ class AppListAdapter<T : DisplayItem>(
 
                 // 设置标题文本（支持高亮）
                 try {
+                    // 使用主题的 primary 颜色进行高亮
+                    val typedValue = android.util.TypedValue()
+                    val highlightColor = if (activity.theme.resolveAttribute(
+                            androidx.appcompat.R.attr.colorPrimary,
+                            typedValue,
+                            true
+                        )) {
+                        typedValue.data
+                    } else {
+                        Color.parseColor("#4285F4") // 备用颜色
+                    }
                     title.text = EnvironmentUtil.getSpannableString(
                         item.getTitle(),
                         highlightKeyword,
-                        Color.parseColor("#4285F4")
+                        highlightColor
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -86,10 +97,21 @@ class AppListAdapter<T : DisplayItem>(
                     
                     // 设置描述（支持高亮）
                     try {
+                        // 使用主题的 primary 颜色进行高亮
+                        val typedValue = android.util.TypedValue()
+                        val highlightColor = if (activity.theme.resolveAttribute(
+                                androidx.appcompat.R.attr.colorPrimary,
+                                typedValue,
+                                true
+                            )) {
+                            typedValue.data
+                        } else {
+                            Color.parseColor("#4285F4") // 备用颜色
+                        }
                         description.text = EnvironmentUtil.getSpannableString(
                             item.getDescription(),
                             highlightKeyword,
-                            Color.parseColor("#4285F4")
+                            highlightColor
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()

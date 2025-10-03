@@ -52,6 +52,18 @@ private fun Activity.getView(): View {
         // 拼接字符串
         val spanBuilder = SpannableStringBuilder("感谢您使用AppShare\n我们非常重视您的个人信息及隐私保护,在您使用我们的产品前，请您认真阅读  ")
 
+        // 获取主题的 primary 颜色用于链接
+        val typedValue = android.util.TypedValue()
+        val linkColor = if (theme.resolveAttribute(
+                androidx.appcompat.R.attr.colorPrimary,
+                typedValue,
+                true
+            )) {
+            typedValue.data
+        } else {
+            Color.parseColor("#4285F4") // 备用颜色
+        }
+
         // 服务协议
         var span = SpannableString("服务协议")
         span.setSpan(object : ClickableSpan() {
@@ -59,7 +71,7 @@ private fun Activity.getView(): View {
                 browse("https://link.appshare.muge.info/appkit/user.html")
             }
         }, 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(ForegroundColorSpan(Color.parseColor("#4285F4")), 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(ForegroundColorSpan(linkColor), 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spanBuilder.append(span)
 
         spanBuilder.append(" 与 ")
@@ -71,7 +83,7 @@ private fun Activity.getView(): View {
                 browse("https://link.appshare.muge.info/appkit/privacy.html")
             }
         }, 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(ForegroundColorSpan(Color.parseColor("#4285F4")), 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(ForegroundColorSpan(linkColor), 0, span.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spanBuilder.append(span)
 
         spanBuilder.append(
