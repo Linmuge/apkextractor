@@ -1,65 +1,76 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import androidx.annotation.NonNull;
+import info.muge.appshare.Global
+import info.muge.appshare.items.ImportItem
+import info.muge.appshare.utils.PinyinUtil
 
-import info.muge.appshare.Global;
-import info.muge.appshare.items.ImportItem;
-import info.muge.appshare.utils.PinyinUtil;
+/**
+ * 搜索包任务
+ */
+class SearchPackageTask(
+    importItemList: List<ImportItem>,
+    info: String,
+    private val callback: SearchTaskCompletedCallback
+) : Thread() {
 
-import java.util.ArrayList;
-import java.util.List;
+    @Volatile
+    private var isInterrupted = false
+    private val search_info: String = info.trim().lowercase()
+    private val importItemList = ArrayList<ImportItem>()
+    private val result_importItems = ArrayList<ImportItem>()
 
-public class SearchPackageTask extends Thread {
-
-    private volatile boolean isInterrupted=false;
-    private final String search_info;
-    private final List<ImportItem> importItemList=new ArrayList<>();
-    private final ArrayList<ImportItem> result_importItems=new ArrayList<>();
-    private final SearchTaskCompletedCallback callback;
-
-    public SearchPackageTask(@NonNull List<ImportItem>importItemList, @NonNull String info, @NonNull SearchTaskCompletedCallback callback){
-        this.search_info=info.trim().toLowerCase();
-        this.importItemList.addAll(importItemList);
-        this.callback=callback;
+    init {
+        this.importItemList.addAll(importItemList)
     }
 
-    @Override
-    public void run() {
-        super.run();
-        for(ImportItem importItem:importItemList){
-            if(isInterrupted){
-                result_importItems.clear();
-                return;
+    override fun run() {
+        super.run()
+        
+        for (importItem in importItemList) {
+            if (isInterrupted) {
+                result_importItems.clear()
+                return
             }
-            try{
-                boolean b=(getFormatString(importItem.getItemName()).contains(search_info)||getFormatString(importItem.getDescription()).contains(search_info)
-                        ||getFormatString(PinyinUtil.getFirstSpell(importItem.getItemName())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getFullSpell(importItem.getItemName())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getPinYin(importItem.getItemName())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getFirstSpell(importItem.getDescription())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getFullSpell(importItem.getDescription())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getPinYin(importItem.getDescription())).contains(search_info))
-                        &&!search_info.trim().equals("");
-                if(b)result_importItems.add(importItem);
-            }catch (Exception e){e.printStackTrace();}
+            
+            try {
+                val b = (getFormatString(importItem.getItemName()).contains(search_info) ||
+                        getFormatString(importItem.getDescription()).contains(search_info) ||
+                        getFormatString(PinyinUtil.getFirstSpell(importItem.getItemName())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getFullSpell(importItem.getItemName())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getPinYin(importItem.getItemName())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getFirstSpell(importItem.getDescription())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getFullSpell(importItem.getDescription())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getPinYin(importItem.getDescription())).contains(search_info)) &&
+                        search_info.trim().isNotEmpty()
+                
+                if (b) {
+                    result_importItems.add(importItem)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if(!isInterrupted)callback.onSearchTaskCompleted(result_importItems,search_info);
+        
+        Global.handler.post {
+            if (!isInterrupted) {
+                callback.onSearchTaskCompleted(result_importItems, search_info)
             }
-        });
+        }
     }
 
-    public void setInterrupted(){
-        isInterrupted=true;
+    fun setInterrupted() {
+        isInterrupted = true
     }
 
-    private String getFormatString(@NonNull String s){
-        return s.trim().toLowerCase();
+    private fun getFormatString(s: String): String {
+        return s.trim().lowercase()
     }
 
-    public interface SearchTaskCompletedCallback{
-        void onSearchTaskCompleted(@NonNull List<ImportItem> importItems,@NonNull String keyword);
+    /**
+     * 搜索任务完成回调
+     */
+    interface SearchTaskCompletedCallback {
+        fun onSearchTaskCompleted(importItems: List<ImportItem>, keyword: String)
     }
 }
+

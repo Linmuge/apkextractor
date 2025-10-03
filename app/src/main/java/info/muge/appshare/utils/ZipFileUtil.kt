@@ -1,179 +1,152 @@
-package info.muge.appshare.utils;
+package info.muge.appshare.utils
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import info.muge.appshare.items.FileItem
+import info.muge.appshare.items.ImportItem
+import java.io.InputStream
+import java.util.Enumeration
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
-import info.muge.appshare.items.FileItem;
-import info.muge.appshare.items.ImportItem;
+/**
+ * Zip文件工具类
+ */
+object ZipFileUtil {
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-
-public class ZipFileUtil {
-
-    public static @Nullable ZipFileInfo getZipFileInfoOfImportItem(@NonNull ImportItem importItem){
-        FileItem fileItem=importItem.getFileItem();
-        try{
-            if(fileItem.isDocumentFile()||fileItem.isShareUriInstance()){
-                return getZipFileInfoOfZipInputStream(fileItem.getInputStream());
-            }else if(fileItem.isFileInstance()){
-                return getZipFileInfoOfZipFile(new ZipFile(fileItem.getFile()));
+    @JvmStatic
+    fun getZipFileInfoOfImportItem(importItem: ImportItem): ZipFileInfo? {
+        val fileItem = importItem.getFileItem()
+        try {
+            return when {
+                fileItem.isDocumentFile() || fileItem.isShareUriInstance() -> {
+                    getZipFileInfoOfZipInputStream(fileItem.getInputStream()!!)
+                }
+                fileItem.isFileInstance() -> {
+                    getZipFileInfoOfZipFile(ZipFile(fileItem.getFile()!!))
+                }
+                else -> null
             }
-        }catch (Exception e){e.printStackTrace();}
-        return null;
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
-    private static @NonNull ZipFileInfo getZipFileInfoOfZipFile(ZipFile zipFile){
-        ZipFileInfo zipFileInfo=new ZipFileInfo();
-        try{
-            Enumeration entries =zipFile.entries();
-            while (entries.hasMoreElements()){
-                ZipEntry zipEntry=(ZipEntry) entries.nextElement();
-                String entryPath=zipEntry.getName().replaceAll("\\*", "/");
-                if((entryPath.toLowerCase().startsWith("android/data"))&&!zipEntry.isDirectory()){
-                    zipFileInfo.addEntry(entryPath);
-                    zipFileInfo.addDataSize(zipEntry.getSize());
-                }
-                else if((entryPath.toLowerCase().startsWith("android/obb"))&&!zipEntry.isDirectory()){
-                    zipFileInfo.addEntry(entryPath);
-                    zipFileInfo.addObbSize(zipEntry.getSize());
-                }
-                else if((entryPath.toLowerCase().endsWith(".apk"))&&!entryPath.contains("/")&&!zipEntry.isDirectory()){
-                    zipFileInfo.addEntry(entryPath);
-                    zipFileInfo.addApkSize(zipEntry.getSize());
+    private fun getZipFileInfoOfZipFile(zipFile: ZipFile): ZipFileInfo {
+        val zipFileInfo = ZipFileInfo()
+        try {
+            val entries: Enumeration<*> = zipFile.entries()
+            while (entries.hasMoreElements()) {
+                val zipEntry = entries.nextElement() as ZipEntry
+                val entryPath = zipEntry.name.replace("\\*", "/")
+                
+                when {
+                    entryPath.lowercase().startsWith("android/data") && !zipEntry.isDirectory -> {
+                        zipFileInfo.addEntry(entryPath)
+                        zipFileInfo.addDataSize(zipEntry.size)
+                    }
+                    entryPath.lowercase().startsWith("android/obb") && !zipEntry.isDirectory -> {
+                        zipFileInfo.addEntry(entryPath)
+                        zipFileInfo.addObbSize(zipEntry.size)
+                    }
+                    entryPath.lowercase().endsWith(".apk") && !entryPath.contains("/") && !zipEntry.isDirectory -> {
+                        zipFileInfo.addEntry(entryPath)
+                        zipFileInfo.addApkSize(zipEntry.size)
+                    }
                 }
             }
-
-        }catch (Exception e){e.printStackTrace();}
-        return zipFileInfo;
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return zipFileInfo
     }
 
     /**
      * 获取一个zip文件中data或者obb的大小，为耗时阻塞方法
      * @return 字节
      */
-    private static @NonNull ZipFileInfo getZipFileInfoOfZipInputStream(@NonNull InputStream inputStream){
-        ZipFileInfo zipFileInfo=new ZipFileInfo();
-        try{
-            ZipInputStream zipInputStream=new ZipInputStream(inputStream);
-            ZipEntry zipEntry=zipInputStream.getNextEntry();
-            while (zipEntry!=null){
-                String entryPath=zipEntry.getName().replaceAll("\\*", "/");
-                if((entryPath.toLowerCase().startsWith("android/data"))&&!zipEntry.isDirectory()){
-                    zipFileInfo.addEntry(entryPath);
-                    long total_this_file=0;
-                    int len;
-                    byte[] buffer=new byte[1024];
-                    while ((len=zipInputStream.read(buffer))!=-1){
-                        total_this_file+=len;
+    private fun getZipFileInfoOfZipInputStream(inputStream: InputStream): ZipFileInfo {
+        val zipFileInfo = ZipFileInfo()
+        try {
+            val zipInputStream = ZipInputStream(inputStream)
+            var zipEntry = zipInputStream.nextEntry
+            
+            while (zipEntry != null) {
+                val entryPath = zipEntry.name.replace("\\*", "/")
+                
+                when {
+                    entryPath.lowercase().startsWith("android/data") && !zipEntry.isDirectory -> {
+                        zipFileInfo.addEntry(entryPath)
+                        var total_this_file = 0L
+                        val buffer = ByteArray(1024)
+                        var len: Int
+                        while (zipInputStream.read(buffer).also { len = it } != -1) {
+                            total_this_file += len
+                        }
+                        zipFileInfo.addDataSize(total_this_file)
                     }
-                    zipFileInfo.addDataSize(total_this_file);
-                }
-                else if(entryPath.toLowerCase().startsWith("android/obb")&&!zipEntry.isDirectory()){
-                    zipFileInfo.addEntry(entryPath);
-                    long total_this_file=0;
-                    int len;
-                    byte[] buffer=new byte[1024];
-                    while ((len=zipInputStream.read(buffer))!=-1){
-                        total_this_file+=len;
+                    entryPath.lowercase().startsWith("android/obb") && !zipEntry.isDirectory -> {
+                        zipFileInfo.addEntry(entryPath)
+                        var total_this_file = 0L
+                        val buffer = ByteArray(1024)
+                        var len: Int
+                        while (zipInputStream.read(buffer).also { len = it } != -1) {
+                            total_this_file += len
+                        }
+                        zipFileInfo.addObbSize(total_this_file)
                     }
-                    zipFileInfo.addObbSize(total_this_file);
-                }
-                else if(entryPath.toLowerCase().endsWith(".apk")&&!zipEntry.isDirectory()&&!entryPath.contains("/")){
-                    zipFileInfo.addEntry(entryPath);
-                    long total_this_file=0;
-                    int len;
-                    byte[] buffer=new byte[1024];
-                    while ((len=zipInputStream.read(buffer))!=-1){
-                        total_this_file+=len;
+                    entryPath.lowercase().endsWith(".apk") && !zipEntry.isDirectory && !entryPath.contains("/") -> {
+                        zipFileInfo.addEntry(entryPath)
+                        var total_this_file = 0L
+                        val buffer = ByteArray(1024)
+                        var len: Int
+                        while (zipInputStream.read(buffer).also { len = it } != -1) {
+                            total_this_file += len
+                        }
+                        zipFileInfo.addApkSize(total_this_file)
                     }
-                    zipFileInfo.addApkSize(total_this_file);
                 }
-
-                zipEntry=zipInputStream.getNextEntry();
+                
+                zipEntry = zipInputStream.nextEntry
             }
-            zipInputStream.close();
-        }catch (Exception e){e.printStackTrace();}
-        return zipFileInfo;
+            zipInputStream.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return zipFileInfo
     }
 
     /**
      * 包含此zip包中的data,obb,apk信息
      */
-    public static class ZipFileInfo{
-        private final ArrayList<String>entryPaths=new ArrayList<>();
-        long dataSize=0;
-        long obbSize=0;
-        long apkSize=0;
-        private ZipFileInfo (){}
+    class ZipFileInfo {
+        private val entryPaths = ArrayList<String>()
+        var dataSize = 0L
+            private set
+        var obbSize = 0L
+            private set
+        var apkSize = 0L
+            private set
 
-        private void addEntry(String entryPath){
-            entryPaths.add(entryPath);
+        internal fun addEntry(entryPath: String) {
+            entryPaths.add(entryPath)
         }
 
-        private void addDataSize(long dataSize) {
-            this.dataSize+= dataSize;
+        internal fun addDataSize(dataSize: Long) {
+            this.dataSize += dataSize
         }
 
-        private void addObbSize(long obbSize) {
-            this.obbSize+= obbSize;
+        internal fun addObbSize(obbSize: Long) {
+            this.obbSize += obbSize
         }
 
-        private void addApkSize(long apkSize){
-            this.apkSize+=apkSize;
+        internal fun addApkSize(apkSize: Long) {
+            this.apkSize += apkSize
         }
 
-        public long getDataSize() {
-            return dataSize;
+        fun getEntryPaths(): ArrayList<String> {
+            return entryPaths
         }
-
-        public long getObbSize() {
-            return obbSize;
-        }
-
-        public long getApkSize() {
-            return apkSize;
-        }
-
-        public @NonNull ArrayList<String> getEntryPaths() {
-            return entryPaths;
-        }
-
-        /*public @NonNull String getAlreadyExistingFilesInfoInMainStorage(@NonNull Context context){
-            StringBuilder builder=new StringBuilder();
-            try{
-                for(String s:entryPaths){
-                    if(!s.contains("/")&&s.endsWith(".apk")){
-                        if(SPUtil.getIsSaved2ExternalStorage(context)){
-                            DocumentFile documentFile=OutputUtil.getExportPathDocumentFile(context);
-                            DocumentFile writeDocumentFile=documentFile.findFile(s);
-                            if(writeDocumentFile!=null){
-                                builder.append(SPUtil.getDisplayingExportPath(context));
-                                builder.append("/");
-                                builder.append(s);
-                                builder.append("\n\n");
-                            }
-                        }else{
-                            File target=new File(SPUtil.getInternalSavePath(context)+"/"+s);
-                            if(target.exists()){
-                                builder.append(target.getAbsolutePath());
-                                builder.append("\n\n");
-                            }
-                        }
-                    }else{
-                        File exportWritingTarget=new File(StorageUtil.getMainExternalStoragePath()+"/"+s);
-                        if(exportWritingTarget.exists()){
-                            builder.append(exportWritingTarget.getAbsolutePath());
-                            builder.append("\n\n");
-                        }
-                    }
-                }
-            }catch (Exception e){e.printStackTrace();}
-            return builder.toString();
-        }*/
     }
 }
+

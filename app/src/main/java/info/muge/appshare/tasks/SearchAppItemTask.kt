@@ -1,63 +1,73 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import androidx.annotation.NonNull;
+import info.muge.appshare.Global
+import info.muge.appshare.items.AppItem
+import info.muge.appshare.utils.PinyinUtil
 
-import info.muge.appshare.Global;
-import info.muge.appshare.items.AppItem;
-import info.muge.appshare.utils.PinyinUtil;
+/**
+ * 搜索应用项任务
+ */
+class SearchAppItemTask(
+    appItems: List<AppItem>,
+    info: String,
+    private val callback: SearchTaskCompletedCallback
+) : Thread() {
 
-import java.util.ArrayList;
-import java.util.List;
+    @Volatile
+    private var isInterrupted = false
+    private val search_info: String = info.trim().lowercase()
+    private val appItemList = ArrayList<AppItem>()
+    private val result_appItems = ArrayList<AppItem>()
 
-public class SearchAppItemTask extends Thread {
-
-    private volatile boolean isInterrupted=false;
-    private final String search_info;
-    private final List<AppItem> appItemList=new ArrayList<>();
-    private final ArrayList<AppItem> result_appItems=new ArrayList<>();
-    private final SearchTaskCompletedCallback callback;
-
-
-    public SearchAppItemTask(List<AppItem>appItems,@NonNull String info,@NonNull SearchTaskCompletedCallback callback){
-        this.search_info=info.trim().toLowerCase();
-        this.appItemList.addAll(appItems);
-        this.callback=callback;
+    init {
+        this.appItemList.addAll(appItems)
     }
 
-    @Override
-    public void run() {
-        super.run();
-        for(AppItem item: appItemList){
-            if(isInterrupted){
-                break;
+    override fun run() {
+        super.run()
+        
+        for (item in appItemList) {
+            if (isInterrupted) {
+                break
             }
-            try{
-                boolean b=(getFormatString(item.getAppName()).contains(search_info)
-                        ||getFormatString(item.getPackageName()).contains(search_info)
-                        ||getFormatString(item.getVersionName()).contains(search_info)
-                        ||getFormatString(PinyinUtil.getFirstSpell(item.getAppName())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getFullSpell(item.getAppName())).contains(search_info)
-                        ||getFormatString(PinyinUtil.getPinYin(item.getAppName())).contains(search_info))&&!search_info.trim().equals("");
-                if(b) result_appItems.add(item);
-            }catch (Exception e){e.printStackTrace();}
+            
+            try {
+                val b = (getFormatString(item.getAppName()).contains(search_info) ||
+                        getFormatString(item.getPackageName()).contains(search_info) ||
+                        getFormatString(item.getVersionName()).contains(search_info) ||
+                        getFormatString(PinyinUtil.getFirstSpell(item.getAppName())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getFullSpell(item.getAppName())).contains(search_info) ||
+                        getFormatString(PinyinUtil.getPinYin(item.getAppName())).contains(search_info)) &&
+                        search_info.trim().isNotEmpty()
+                
+                if (b) {
+                    result_appItems.add(item)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if(!isInterrupted)callback.onSearchTaskCompleted(result_appItems,search_info);
+        
+        Global.handler.post {
+            if (!isInterrupted) {
+                callback.onSearchTaskCompleted(result_appItems, search_info)
             }
-        });
+        }
     }
 
-    public void setInterrupted(){
-        isInterrupted=true;
+    fun setInterrupted() {
+        isInterrupted = true
     }
 
-    private String getFormatString(@NonNull String s){
-        return s.trim().toLowerCase();
+    private fun getFormatString(s: String): String {
+        return s.trim().lowercase()
     }
 
-    public interface SearchTaskCompletedCallback{
-        void onSearchTaskCompleted(@NonNull List<AppItem> appItems,@NonNull String keyword);
+    /**
+     * 搜索任务完成回调
+     */
+    interface SearchTaskCompletedCallback {
+        fun onSearchTaskCompleted(appItems: List<AppItem>, keyword: String)
     }
 }
+

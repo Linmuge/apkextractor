@@ -454,7 +454,7 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>(), View.OnClick
          */
         get() {
             val list = java.util.ArrayList<AppItem>()
-            val item = AppItem(appItem, false, false)
+            val item = AppItem(appItem!!, false, false)
 
             list.add(item)
             return list

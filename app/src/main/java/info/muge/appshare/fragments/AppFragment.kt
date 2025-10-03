@@ -300,7 +300,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                                 Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT
                             )
                     )
-                    stringBuilder.append(appItem.packageName)
+                    stringBuilder.append(appItem.getPackageName())
                 }
                 //closeMultiSelectMode();
                 clip2ClipboardAndShowSnackbar(stringBuilder.toString())
@@ -355,7 +355,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     ) {
         if (activity == null) return
         val intent = Intent(activity, AppDetailActivity::class.java)
-        intent.putExtra(BaseActivity.EXTRA_PACKAGE_NAME, appItem.packageName)
+        intent.putExtra(BaseActivity.EXTRA_PACKAGE_NAME, appItem.getPackageName())
 
         // 获取icon视图用于共享元素动画
         val iconView = holder.itemView.findViewById<ImageView>(R.id.item_app_icon)

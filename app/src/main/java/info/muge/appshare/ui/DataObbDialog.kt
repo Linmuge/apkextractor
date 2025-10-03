@@ -1,116 +1,120 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-import android.content.Context;
-import android.content.DialogInterface;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import android.text.format.Formatter;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.TextView;
+import android.content.Context
+import android.text.format.Formatter
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.CheckBox
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import info.muge.appshare.Global
+import info.muge.appshare.R
+import info.muge.appshare.items.AppItem
+import info.muge.appshare.utils.FileUtil
+import info.muge.appshare.utils.StorageUtil
+import java.io.File
 
-import info.muge.appshare.Global;
-import info.muge.appshare.R;
-import info.muge.appshare.items.AppItem;
-import info.muge.appshare.utils.FileUtil;
-import info.muge.appshare.utils.StorageUtil;
+/**
+ * Data和Obb选择对话框
+ */
+class DataObbDialog(
+    context: Context,
+    export_list: List<AppItem>,
+    private val callback: DialogDataObbConfirmedCallback?
+) : AlertDialog(context), View.OnClickListener {
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+    private val view: View
+    private val list = ArrayList<AppItem>()
+    private val list_data_controllable = ArrayList<AppItem>()
+    private val list_obb_controllable = ArrayList<AppItem>()
+    private lateinit var cb_data: CheckBox
+    private lateinit var cb_obb: CheckBox
 
-public class DataObbDialog extends AlertDialog implements View.OnClickListener {
-
-    private final View view;
-    private DialogDataObbConfirmedCallback callback;
-    private final List<AppItem>list=new ArrayList<>();
-    private final List<AppItem> list_data_controllable =new ArrayList<>();
-    private final List<AppItem> list_obb_controllable=new ArrayList<>();
-    private CheckBox cb_data;
-    private CheckBox cb_obb;
-
-    /**
-     * @param export_list 传递进来的AppItem可为源数据，初始Data和Obb导出值为false
-     */
-    public DataObbDialog(@NonNull Context context, @NonNull List<AppItem>export_list, final DialogDataObbConfirmedCallback callback) {
-        super(context);
-        this.callback=callback;
-        for(AppItem appItem:export_list){
-            list.add(new AppItem(appItem,false,false));
+    init {
+        for (appItem in export_list) {
+            list.add(AppItem(appItem, false, false))
         }
-        view=LayoutInflater.from(context).inflate(R.layout.dialog_data_obb,null);
-        cb_data=view.findViewById(R.id.dialog_checkbox_data);
-        cb_obb=view.findViewById(R.id.dialog_checkbox_obb);
-        TextView tv_att=view.findViewById(R.id.data_obb_att);
-        tv_att.setText(context.getResources().getString(R.string.dialog_data_obb_message));
-        setView(view);
-        setTitle(context.getResources().getString(R.string.dialog_data_obb_title));
-
-        setButton(AlertDialog.BUTTON_POSITIVE, context.getResources().getString(R.string.dialog_button_confirm), new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {}
-        });
-        setButton(AlertDialog.BUTTON_NEGATIVE,context.getResources().getString(R.string.dialog_button_cancel),new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {}
-        });
-
-
+        
+        view = LayoutInflater.from(context).inflate(R.layout.dialog_data_obb, null)
+        cb_data = view.findViewById(R.id.dialog_checkbox_data)
+        cb_obb = view.findViewById(R.id.dialog_checkbox_obb)
+        val tv_att = view.findViewById<TextView>(R.id.data_obb_att)
+        tv_att.text = context.resources.getString(R.string.dialog_data_obb_message)
+        
+        setView(view)
+        setTitle(context.resources.getString(R.string.dialog_data_obb_title))
+        
+        setButton(BUTTON_POSITIVE, context.resources.getString(R.string.dialog_button_confirm)) { _, _ -> }
+        setButton(BUTTON_NEGATIVE, context.resources.getString(R.string.dialog_button_cancel)) { _, _ -> }
     }
 
-    @Override
-    public void show(){
-        super.show();
-        getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(null);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (DataObbDialog.this){
-                    long data=0,obb=0;
-                    for(AppItem item:list){
-                        long data_item= FileUtil.getFileOrFolderSize(new File(StorageUtil.getMainExternalStoragePath()+"/android/data/"+item.getPackageName()));
-                        long obb_item=FileUtil.getFileOrFolderSize(new File(StorageUtil.getMainExternalStoragePath()+"/android/obb/"+item.getPackageName()));
-                        data+=data_item;
-                        obb+=obb_item;
-                        if(data_item>0) list_data_controllable.add(item);
-                        if(obb_item>0) list_obb_controllable.add(item);
+    override fun show() {
+        super.show()
+        getButton(BUTTON_POSITIVE).setOnClickListener(null)
+        
+        Thread {
+            synchronized(this@DataObbDialog) {
+                var data = 0L
+                var obb = 0L
+                
+                for (item in list) {
+                    val data_item = FileUtil.getFileOrFolderSize(
+                        File("${StorageUtil.getMainExternalStoragePath()}/android/data/${item.getPackageName()}")
+                    )
+                    val obb_item = FileUtil.getFileOrFolderSize(
+                        File("${StorageUtil.getMainExternalStoragePath()}/android/obb/${item.getPackageName()}")
+                    )
+                    data += data_item
+                    obb += obb_item
+                    
+                    if (data_item > 0) list_data_controllable.add(item)
+                    if (obb_item > 0) list_obb_controllable.add(item)
+                }
+                
+                val data_total = data
+                val obb_total = obb
+                
+                Global.handler.post {
+                    if (data_total == 0L && obb_total == 0L) {
+                        cancel()
+                        callback?.onDialogDataObbConfirmed(list)
+                        return@post
                     }
-                    final long data_total=data;
-                    final long obb_total=obb;
-                    Global.handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(data_total==0&&obb_total==0){
-                                cancel();
-                                if(callback!=null)callback.onDialogDataObbConfirmed(list);
-                                return;
-                            }
-                            view.findViewById(R.id.dialog_data_obb_wait_area).setVisibility(View.GONE);
-                            view.findViewById(R.id.dialog_data_obb_show_area).setVisibility(View.VISIBLE);
-                            cb_data.setEnabled(data_total>0);
-                            cb_obb.setEnabled(obb_total>0);
-                            cb_data.setText("Data("+ Formatter.formatFileSize(getContext(),data_total)+")");
-                            cb_obb.setText("Obb("+Formatter.formatFileSize(getContext(),obb_total)+")");
-                            getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(DataObbDialog.this);
-                        }
-                    });
+                    
+                    view.findViewById<View>(R.id.dialog_data_obb_wait_area).visibility = View.GONE
+                    view.findViewById<View>(R.id.dialog_data_obb_show_area).visibility = View.VISIBLE
+                    cb_data.isEnabled = data_total > 0
+                    cb_obb.isEnabled = obb_total > 0
+                    cb_data.text = "Data(${Formatter.formatFileSize(context, data_total)})"
+                    cb_obb.text = "Obb(${Formatter.formatFileSize(context, obb_total)})"
+                    getButton(BUTTON_POSITIVE).setOnClickListener(this@DataObbDialog)
                 }
             }
-        }).start();
+        }.start()
     }
 
-    @Override
-    public void onClick(View v) {
-        if(v.equals(getButton(AlertDialog.BUTTON_POSITIVE))){
-            if(cb_data.isChecked()) for(AppItem item:list_data_controllable) item.exportData=true;
-            if(cb_obb.isChecked()) for (AppItem item:list_obb_controllable) item.exportObb=true;
-            if(callback!=null)callback.onDialogDataObbConfirmed(list);
-            cancel();
+    override fun onClick(v: View) {
+        if (v == getButton(BUTTON_POSITIVE)) {
+            if (cb_data.isChecked) {
+                for (item in list_data_controllable) {
+                    item.exportData = true
+                }
+            }
+            if (cb_obb.isChecked) {
+                for (item in list_obb_controllable) {
+                    item.exportObb = true
+                }
+            }
+            callback?.onDialogDataObbConfirmed(list)
+            cancel()
         }
     }
 
-    public interface DialogDataObbConfirmedCallback{
-        void onDialogDataObbConfirmed(@NonNull List<AppItem>export_list);
+    /**
+     * Data和Obb确认回调
+     */
+    interface DialogDataObbConfirmedCallback {
+        fun onDialogDataObbConfirmed(export_list: List<AppItem>)
     }
 }
+

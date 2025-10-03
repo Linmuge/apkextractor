@@ -1,378 +1,345 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import android.content.Context;
-import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.documentfile.provider.DocumentFile;
+import android.content.Context
+import android.content.Intent
+import androidx.documentfile.provider.DocumentFile
+import info.muge.appshare.Constants
+import info.muge.appshare.Global
+import info.muge.appshare.items.AppItem
+import info.muge.appshare.items.FileItem
+import info.muge.appshare.utils.EnvironmentUtil
+import info.muge.appshare.utils.FileUtil
+import info.muge.appshare.utils.OutputUtil
+import info.muge.appshare.utils.SPUtil
+import info.muge.appshare.utils.StorageUtil
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
-import info.muge.appshare.Constants;
-import info.muge.appshare.Global;
-import info.muge.appshare.items.AppItem;
-import info.muge.appshare.items.FileItem;
-import info.muge.appshare.utils.EnvironmentUtil;
-import info.muge.appshare.utils.FileUtil;
-import info.muge.appshare.utils.OutputUtil;
-import info.muge.appshare.utils.SPUtil;
-import info.muge.appshare.utils.StorageUtil;
+/**
+ * 导出任务
+ * @param list 要导出的AppItem集合
+ * @param callback 任务进度回调，在主UI线程
+ */
+class ExportTask(
+    private val context: Context,
+    private val list: List<AppItem>,
+    private var listener: ExportProgressListener?
+) : Thread() {
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-public class ExportTask extends Thread {
-
-    private Context context;
-    private final List<AppItem> list;
-    private ExportProgressListener listener;
     /**
      * 本次导出任务的目的存储路径是否为外置存储
      */
-    private final boolean isExternal;
-    private volatile boolean isInterrupted=false;
-    private long progress=0,total=0;
-    private long progress_check_zip =0;
-    private long zipTime=0;
-    private long zipWriteLength_second=0;
+    private val isExternal: Boolean = SPUtil.getIsSaved2ExternalStorage(context)
+    
+    @Volatile
+    private var isInterrupted = false
+    private var progress = 0L
+    private var total = 0L
+    private var progress_check_zip = 0L
+    private var zipTime = 0L
+    private var zipWriteLength_second = 0L
 
-    private FileItem currentWritingFile=null;
-    private String currentWritingPath=null;
+    private var currentWritingFile: FileItem? = null
+    private var currentWritingPath: String? = null
 
-    private final ArrayList<FileItem>write_paths=new ArrayList<>();
-    private final StringBuilder error_message=new StringBuilder();
+    private val write_paths = ArrayList<FileItem>()
+    private val error_message = StringBuilder()
 
-    /**
-     * 导出任务构造方法
-     * @param list 要导出的AppItem集合
-     * @param callback 任务进度回调，在主UI线程
-     */
-    public ExportTask(@NonNull Context context, @NonNull List<AppItem>list,@Nullable ExportProgressListener callback){
-        super();
-        this.context=context;
-        this.list=list;
-        this.listener=callback;
-        isExternal= SPUtil.getIsSaved2ExternalStorage(context);
+    fun setExportProgressListener(listener: ExportProgressListener) {
+        this.listener = listener
     }
 
-    public void setExportProgressListener(ExportProgressListener listener){
-        this.listener=listener;
-    }
-
-    @Override
-    public void run() {
-        try{
-            //初始化File导出路径
-            if(!isExternal){
-                File export_path=new File(SPUtil.getInternalSavePath());
-                if(!export_path.exists()){
-                    export_path.mkdirs();
+    override fun run() {
+        try {
+            // 初始化File导出路径
+            if (!isExternal) {
+                val export_path = File(SPUtil.getInternalSavePath())
+                if (!export_path.exists()) {
+                    export_path.mkdirs()
                 }
             }
-        }catch (Exception e){
-            e.printStackTrace();
-            if(listener!=null)listener.onExportTaskFinished(new ArrayList<FileItem>(),e.toString());
-            return;
-        }
-
-        total= getTotalLength();
-        long progress_check_apk=0;
-        long bytesPerSecond=0;
-        long startTime=System.currentTimeMillis();
-
-        for(int i=0;i<list.size();i++){
-            if(isInterrupted)break;
-            try{
-                final AppItem item=list.get(i);
-                final int order_this_loop=i+1;
-
-                if(!item.exportData&&!item.exportObb){
-
-                    OutputStream outputStream;
-                    if(isExternal) {
-                        DocumentFile documentFile = OutputUtil.getWritingDocumentFileForAppItem(context,item,"apk",i+1);
-                        this.currentWritingFile=new FileItem(context,documentFile);
-                        this.currentWritingPath=SPUtil.getInternalSavePath()+"/"+documentFile.getName();
-                        outputStream= OutputUtil.getOutputStreamForDocumentFile(context,documentFile);
-                    }
-                    else {
-                        String writePath=OutputUtil.getAbsoluteWritePath(context,item,"apk",i+1);
-                        this.currentWritingFile=new FileItem(writePath);
-                        this.currentWritingPath=writePath;
-                        outputStream=new FileOutputStream(new File(OutputUtil.getAbsoluteWritePath(context,item,"apk",i+1)));
-                    }
-
-                    postCallback2Listener(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(listener!=null)listener.onExportAppItemStarted(order_this_loop,item,list.size(),String.valueOf(currentWritingPath));
-                        }
-                    });
-
-                    InputStream in = new FileInputStream(String.valueOf(item.getSourcePath())); //读入原文件
-
-                    BufferedOutputStream out= new BufferedOutputStream(outputStream);
-
-                    int byteread;
-                    byte[] buffer = new byte[1024*10];
-                    while ( (byteread = in.read(buffer)) != -1&&!this.isInterrupted) {
-                        out.write(buffer, 0, byteread);
-                        progress += byteread;
-                        bytesPerSecond+=byteread;
-                        long endTime=System.currentTimeMillis();
-                        if((endTime-startTime)>1000){
-                            startTime=endTime;
-                            final long speed=bytesPerSecond;
-                            bytesPerSecond=0;
-                            /*Long speed=Long.valueOf(bytesPerSecond);
-				            	 bytesPerSecond=0;
-				            	 Message msg_speed = new Message();
-				            	 msg_speed.what=BaseActivity.MESSAGE_COPYFILE_REFRESH_SPEED;
-				            	 msg_speed.obj=speed;
-				            	 BaseActivity.sendMessage(msg_speed);*/
-                            postCallback2Listener(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(listener!=null)listener.onExportSpeedUpdated(speed);
-                                }
-                            });
-
-                        }
-
-                        if((progress-progress_check_apk)>100*1024){   //每写100K发送一次更新进度的Message
-                            progress_check_apk=progress;
-                            /*Message msg_progress=new Message();
-                            Long progressinfo[]  = new Long[]{Long.valueOf(progress),Long.valueOf(total)};
-                            msg_progress.what=BaseActivity.MESSAGE_COPYFILE_REFRESH_PROGRESS;
-                            msg_progress.obj=progressinfo;
-                            BaseActivity.sendMessage(msg_progress);*/
-                            postCallback2Listener(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(listener!=null)listener.onExportProgressUpdated(progress,total,String.valueOf(currentWritingPath));
-                                }
-                            });
-                        }
-                    }
-                    out.flush();
-                    in.close();
-                    out.close();
-                    write_paths.add(currentWritingFile);
-                    if(!isInterrupted)currentWritingFile=null;
+        } catch (e: Exception) {
+            e.printStackTrace()
+            listener?.let {
+                Global.handler.post {
+                    it.onExportTaskFinished(ArrayList(), e.toString())
                 }
+            }
+            return
+        }
 
-                else{
-                    OutputStream outputStream;
-                    if(isExternal){
-                        DocumentFile documentFile= OutputUtil.getWritingDocumentFileForAppItem(context,item,SPUtil.getCompressingExtensionName(context),i+1);
-                        this.currentWritingFile=new FileItem(context,documentFile);
-                        this.currentWritingPath=SPUtil.getInternalSavePath()+"/"+documentFile.getName();
-                        outputStream= OutputUtil.getOutputStreamForDocumentFile(context,documentFile);
+        total = getTotalLength()
+        var progress_check_apk = 0L
+        var bytesPerSecond = 0L
+        var startTime = System.currentTimeMillis()
+
+        for (i in list.indices) {
+            if (isInterrupted) break
+            
+            try {
+                val item = list[i]
+                val order_this_loop = i + 1
+
+                if (!item.exportData && !item.exportObb) {
+                    // 导出单个APK文件
+                    val outputStream: OutputStream
+                    if (isExternal) {
+                        val documentFile = OutputUtil.getWritingDocumentFileForAppItem(context, item, "apk", i + 1)!!
+                        currentWritingFile = FileItem(context, documentFile)
+                        currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
+                        outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
+                    } else {
+                        val writePath = OutputUtil.getAbsoluteWritePath(context, item, "apk", i + 1)
+                        currentWritingFile = FileItem(writePath)
+                        currentWritingPath = writePath
+                        outputStream = FileOutputStream(File(OutputUtil.getAbsoluteWritePath(context, item, "apk", i + 1)))
                     }
-                    else {
-                        String writePath=OutputUtil.getAbsoluteWritePath(context,item,SPUtil.getCompressingExtensionName(context),i+1);
-                        this.currentWritingFile= new FileItem(writePath);
-                        this.currentWritingPath=writePath;
-                        outputStream=new FileOutputStream(new File(OutputUtil.getAbsoluteWritePath(context,item,SPUtil.getCompressingExtensionName(context),i+1)));
+
+                    postCallback2Listener {
+                        listener?.onExportAppItemStarted(order_this_loop, item, list.size, currentWritingPath.toString())
                     }
-                    postCallback2Listener(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(listener!=null)listener.onExportAppItemStarted(order_this_loop,item,list.size(),currentWritingFile.getPath());
+
+                    val inputStream = FileInputStream(item.getSourcePath())
+                    val out = BufferedOutputStream(outputStream)
+
+                    val buffer = ByteArray(1024 * 10)
+                    var byteread: Int
+                    
+                    while (inputStream.read(buffer).also { byteread = it } != -1 && !isInterrupted) {
+                        out.write(buffer, 0, byteread)
+                        progress += byteread
+                        bytesPerSecond += byteread
+                        
+                        val endTime = System.currentTimeMillis()
+                        if (endTime - startTime > 1000) {
+                            startTime = endTime
+                            val speed = bytesPerSecond
+                            bytesPerSecond = 0
+                            
+                            postCallback2Listener {
+                                listener?.onExportSpeedUpdated(speed)
+                            }
                         }
-                    });
 
-                    ZipOutputStream zos=new ZipOutputStream(new BufferedOutputStream(outputStream));
-                    zos.setComment("Packaged by info.muge.appshare \nhttps://github.com/ghmxr/appshare");
-                    int zip_level= SPUtil.getGlobalSharedPreferences(context).getInt(Constants.PREFERENCE_ZIP_COMPRESS_LEVEL, Constants.PREFERENCE_ZIP_COMPRESS_LEVEL_DEFAULT);
-
-                    if(zip_level>=0&&zip_level<=9) zos.setLevel(zip_level);
-
-                    writeZip(new File(String.valueOf(item.getSourcePath())),"",zos,zip_level);
-                    if(item.exportData){
-                        writeZip(new File(StorageUtil.getMainExternalStoragePath()+"/android/data/"+item.getPackageName()),"Android/data/",zos,zip_level);
+                        if (progress - progress_check_apk > 100 * 1024) {
+                            progress_check_apk = progress
+                            postCallback2Listener {
+                                listener?.onExportProgressUpdated(progress, total, currentWritingPath.toString())
+                            }
+                        }
                     }
-                    if(item.exportObb){
-                        writeZip(new File(StorageUtil.getMainExternalStoragePath()+"/android/obb/"+item.getPackageName()),"Android/obb/",zos,zip_level);
+                    
+                    out.flush()
+                    inputStream.close()
+                    out.close()
+                    write_paths.add(currentWritingFile!!)
+                    if (!isInterrupted) currentWritingFile = null
+                } else {
+                    // 导出ZIP文件（包含Data/Obb）
+                    val outputStream: OutputStream
+                    if (isExternal) {
+                        val documentFile = OutputUtil.getWritingDocumentFileForAppItem(
+                            context, item, SPUtil.getCompressingExtensionName(context), i + 1
+                        )!!
+                        currentWritingFile = FileItem(context, documentFile)
+                        currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
+                        outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
+                    } else {
+                        val writePath = OutputUtil.getAbsoluteWritePath(
+                            context, item, SPUtil.getCompressingExtensionName(context), i + 1
+                        )
+                        currentWritingFile = FileItem(writePath)
+                        currentWritingPath = writePath
+                        outputStream = FileOutputStream(
+                            File(OutputUtil.getAbsoluteWritePath(context, item, SPUtil.getCompressingExtensionName(context), i + 1))
+                        )
                     }
-                    zos.flush();
-                    zos.close();
-                    write_paths.add(currentWritingFile);
-                    if(!isInterrupted)currentWritingFile=null;
+                    
+                    postCallback2Listener {
+                        listener?.onExportAppItemStarted(order_this_loop, item, list.size, currentWritingFile!!.getPath())
+                    }
+
+                    val zos = ZipOutputStream(BufferedOutputStream(outputStream))
+                    zos.setComment("Packaged by info.muge.appshare \nhttps://github.com/ghmxr/appshare")
+                    val zip_level = SPUtil.getGlobalSharedPreferences(context)
+                        .getInt(Constants.PREFERENCE_ZIP_COMPRESS_LEVEL, Constants.PREFERENCE_ZIP_COMPRESS_LEVEL_DEFAULT)
+
+                    if (zip_level in 0..9) zos.setLevel(zip_level)
+
+                    writeZip(File(item.getSourcePath()), "", zos, zip_level)
+                    if (item.exportData) {
+                        writeZip(
+                            File("${StorageUtil.getMainExternalStoragePath()}/android/data/${item.getPackageName()}"),
+                            "Android/data/",
+                            zos,
+                            zip_level
+                        )
+                    }
+                    if (item.exportObb) {
+                        writeZip(
+                            File("${StorageUtil.getMainExternalStoragePath()}/android/obb/${item.getPackageName()}"),
+                            "Android/obb/",
+                            zos,
+                            zip_level
+                        )
+                    }
+                    
+                    zos.flush()
+                    zos.close()
+                    write_paths.add(currentWritingFile!!)
+                    if (!isInterrupted) currentWritingFile = null
                 }
-
-
-            }catch (Exception e){
-                e.printStackTrace();
-                this.error_message.append(currentWritingPath);
-                this.error_message.append(":");
-                this.error_message.append(e.toString());
-                this.error_message.append("\n\n");
-                try{
-                    currentWritingFile.delete();//在写入中如果有异常就尝试删除这个文件，有可能是破损的
-                }catch (Exception ee){}
+            } catch (e: Exception) {
+                e.printStackTrace()
+                error_message.append(currentWritingPath)
+                error_message.append(":")
+                error_message.append(e.toString())
+                error_message.append("\n\n")
+                try {
+                    currentWritingFile?.delete() // 在写入中如果有异常就尝试删除这个文件，有可能是破损的
+                } catch (ee: Exception) {
+                }
             }
-
         }
 
-        if(isInterrupted){
-            try{
-                currentWritingFile.delete();//没有写入完成的文件为破损文件，尝试删除
-            }catch(Exception e){}
+        if (isInterrupted) {
+            try {
+                currentWritingFile?.delete() // 没有写入完成的文件为破损文件，尝试删除
+            } catch (e: Exception) {
+            }
         }
 
-        //更新导出文件到媒体库
-        EnvironmentUtil.requestUpdatingMediaDatabase(context);
+        // 更新导出文件到媒体库
+        EnvironmentUtil.requestUpdatingMediaDatabase(context)
 
-        postCallback2Listener(new Runnable() {
-            @Override
-            public void run() {
-                if(listener!=null&&!isInterrupted)listener.onExportTaskFinished(write_paths,error_message.toString());
-                context.sendBroadcast(new Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST));
-                context.sendBroadcast(new Intent(Constants.ACTION_REFRESH_AVAILIBLE_STORAGE));
+        postCallback2Listener {
+            if (!isInterrupted) {
+                listener?.onExportTaskFinished(write_paths, error_message.toString())
             }
-        });
-
+            context.sendBroadcast(Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST))
+            context.sendBroadcast(Intent(Constants.ACTION_REFRESH_AVAILIBLE_STORAGE))
+        }
     }
 
-
-    private void postCallback2Listener(Runnable runnable){
-        if(listener==null||runnable==null)return;
-        Global.handler.post(runnable);
+    private fun postCallback2Listener(runnable: Runnable?) {
+        if (listener == null || runnable == null) return
+        Global.handler.post(runnable)
     }
-
 
     /**
      * 获取本次导出的总计长度
      * @return 总长度，字节
      */
-    private long getTotalLength(){
-        long total=0;
-        for(AppItem item:list){
-            total+=item.getSize();
-            if(item.exportData){
-                total+= FileUtil.getFileOrFolderSize(new File(StorageUtil.getMainExternalStoragePath()+"/android/data/"+item.getPackageName()));
+    private fun getTotalLength(): Long {
+        var total = 0L
+        for (item in list) {
+            total += item.getSize()
+            if (item.exportData) {
+                total += FileUtil.getFileOrFolderSize(
+                    File("${StorageUtil.getMainExternalStoragePath()}/android/data/${item.getPackageName()}")
+                )
             }
-            if(item.exportObb){
-                total+=FileUtil.getFileOrFolderSize(new File(StorageUtil.getMainExternalStoragePath()+"/android/obb/"+item.getPackageName()));
+            if (item.exportObb) {
+                total += FileUtil.getFileOrFolderSize(
+                    File("${StorageUtil.getMainExternalStoragePath()}/android/obb/${item.getPackageName()}")
+                )
             }
         }
-        return total;
+        return total
     }
 
     /**
      * 将本Runnable停止，删除当前正在导出而未完成的文件，使线程返回
      */
-    public void setInterrupted(){
-        this.isInterrupted=true;
+    fun setInterrupted() {
+        isInterrupted = true
     }
 
-    private void writeZip(final File file, String parent, ZipOutputStream zos, final int zip_level) {
-        if(file==null||parent==null||zos==null) return;
-        if(isInterrupted) return;
-        if(file.exists()){
-            if(file.isDirectory()){
-                parent+=file.getName()+File.separator;
-                File [] files=file.listFiles();
-                if(files.length>0){
-                    for(File f:files){
-                        writeZip(f,parent,zos,zip_level);
+    private fun writeZip(file: File?, parent: String, zos: ZipOutputStream, zip_level: Int) {
+        if (file == null || isInterrupted) return
+        if (!file.exists()) return
+
+        if (file.isDirectory) {
+            val newParent = parent + file.name + File.separator
+            val files = file.listFiles()
+
+            if (files != null && files.isNotEmpty()) {
+                for (f in files) {
+                    writeZip(f, newParent, zos, zip_level)
+                }
+            } else {
+                try {
+                    zos.putNextEntry(ZipEntry(newParent))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            try {
+                val inputStream = FileInputStream(file)
+                val zipentry = ZipEntry(parent + file.name)
+
+                if (zip_level == Constants.ZIP_LEVEL_STORED) {
+                    zipentry.method = ZipOutputStream.STORED
+                    zipentry.compressedSize = file.length()
+                    zipentry.size = file.length()
+                    zipentry.crc = FileUtil.getCRC32FromFile(file).value
+                }
+
+                zos.putNextEntry(zipentry)
+                val buffer = ByteArray(1024)
+                var length: Int
+
+                postCallback2Listener {
+                    listener?.onExportZipProgressUpdated(file.absolutePath)
+                }
+
+                while (inputStream.read(buffer).also { length = it } != -1 && !isInterrupted) {
+                    zos.write(buffer, 0, length)
+                    progress += length
+                    zipWriteLength_second += length
+
+                    val endTime = System.currentTimeMillis()
+                    if (endTime - zipTime > 1000) {
+                        zipTime = endTime
+                        val zip_speed = zipWriteLength_second
+
+                        postCallback2Listener {
+                            listener?.onExportSpeedUpdated(zip_speed)
+                        }
+                        zipWriteLength_second = 0
                     }
-                }else{
-                    try{
-                        zos.putNextEntry(new ZipEntry(parent));
-                    }catch(IOException e){
-                        e.printStackTrace();
+
+                    if (progress - progress_check_zip > 100 * 1024) {
+                        progress_check_zip = progress
+                        postCallback2Listener {
+                            listener?.onExportProgressUpdated(progress, total, file.absolutePath)
+                        }
                     }
                 }
-            }else{
-                try{
-                    FileInputStream in=new FileInputStream(file);
-                    ZipEntry zipentry=new ZipEntry(parent+file.getName());
 
-                    if(zip_level== Constants.ZIP_LEVEL_STORED){
-                        zipentry.setMethod(ZipOutputStream.STORED);
-                        zipentry.setCompressedSize(file.length());
-                        zipentry.setSize(file.length());
-                        zipentry.setCrc(FileUtil.getCRC32FromFile(file).getValue());
-                    }
-
-                    zos.putNextEntry(zipentry);
-                    byte[] buffer=new byte[1024];
-                    int length;
-
-                    /*Message msg_currentfile = new Message();
-                    msg_currentfile.what=BaseActivity.MESSAGE_COPYFILE_CURRENTFILE;
-                    String currentPath=file.getAbsolutePath();
-                    if(currentPath.length()>90) currentPath="..."+currentPath.substring(currentPath.length()-90,currentPath.length());
-                    msg_currentfile.obj=context.getResources().getString(R.string.copytask_zip_current)+currentPath;
-                    BaseActivity.sendMessage(msg_currentfile);*/
-                    postCallback2Listener(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(listener!=null)listener.onExportZipProgressUpdated(file.getAbsolutePath());
-                        }
-                    });
-
-                    while((length=in.read(buffer))!=-1&&!isInterrupted){
-                        zos.write(buffer,0,length);
-                        this.progress+=length;
-                        this.zipWriteLength_second+=length;
-                        Long endTime=System.currentTimeMillis();
-                        if(endTime-this.zipTime>1000){
-                            this.zipTime=endTime;
-                            /*Message msg_speed=new Message();
-                            msg_speed.what=BaseActivity.MESSAGE_COPYFILE_REFRESH_SPEED;
-                            msg_speed.obj=this.zipWriteLength_second;
-                            BaseActivity.sendMessage(msg_speed);*/
-                            final long zip_speed=zipWriteLength_second;
-                            postCallback2Listener(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(listener!=null)listener.onExportSpeedUpdated(zip_speed);
-                                }
-                            });
-                            this.zipWriteLength_second=0;
-                        }
-                        if(this.progress- progress_check_zip >100*1024){
-                            progress_check_zip =this.progress;
-                            /*Message msg=new Message();
-                            msg.what=Main.MESSAGE_COPYFILE_REFRESH_PROGRESS;
-                            msg.obj=new Long[]{this.progress,this.total};
-                            BaseActivity.sendMessage(msg);*/
-                            postCallback2Listener(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(listener!=null)listener.onExportProgressUpdated(progress,total,file.getAbsolutePath());
-                                }
-                            });
-                        }
-
-                    }
-                    zos.flush();
-                    in.close();
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
+                zos.flush()
+                inputStream.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
-
-
-    public interface ExportProgressListener{
-        void onExportAppItemStarted(int order, AppItem item, int total, String write_path);
-        void onExportProgressUpdated(long current, long total, String write_path);
-        void onExportZipProgressUpdated(String write_path);
-        void onExportSpeedUpdated(long speed);
-        //void onAppItemFinished(int order,AppItem item,int total);
-        void onExportTaskFinished(List<FileItem>write_paths, String error_message);
+    /**
+     * 导出进度监听器
+     */
+    interface ExportProgressListener {
+        fun onExportAppItemStarted(order: Int, item: AppItem, total: Int, write_path: String)
+        fun onExportProgressUpdated(current: Long, total: Long, write_path: String)
+        fun onExportZipProgressUpdated(write_path: String)
+        fun onExportSpeedUpdated(speed: Long)
+        fun onExportTaskFinished(write_paths: List<FileItem>, error_message: String)
     }
 }
+

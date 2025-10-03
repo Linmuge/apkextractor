@@ -1,110 +1,79 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import info.muge.appshare.Global
+import info.muge.appshare.items.ImportItem
+import info.muge.appshare.utils.StorageUtil
+import info.muge.appshare.utils.ZipFileUtil
+import java.io.File
 
-import info.muge.appshare.Global;
-import info.muge.appshare.items.ImportItem;
-import info.muge.appshare.utils.StorageUtil;
-import info.muge.appshare.utils.ZipFileUtil;
+/**
+ * 获取导入长度和重复信息任务
+ */
+class GetImportLengthAndDuplicateInfoTask(
+    private val importItems: List<ImportItem>,
+    private val zipFileInfos: List<ZipFileUtil.ZipFileInfo>,
+    private val callback: GetImportLengthAndDuplicateInfoCallback?
+) : Thread() {
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+    @Volatile
+    private var isInterrupted = false
 
-public class GetImportLengthAndDuplicateInfoTask extends Thread {
-
-    //private Context context;
-    private List<ZipFileUtil.ZipFileInfo>zipFileInfos;
-    private List<ImportItem>importItems;
-    private GetImportLengthAndDuplicateInfoCallback callback;
-    private volatile boolean isInterrupted=false;
-
-    public GetImportLengthAndDuplicateInfoTask(@NonNull List<ImportItem>importItems
-            , @NonNull List<ZipFileUtil.ZipFileInfo>zipFileInfos
-            , @Nullable GetImportLengthAndDuplicateInfoCallback callback) {
-        super();
-        //this.context=context;
-        this.zipFileInfos=zipFileInfos;
-        this.importItems=importItems;
-        this.callback=callback;
-    }
-
-    @Override
-    public void run() {
-        super.run();
-        //final StringBuilder stringBuilder=new StringBuilder();
-        final ArrayList<String>duplication_infos=new ArrayList<>();
-        long total=0;
-        for(int i=0;i<importItems.size();i++){
-            if(isInterrupted)return;
-            try{
-                ImportItem importItem=importItems.get(i);
-                ZipFileUtil.ZipFileInfo zipFileInfo=zipFileInfos.get(i);
-                List<String>entryPaths=zipFileInfo.getEntryPaths();
-                if(importItem.importData){
-                    total+=zipFileInfo.getDataSize();
-                    //stringBuilder.append(zipFileInfos.get(i).getAlreadyExistingFilesInfoInMainStorage(context));
+    override fun run() {
+        super.run()
+        
+        val duplication_infos = ArrayList<String>()
+        var total = 0L
+        
+        for (i in importItems.indices) {
+            if (isInterrupted) return
+            
+            try {
+                val importItem = importItems[i]
+                val zipFileInfo = zipFileInfos[i]
+                val entryPaths = zipFileInfo.getEntryPaths()
+                
+                if (importItem.importData) {
+                    total += zipFileInfo.dataSize
                 }
-                if(importItem.importObb){
-                    total+=zipFileInfo.getObbSize();
-                    //stringBuilder.append(zipFileInfos.get(i).getAlreadyExistingFilesInfoInMainStorage(context));
+                if (importItem.importObb) {
+                    total += zipFileInfo.obbSize
                 }
-                if(importItem.importApk){
-                    total+=zipFileInfo.getApkSize();
-                    //stringBuilder.append(zipFileInfos.get(i).getAlreadyExistingFilesInfoInMainStorage(context));
+                if (importItem.importApk) {
+                    total += zipFileInfo.apkSize
                 }
-                for(String s:entryPaths){
-                    if(!s.contains("/")&&s.endsWith(".apk"))continue;
-                    if(!importItem.importObb&&s.toLowerCase().startsWith("android/obb"))continue;
-                    if(!importItem.importData&&s.toLowerCase().startsWith("android/data"))continue;
-                    /*if(!s.contains("/")&&s.endsWith(".apk")){
-                        if(SPUtil.getIsSaved2ExternalStorage(context)){
-                            DocumentFile documentFile= OutputUtil.getExportPathDocumentFile(context);
-                            DocumentFile writeDocumentFile=documentFile.findFile(s);
-                            if(writeDocumentFile!=null){
-                                stringBuilder.append(SPUtil.getDisplayingExportPath(context));
-                                stringBuilder.append("/");
-                                stringBuilder.append(s);
-                                stringBuilder.append("\n\n");
-                            }
-                        }else{
-                            File target=new File(SPUtil.getInternalSavePath(context)+"/"+s);
-                            if(target.exists()){
-                                stringBuilder.append(target.getAbsolutePath());
-                                stringBuilder.append("\n\n");
-                            }
-                        }
-                    }else{
-                        File exportWritingTarget=new File(StorageUtil.getMainExternalStoragePath()+"/"+s);
-                        if(exportWritingTarget.exists()){
-                            stringBuilder.append(exportWritingTarget.getAbsolutePath());
-                            stringBuilder.append("\n\n");
-                        }
-                    }*/
-                    File exportWritingTarget=new File(StorageUtil.getMainExternalStoragePath()+"/"+s);
-                    if(exportWritingTarget.exists()){
-                        //stringBuilder.append(exportWritingTarget.getAbsolutePath());
-                        //stringBuilder.append("\n\n");
-                        duplication_infos.add(exportWritingTarget.getAbsolutePath());
+                
+                for (s in entryPaths) {
+                    if (!s.contains("/") && s.endsWith(".apk")) continue
+                    if (!importItem.importObb && s.lowercase().startsWith("android/obb")) continue
+                    if (!importItem.importData && s.lowercase().startsWith("android/data")) continue
+                    
+                    val exportWritingTarget = File("${StorageUtil.getMainExternalStoragePath()}/$s")
+                    if (exportWritingTarget.exists()) {
+                        duplication_infos.add(exportWritingTarget.absolutePath)
                     }
                 }
-            }catch (Exception e){e.printStackTrace();}
-        }
-        final long total_length=total;
-        if(callback!=null&&!isInterrupted) Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if(callback!=null)callback.onCheckingFinished(duplication_infos,total_length);
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        });
+        }
+        
+        val total_length = total
+        if (callback != null && !isInterrupted) {
+            Global.handler.post {
+                callback.onCheckingFinished(duplication_infos, total_length)
+            }
+        }
     }
 
-    public void setInterrupted(){
-        this.isInterrupted=true;
+    fun setInterrupted() {
+        this.isInterrupted = true
     }
 
-    public interface GetImportLengthAndDuplicateInfoCallback{
-        void onCheckingFinished(@NonNull List<String> results,long total);
+    /**
+     * 获取导入长度和重复信息回调
+     */
+    interface GetImportLengthAndDuplicateInfoCallback {
+        fun onCheckingFinished(results: List<String>, total: Long)
     }
 }
+

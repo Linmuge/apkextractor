@@ -1,42 +1,44 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-import android.content.Context;
-import androidx.annotation.NonNull;
-import android.text.format.Formatter;
+import android.content.Context
+import android.text.format.Formatter
+import info.muge.appshare.R
+import info.muge.appshare.items.AppItem
+import java.text.DecimalFormat
 
-import info.muge.appshare.R;
-import info.muge.appshare.items.AppItem;
+/**
+ * 导出对话框
+ */
+class ExportingDialog(context: Context) : ProgressDialog(context, context.resources.getString(R.string.dialog_export_title)) {
 
-import java.text.DecimalFormat;
-
-public class ExportingDialog extends ProgressDialog {
-
-    public ExportingDialog(@NonNull Context context){
-        super(context,context.getResources().getString(R.string.dialog_export_title));
-        att.setText(context.getResources().getString(R.string.dialog_wait));
+    init {
+        att.text = context.resources.getString(R.string.dialog_wait)
     }
 
-    public void setProgressOfApp(int current, int total, @NonNull AppItem item,@NonNull String write_path){
-        setTitle(getContext().getResources().getString(R.string.dialog_export_title)+"("+current+"/"+total+")"+":"+item.getAppName());
-        setIcon(item.getIcon());
-        att.setText(getContext().getResources().getString(R.string.dialog_export_msg_apk)+write_path);
+    fun setProgressOfApp(current: Int, total: Int, item: AppItem, write_path: String) {
+        setTitle("${context.resources.getString(R.string.dialog_export_title)}($current/$total):${item.getAppName()}")
+        setIcon(item.getIcon())
+        att.text = "${context.resources.getString(R.string.dialog_export_msg_apk)}$write_path"
     }
 
-    public void setProgressOfWriteBytes(long current,long total){
-        if(current<0)return;
-        if(current>total)return;
-        progressBar.setMax((int)(total/1024));
-        progressBar.setProgress((int)(current/1024));
-        DecimalFormat dm=new DecimalFormat("#.00");
-        int percent=(int)(Double.valueOf(dm.format((double)current/total))*100);
-        att_right.setText(Formatter.formatFileSize(getContext(),current)+"/"+Formatter.formatFileSize(getContext(),total)+"("+percent+"%)");
+    fun setProgressOfWriteBytes(current: Long, total: Long) {
+        if (current < 0) return
+        if (current > total) return
+        
+        progressBar.max = (total / 1024).toInt()
+        progressBar.progress = (current / 1024).toInt()
+        
+        val dm = DecimalFormat("#.00")
+        val percent = (dm.format(current.toDouble() / total).toDouble() * 100).toInt()
+        att_right.text = "${Formatter.formatFileSize(context, current)}/${Formatter.formatFileSize(context, total)}($percent%)"
     }
 
-    public void setSpeed(long bytes){
-        att_left.setText(Formatter.formatFileSize(getContext(),bytes)+"/s");
+    fun setSpeed(bytes: Long) {
+        att_left.text = "${Formatter.formatFileSize(context, bytes)}/s"
     }
 
-    public void setProgressOfCurrentZipFile(@NonNull String write_path){
-        att.setText(getContext().getResources().getString(R.string.dialog_export_zip)+write_path);
+    fun setProgressOfCurrentZipFile(write_path: String) {
+        att.text = "${context.resources.getString(R.string.dialog_export_zip)}$write_path"
     }
 }
+

@@ -1,233 +1,268 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.documentfile.provider.DocumentFile;
-import android.widget.Toast;
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.widget.Toast
+import info.muge.appshare.Constants
+import info.muge.appshare.Global
+import info.muge.appshare.items.FileItem
+import info.muge.appshare.items.ImportItem
+import info.muge.appshare.ui.ToastManager
+import info.muge.appshare.utils.EnvironmentUtil
+import info.muge.appshare.utils.OutputUtil
+import info.muge.appshare.utils.SPUtil
+import info.muge.appshare.utils.StorageUtil
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.zip.ZipInputStream
 
-import info.muge.appshare.Constants;
-import info.muge.appshare.Global;
-import info.muge.appshare.items.FileItem;
-import info.muge.appshare.items.ImportItem;
-import info.muge.appshare.ui.ToastManager;
-import info.muge.appshare.utils.EnvironmentUtil;
-import info.muge.appshare.utils.OutputUtil;
-import info.muge.appshare.utils.SPUtil;
-import info.muge.appshare.utils.StorageUtil;
+/**
+ * 导入任务
+ */
+class ImportTask(
+    private val context: Context,
+    importItems: List<ImportItem>,
+    private val callback: ImportTaskCallback?
+) : Thread() {
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+    private val importItemArrayList = ArrayList<ImportItem>()
+    
+    @Volatile
+    private var isInterrupted = false
+    
+    private var currentWritePath: String? = null
+    private var currentWrtingFileItem: FileItem? = null
+    private var progress = 0L
+    private var progress_check_length = 0L
+    private var speed_bytes = 0L
+    private var speed_check_time = 0L
+    private val isExternal: Boolean
+    private val error_info = StringBuilder()
+    private var apkUri: Uri? = null
+    private var apk_num = 0
 
-public class ImportTask extends Thread {
-
-    private final ArrayList<ImportItem>importItemArrayList=new ArrayList<>();
-    private Context context;
-    private volatile boolean isInterrupted=false;
-    //private ArrayList<String>write_paths=new ArrayList<>();
-    private String currentWritePath;
-    private FileItem currentWrtingFileItem;
-    private long progress=0;
-    private long progress_check_length=0;
-    private long speed_bytes=0;
-    private long speed_check_time=0;
-    private final boolean isExternal;
-
-    private final StringBuilder error_info=new StringBuilder();
-
-    private ImportTaskCallback callback;
-    private Uri apkUri;
-    private int apk_num=0;
-
-    public ImportTask(@NonNull Context context, @NonNull List<ImportItem>importItems,ImportTaskCallback callback) {
-        super();
-        this.context=context;
-        importItemArrayList.addAll(importItems);
-        this.callback=callback;
-        isExternal= SPUtil.getIsSaved2ExternalStorage(context);
+    init {
+        importItemArrayList.addAll(importItems)
+        isExternal = SPUtil.getIsSaved2ExternalStorage(context)
     }
 
-    @Override
-    public void run() {
-        super.run();
-        for(ImportItem importItem:importItemArrayList){
-            if(isInterrupted)break;
-            try{
-                ZipInputStream zipInputStream=new ZipInputStream(importItem.getZipInputStream());
-                ZipEntry zipEntry=zipInputStream.getNextEntry();
-                while (zipEntry!=null&&!isInterrupted){
-                    try{
-                        String entryPath=zipEntry.getName().replaceAll("\\*", "/");
-                        if((entryPath.toLowerCase().startsWith("android/data"))&&!zipEntry.isDirectory()&&importItem.importData){
-                            unZipToFile(zipInputStream,entryPath);
-                        }
-                        else if((entryPath.toLowerCase().startsWith("android/obb"))&&!zipEntry.isDirectory()&&importItem.importObb){
-                            unZipToFile(zipInputStream,entryPath);
-                        }
-                        else if((entryPath.toLowerCase().endsWith(".apk"))&&!zipEntry.isDirectory()&&!entryPath.contains("/")&&importItem.importApk){
-                            OutputStream outputStream;
-                            final String fileName=entryPath.substring(entryPath.lastIndexOf("/")+1);
-                            if(isExternal){
-                                String writeFileName=getApkFileNameWithNum(fileName);
-                                DocumentFile checkFile=OutputUtil.getExportPathDocumentFile(context).findFile(writeFileName);
-                                while (checkFile!=null&&checkFile.exists()){
-                                    apk_num++;
-                                    writeFileName=getApkFileNameWithNum(fileName);
-                                    checkFile=OutputUtil.getExportPathDocumentFile(context).findFile(writeFileName);
-                                }
-                                DocumentFile writeDocumentFile=OutputUtil.getExportPathDocumentFile(context)
-                                        .createFile("application/vnd.android.package-archive", writeFileName);
-                                outputStream=OutputUtil.getOutputStreamForDocumentFile(context
-                                        ,writeDocumentFile);
-                                currentWritePath=SPUtil.getInternalSavePath()+"/"+writeFileName;
-                                currentWrtingFileItem=new FileItem(context,writeDocumentFile);
-                                apkUri=writeDocumentFile.getUri();
-                            }else{
-                                String writePath=SPUtil.getInternalSavePath()+"/"+ getApkFileNameWithNum(fileName);
-                                File writeFile=new File(writePath);
-                                while (writeFile.exists()){
-                                    apk_num++;
-                                    writeFile=new File(SPUtil.getInternalSavePath()+"/"+ getApkFileNameWithNum(fileName));
-                                }
-                                outputStream=new FileOutputStream(writeFile);
-                                currentWritePath=writeFile.getAbsolutePath();
-                                currentWrtingFileItem=new FileItem(writeFile);
-                                if(Build.VERSION.SDK_INT<=23)apkUri=Uri.fromFile(writeFile);
-                                else apkUri= EnvironmentUtil.getUriForFileByFileProvider(context,writeFile);
+    override fun run() {
+        super.run()
+        
+        for (importItem in importItemArrayList) {
+            if (isInterrupted) break
+            
+            try {
+                val zipInputStream = ZipInputStream(importItem.getZipInputStream())
+                var zipEntry = zipInputStream.nextEntry
+                
+                while (zipEntry != null && !isInterrupted) {
+                    try {
+                        val entryPath = zipEntry.name.replace("\\*", "/")
+                        
+                        when {
+                            entryPath.lowercase().startsWith("android/data") && !zipEntry.isDirectory && importItem.importData -> {
+                                unZipToFile(zipInputStream, entryPath)
                             }
-                            BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(outputStream);
-                            byte [] buffer=new byte[1024];
-                            int len;
-                            while ((len=zipInputStream.read(buffer))!=-1&&!isInterrupted){
-                                bufferedOutputStream.write(buffer,0,len);
-                                progress+=len;
-                                checkSpeedAndPostToCallback(len);
-                                checkProgressAndPostToCallback();
+                            entryPath.lowercase().startsWith("android/obb") && !zipEntry.isDirectory && importItem.importObb -> {
+                                unZipToFile(zipInputStream, entryPath)
                             }
-                            bufferedOutputStream.flush();
-                            bufferedOutputStream.close();
-                            if(!isInterrupted)currentWrtingFileItem=null;
+                            entryPath.lowercase().endsWith(".apk") && !zipEntry.isDirectory && !entryPath.contains("/") && importItem.importApk -> {
+                                val outputStream: OutputStream
+                                val fileName = entryPath.substring(entryPath.lastIndexOf("/") + 1)
+                                
+                                if (isExternal) {
+                                    var writeFileName = getApkFileNameWithNum(fileName)
+                                    var checkFile = OutputUtil.getExportPathDocumentFile(context).findFile(writeFileName)
+                                    
+                                    while (checkFile != null && checkFile.exists()) {
+                                        apk_num++
+                                        writeFileName = getApkFileNameWithNum(fileName)
+                                        checkFile = OutputUtil.getExportPathDocumentFile(context).findFile(writeFileName)
+                                    }
+                                    
+                                    val writeDocumentFile = OutputUtil.getExportPathDocumentFile(context)
+                                        .createFile("application/vnd.android.package-archive", writeFileName)!!
+                                    outputStream = OutputUtil.getOutputStreamForDocumentFile(context, writeDocumentFile)!!
+                                    currentWritePath = "${SPUtil.getInternalSavePath()}/$writeFileName"
+                                    currentWrtingFileItem = FileItem(context, writeDocumentFile)
+                                    apkUri = writeDocumentFile.uri
+                                } else {
+                                    var writePath = "${SPUtil.getInternalSavePath()}/${getApkFileNameWithNum(fileName)}"
+                                    var writeFile = File(writePath)
+                                    
+                                    while (writeFile.exists()) {
+                                        apk_num++
+                                        writeFile = File("${SPUtil.getInternalSavePath()}/${getApkFileNameWithNum(fileName)}")
+                                    }
+                                    
+                                    outputStream = FileOutputStream(writeFile)
+                                    currentWritePath = writeFile.absolutePath
+                                    currentWrtingFileItem = FileItem(writeFile)
+                                    apkUri = if (Build.VERSION.SDK_INT <= 23) {
+                                        Uri.fromFile(writeFile)
+                                    } else {
+                                        EnvironmentUtil.getUriForFileByFileProvider(context, writeFile)
+                                    }
+                                }
+                                
+                                val bufferedOutputStream = BufferedOutputStream(outputStream)
+                                val buffer = ByteArray(1024)
+                                var len: Int
+                                
+                                while (zipInputStream.read(buffer).also { len = it } != -1 && !isInterrupted) {
+                                    bufferedOutputStream.write(buffer, 0, len)
+                                    progress += len
+                                    checkSpeedAndPostToCallback(len.toLong())
+                                    checkProgressAndPostToCallback()
+                                }
+                                
+                                bufferedOutputStream.flush()
+                                bufferedOutputStream.close()
+                                
+                                if (!isInterrupted) {
+                                    currentWrtingFileItem = null
+                                }
+                            }
                         }
-                        if(!isInterrupted)zipEntry=zipInputStream.getNextEntry();
-                        else break;
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        error_info.append(currentWritePath);
-                        error_info.append(":");
-                        error_info.append(e.toString());
-                        error_info.append("\n\n");
-                        try{
-                            currentWrtingFileItem.delete();
-                        }catch (Exception ee){}
+                        
+                        if (!isInterrupted) {
+                            zipEntry = zipInputStream.nextEntry
+                        } else {
+                            break
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        error_info.append(currentWritePath)
+                        error_info.append(":")
+                        error_info.append(e.toString())
+                        error_info.append("\n\n")
+                        try {
+                            currentWrtingFileItem?.delete()
+                        } catch (ee: Exception) {
+                            ee.printStackTrace()
+                        }
                     }
                 }
-                zipInputStream.close();
-            }catch (Exception e){
-                e.printStackTrace();
-                error_info.append(String.valueOf(importItem.getFileItem().getPath()));
-                error_info.append(":");
-                error_info.append(e.toString());
-                error_info.append("\n\n");
+                zipInputStream.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                error_info.append(importItem.getFileItem().getPath())
+                error_info.append(":")
+                error_info.append(e.toString())
+                error_info.append("\n\n")
             }
-
         }
-        if(isInterrupted){
-            try{
-                if(currentWrtingFileItem!=null){
-                    currentWrtingFileItem.delete();
-                }
-            }catch (Exception e){e.printStackTrace();}
-        }else if(callback!=null) Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                callback.onImportTaskFinished(error_info.toString());
-                context.sendBroadcast(new Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST));
-                context.sendBroadcast(new Intent(Constants.ACTION_REFRESH_AVAILIBLE_STORAGE));
-                try{
-                    if(importItemArrayList.size()==1&&apkUri!=null&&error_info.toString().trim().length()==0){
-                        Intent intent=new Intent(Intent.ACTION_VIEW);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        intent.setDataAndType(apkUri,"application/vnd.android.package-archive");
-                        context.startActivity(intent);
+        
+        if (isInterrupted) {
+            try {
+                currentWrtingFileItem?.delete()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        } else if (callback != null) {
+            Global.handler.post {
+                callback.onImportTaskFinished(error_info.toString())
+                context.sendBroadcast(Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST))
+                context.sendBroadcast(Intent(Constants.ACTION_REFRESH_AVAILIBLE_STORAGE))
+                
+                try {
+                    if (importItemArrayList.size == 1 && apkUri != null && error_info.toString().trim().isEmpty()) {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        intent.setDataAndType(apkUri, "application/vnd.android.package-archive")
+                        context.startActivity(intent)
                     }
-                }catch (Exception e){
-                    e.printStackTrace();
-                    ToastManager.showToast(context,e.toString(), Toast.LENGTH_SHORT);
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    ToastManager.showToast(context, e.toString(), Toast.LENGTH_SHORT)
                 }
             }
-        });
-    }
-
-    private void unZipToFile(ZipInputStream zipInputStream,String entryPath) throws Exception{
-        File folder=new File(StorageUtil.getMainExternalStoragePath()+"/"+entryPath.substring(0,entryPath.lastIndexOf("/")));
-        if(!folder.exists())folder.mkdirs();
-        String writePath=StorageUtil.getMainExternalStoragePath()+"/"+entryPath;
-        File writeFile=new File(writePath);
-        OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(writeFile));
-        currentWritePath=writePath;
-        currentWrtingFileItem=new FileItem(writeFile);
-        byte [] buffer=new byte[1024];
-        int len;
-        while ((len=zipInputStream.read(buffer))!=-1&&!isInterrupted){
-            outputStream.write(buffer,0,len);
-            progress+=len;
-            checkSpeedAndPostToCallback(len);
-            checkProgressAndPostToCallback();
         }
-        outputStream.flush();
-        outputStream.close();
-        if(!isInterrupted)currentWrtingFileItem=null;
     }
 
-    private void checkProgressAndPostToCallback(){
-        if(progress-progress_check_length>100*1024){
-            progress_check_length=progress;
-            if(callback!=null)Global.handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    callback.onImportTaskProgress(currentWritePath,progress);
+    @Throws(Exception::class)
+    private fun unZipToFile(zipInputStream: ZipInputStream, entryPath: String) {
+        val folder = File("${StorageUtil.getMainExternalStoragePath()}/${entryPath.substring(0, entryPath.lastIndexOf("/"))}")
+        if (!folder.exists()) {
+            folder.mkdirs()
+        }
+        
+        val writePath = "${StorageUtil.getMainExternalStoragePath()}/$entryPath"
+        val writeFile = File(writePath)
+        val outputStream = BufferedOutputStream(FileOutputStream(writeFile))
+        currentWritePath = writePath
+        currentWrtingFileItem = FileItem(writeFile)
+        
+        val buffer = ByteArray(1024)
+        var len: Int
+        
+        while (zipInputStream.read(buffer).also { len = it } != -1 && !isInterrupted) {
+            outputStream.write(buffer, 0, len)
+            progress += len
+            checkSpeedAndPostToCallback(len.toLong())
+            checkProgressAndPostToCallback()
+        }
+        
+        outputStream.flush()
+        outputStream.close()
+        
+        if (!isInterrupted) {
+            currentWrtingFileItem = null
+        }
+    }
+
+    private fun checkProgressAndPostToCallback() {
+        if (progress - progress_check_length > 100 * 1024) {
+            progress_check_length = progress
+            callback?.let {
+                Global.handler.post {
+                    it.onImportTaskProgress(currentWritePath ?: "", progress)
                 }
-            });
+            }
         }
     }
 
-    private void checkSpeedAndPostToCallback(long speed_plus_value){
-        speed_bytes+=speed_plus_value;
-        long current=System.currentTimeMillis();
-        if(current-speed_check_time>1000){
-            speed_check_time=current;
-            final long speed_post=speed_bytes;
-            speed_bytes=0;
-            if(callback!=null)Global.handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    callback.onRefreshSpeed(speed_post);
+    private fun checkSpeedAndPostToCallback(speed_plus_value: Long) {
+        speed_bytes += speed_plus_value
+        val current = System.currentTimeMillis()
+        
+        if (current - speed_check_time > 1000) {
+            speed_check_time = current
+            val speed_post = speed_bytes
+            speed_bytes = 0
+            
+            callback?.let {
+                Global.handler.post {
+                    it.onRefreshSpeed(speed_post)
                 }
-            });
+            }
         }
     }
 
-    public void setInterrupted(){
-        this.isInterrupted=true;
+    fun setInterrupted() {
+        this.isInterrupted = true
     }
 
-    private String getApkFileNameWithNum(String originName){
-        return originName.substring(0,originName.lastIndexOf("."))+(apk_num>0?apk_num:"")+".apk";
+    private fun getApkFileNameWithNum(originName: String): String {
+        val nameWithoutExt = originName.substring(0, originName.lastIndexOf("."))
+        val numSuffix = if (apk_num > 0) apk_num.toString() else ""
+        return "$nameWithoutExt$numSuffix.apk"
     }
 
-    public interface ImportTaskCallback{
-        void onImportTaskStarted();
-        void onRefreshSpeed(long speed);
-        void onImportTaskProgress(@NonNull String writePath,long progress);
-        void onImportTaskFinished(@NonNull String errorMessage);
+    /**
+     * 导入任务回调
+     */
+    interface ImportTaskCallback {
+        fun onImportTaskStarted()
+        fun onRefreshSpeed(speed: Long)
+        fun onImportTaskProgress(writePath: String, progress: Long)
+        fun onImportTaskFinished(errorMessage: String)
     }
 }
+
