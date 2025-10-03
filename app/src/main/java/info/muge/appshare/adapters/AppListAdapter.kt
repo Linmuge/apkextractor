@@ -56,26 +56,26 @@ class AppListAdapter<T : DisplayItem>(
                 val title = itemView.findViewById<TextView>(R.id.item_app_title)
                 
                 // 设置图标
-                icon.setImageDrawable(item.iconDrawable)
-                
+                icon.setImageDrawable(item.getIconDrawable())
+
                 // 设置标题颜色
-                val titleColor = if (item.isRedMarked) {
+                val titleColor = if (item.isRedMarked()) {
                     activity.resources.getColor(R.color.colorSystemAppTitleColor)
                 } else {
                     activity.resources.getColor(R.color.colorHighLightText)
                 }
                 title.setTextColor(titleColor)
-                
+
                 // 设置标题文本（支持高亮）
                 try {
                     title.text = EnvironmentUtil.getSpannableString(
-                        item.title.toString(),
+                        item.getTitle(),
                         highlightKeyword,
                         Color.parseColor("#4285F4")
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    title.text = item.title.toString()
+                    title.text = item.getTitle()
                 }
                 
                 // 列表模式特有的视图
@@ -87,17 +87,17 @@ class AppListAdapter<T : DisplayItem>(
                     // 设置描述（支持高亮）
                     try {
                         description.text = EnvironmentUtil.getSpannableString(
-                            item.description,
+                            item.getDescription(),
                             highlightKeyword,
                             Color.parseColor("#4285F4")
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        description.text = item.description
+                        description.text = item.getDescription()
                     }
-                    
+
                     // 设置大小
-                    right.text = Formatter.formatFileSize(activity, item.size)
+                    right.text = Formatter.formatFileSize(activity, item.getSize())
                     
                     // 多选模式处理
                     right.visibility = if (isMultiSelectMode) View.GONE else View.VISIBLE
@@ -260,7 +260,7 @@ class AppListAdapter<T : DisplayItem>(
         if (selectedPositions != null && models != null) {
             for (i in models.indices) {
                 if (i < selectedPositions!!.size && selectedPositions!![i]) {
-                    totalSize += models[i].size
+                    totalSize += models[i].getSize()
                 }
             }
         }

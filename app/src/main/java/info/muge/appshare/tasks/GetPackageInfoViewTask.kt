@@ -1,248 +1,255 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.ProviderInfo;
-import android.content.pm.ServiceInfo;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
+import android.content.pm.PackageInfo
+import android.content.pm.ProviderInfo
+import android.content.pm.ServiceInfo
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
+import info.muge.appshare.Constants
+import info.muge.appshare.Global
+import info.muge.appshare.R
+import info.muge.appshare.ui.AssemblyView
+import info.muge.appshare.ui.ToastManager
+import info.muge.appshare.utils.SPUtil
 
-import info.muge.appshare.Constants;
-import info.muge.appshare.Global;
-import info.muge.appshare.R;
-import info.muge.appshare.ui.AssemblyView;
-import info.muge.appshare.ui.ToastManager;
-import info.muge.appshare.utils.SPUtil;
+/**
+ * 获取包信息视图任务
+ */
+class GetPackageInfoViewTask(
+    private val activity: Activity,
+    private val packageInfo: PackageInfo,
+    private val static_receiver_bundle: Bundle,
+    private val assemblyView: AssemblyView,
+    private val callback: CompletedCallback
+) : Thread() {
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+    override fun run() {
+        super.run()
+        
+        val settings: SharedPreferences = SPUtil.getGlobalSharedPreferences(activity)
+        val permissions = packageInfo.requestedPermissions
+        val activities = packageInfo.activities
+        val receivers = packageInfo.receivers
+        val services = packageInfo.services
+        val providers = packageInfo.providers
 
-public class GetPackageInfoViewTask extends Thread {
-    private final Activity activity;
-    private final PackageInfo packageInfo;
-    private final Bundle static_receiver_bundle;
-    private final CompletedCallback callback;
-    private final AssemblyView assemblyView;
+        val get_permissions = settings.getBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS, Constants.PREFERENCE_LOAD_PERMISSIONS_DEFAULT)
+        val get_activities = settings.getBoolean(Constants.PREFERENCE_LOAD_ACTIVITIES, Constants.PREFERENCE_LOAD_ACTIVITIES_DEFAULT)
+        val get_receivers = settings.getBoolean(Constants.PREFERENCE_LOAD_RECEIVERS, Constants.PREFERENCE_LOAD_RECEIVERS_DEFAULT)
+        val get_static_loaders = settings.getBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS, Constants.PREFERENCE_LOAD_STATIC_LOADERS_DEFAULT)
+        val get_services = settings.getBoolean(Constants.PREFERENCE_LOAD_SERVICES, Constants.PREFERENCE_LOAD_SERVICES_DEFAULT)
+        val get_providers = settings.getBoolean(Constants.PREFERENCE_LOAD_PROVIDERS, Constants.PREFERENCE_LOAD_PROVIDERS_DEFAULT)
 
-    public GetPackageInfoViewTask(@NonNull Activity activity, @NonNull PackageInfo packageInfo
-            , @NonNull Bundle static_receiver_bundle
-            , @NonNull AssemblyView assemblyView
-            , @NonNull CompletedCallback callback) {
-        this.activity=activity;
-        this.packageInfo=packageInfo;
-        this.static_receiver_bundle=static_receiver_bundle;
-        this.assemblyView=assemblyView;
-        this.callback=callback;
-    }
+        val permission_child_views = ArrayList<View>()
+        val activity_child_views = ArrayList<View>()
+        val receiver_child_views = ArrayList<View>()
+        val loaders_child_views = ArrayList<View>()
+        val service_child_views = ArrayList<View>()
+        val provider_child_views = ArrayList<View>()
 
-    @Override
-    public void run() {
-        super.run();
-        final SharedPreferences settings= SPUtil.getGlobalSharedPreferences(activity);
-        final String[] permissions=packageInfo.requestedPermissions;
-        final ActivityInfo[] activities=packageInfo.activities;
-        final ActivityInfo[] receivers=packageInfo.receivers;
-        final ServiceInfo[] services=packageInfo.services;
-        final ProviderInfo[] providers=packageInfo.providers;
-
-        final boolean get_permissions=settings.getBoolean(Constants.PREFERENCE_LOAD_PERMISSIONS,Constants.PREFERENCE_LOAD_PERMISSIONS_DEFAULT);
-        final boolean get_activities=settings.getBoolean(Constants.PREFERENCE_LOAD_ACTIVITIES,Constants.PREFERENCE_LOAD_ACTIVITIES_DEFAULT);
-        final boolean get_receivers=settings.getBoolean(Constants.PREFERENCE_LOAD_RECEIVERS,Constants.PREFERENCE_LOAD_RECEIVERS_DEFAULT);
-        final boolean get_static_loaders=settings.getBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS,Constants.PREFERENCE_LOAD_STATIC_LOADERS_DEFAULT);
-        final boolean get_services=settings.getBoolean(Constants.PREFERENCE_LOAD_SERVICES,Constants.PREFERENCE_LOAD_SERVICES_DEFAULT);
-        final boolean get_providers=settings.getBoolean(Constants.PREFERENCE_LOAD_PROVIDERS,Constants.PREFERENCE_LOAD_PROVIDERS_DEFAULT);
-
-        final ArrayList<View> permission_child_views=new ArrayList<>();
-        final ArrayList<View>activity_child_views=new ArrayList<>();
-        final ArrayList<View>receiver_child_views=new ArrayList<>();
-        final ArrayList<View>loaders_child_views=new ArrayList<>();
-        final ArrayList<View>service_child_views=new ArrayList<>();
-        final ArrayList<View>provider_child_views=new ArrayList<>();
-
-        if(permissions!=null&&get_permissions){
-            for(final String s:permissions){
-                if(s==null)continue;
-                permission_child_views.add(getSingleItemView(assemblyView.getLinearLayout_permission(), s, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(s);
-                    }
-                }, null));
+        // 处理权限
+        if (permissions != null && get_permissions) {
+            for (s in permissions) {
+                if (s == null) continue
+                permission_child_views.add(
+                    getSingleItemView(
+                        assemblyView.linearLayout_permission,
+                        s,
+                        { clip2ClipboardAndShowSnackbar(s) },
+                        null
+                    )
+                )
             }
         }
-        if(activities!=null&&get_activities){
-            for(final ActivityInfo info:activities){
-                activity_child_views.add(getSingleItemView(assemblyView.getLinearLayout_activity(), info.name, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(info.name);
-                    }
-                }, new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        try {
-                            Intent intent = new Intent();
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.setClassName(info.packageName, info.name);
-                            activity.startActivity(intent);
-                        } catch (Exception e) {
-                            ToastManager.showToast(activity, e.toString(), Toast.LENGTH_SHORT);
+
+        // 处理Activity
+        if (activities != null && get_activities) {
+            for (info in activities) {
+                activity_child_views.add(
+                    getSingleItemView(
+                        assemblyView.linearLayout_activity,
+                        info.name,
+                        { clip2ClipboardAndShowSnackbar(info.name) },
+                        {
+                            try {
+                                val intent = Intent()
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                intent.setClassName(info.packageName, info.name)
+                                activity.startActivity(intent)
+                            } catch (e: Exception) {
+                                ToastManager.showToast(activity, e.toString(), Toast.LENGTH_SHORT)
+                            }
+                            true
                         }
-                        return true;
-                    }
-                }));
-            }
-        }
-        if(receivers!=null&&get_receivers){
-            for(final ActivityInfo activityInfo:receivers){
-                receiver_child_views.add(getSingleItemView(assemblyView.getLinearLayout_receiver(), activityInfo.name, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(activityInfo.name);
-                    }
-                }, null));
+                    )
+                )
             }
         }
 
-        if(services!=null&&get_services){
-            for(final ServiceInfo serviceInfo:services){
-                service_child_views.add(getSingleItemView(assemblyView.getLinearLayout_service(), serviceInfo.name, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(serviceInfo.name);
-                    }
-                }, new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        try{
-                            Intent intent=new Intent();
-                            intent.setClassName(serviceInfo.packageName,serviceInfo.name);
-                            activity.startService(intent);
-                        }catch (Exception e){
-                            ToastManager.showToast(activity,e.toString(),Toast.LENGTH_SHORT);
+        // 处理Receiver
+        if (receivers != null && get_receivers) {
+            for (activityInfo in receivers) {
+                receiver_child_views.add(
+                    getSingleItemView(
+                        assemblyView.linearLayout_receiver,
+                        activityInfo.name,
+                        { clip2ClipboardAndShowSnackbar(activityInfo.name) },
+                        null
+                    )
+                )
+            }
+        }
+
+        // 处理Service
+        if (services != null && get_services) {
+            for (serviceInfo in services) {
+                service_child_views.add(
+                    getSingleItemView(
+                        assemblyView.linearLayout_service,
+                        serviceInfo.name,
+                        { clip2ClipboardAndShowSnackbar(serviceInfo.name) },
+                        {
+                            try {
+                                val intent = Intent()
+                                intent.setClassName(serviceInfo.packageName, serviceInfo.name)
+                                activity.startService(intent)
+                            } catch (e: Exception) {
+                                ToastManager.showToast(activity, e.toString(), Toast.LENGTH_SHORT)
+                            }
+                            true
                         }
-                        return true;
-                    }
-                }));
+                    )
+                )
             }
         }
 
-        if(providers!=null&&get_providers){
-            for(final ProviderInfo providerInfo:providers){
-                provider_child_views.add(getSingleItemView(assemblyView.getLinearLayout_provider(), providerInfo.name, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(providerInfo.name);
-                    }
-                },null));
+        // 处理Provider
+        if (providers != null && get_providers) {
+            for (providerInfo in providers) {
+                provider_child_views.add(
+                    getSingleItemView(
+                        assemblyView.linearLayout_provider,
+                        providerInfo.name,
+                        { clip2ClipboardAndShowSnackbar(providerInfo.name) },
+                        null
+                    )
+                )
             }
         }
 
-        final Set<String> keys=static_receiver_bundle.keySet();
-        if(get_static_loaders){
-            for(final String s:keys){
-                View static_loader_item_view=LayoutInflater.from(activity).inflate(R.layout.item_static_loader,assemblyView.getLinearLayout_loader(),false);
-                ((TextView)static_loader_item_view.findViewById(R.id.static_loader_name)).setText(s);
-                static_loader_item_view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(s);
+        // 处理静态加载器
+        val keys = static_receiver_bundle.keySet()
+        if (get_static_loaders) {
+            for (s in keys) {
+                val static_loader_item_view = LayoutInflater.from(activity)
+                    .inflate(R.layout.item_static_loader, assemblyView.linearLayout_loader, false)
+                static_loader_item_view.findViewById<TextView>(R.id.static_loader_name).text = s
+                static_loader_item_view.setOnClickListener { clip2ClipboardAndShowSnackbar(s) }
+                
+                val filter_views = static_loader_item_view.findViewById<ViewGroup>(R.id.static_loader_intents)
+                val filters = static_receiver_bundle.getStringArrayList(s)
+                if (filters != null) {
+                    for (filter in filters) {
+                        val itemView = LayoutInflater.from(activity)
+                            .inflate(R.layout.item_single_textview, filter_views, false)
+                        itemView.findViewById<TextView>(R.id.item_textview).text = filter
+                        itemView.setOnClickListener { clip2ClipboardAndShowSnackbar(filter) }
+                        filter_views.addView(itemView)
                     }
-                });
-                ViewGroup filter_views=static_loader_item_view.findViewById(R.id.static_loader_intents);
-                List<String>filters=static_receiver_bundle.getStringArrayList(s);
-                if(filters==null)continue;
-                for(final String filter:filters){
-                    View itemView=LayoutInflater.from(activity).inflate(R.layout.item_single_textview,filter_views,false);
-                    ((TextView)itemView.findViewById(R.id.item_textview)).setText(filter);
-                    itemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            clip2ClipboardAndShowSnackbar(filter);
-                        }
-                    });
-                    filter_views.addView(itemView);
                 }
-                loaders_child_views.add(static_loader_item_view);
+                loaders_child_views.add(static_loader_item_view)
             }
         }
 
-        Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if(get_permissions) {
-                    for(View view:permission_child_views) assemblyView.getLinearLayout_permission().addView(view);
-                    TextView att_permission=assemblyView.getTv_permission();
-                    att_permission.setText(activity.getResources().getString(R.string.activity_detail_permissions)
-                            +"("+permission_child_views.size()+activity.getResources().getString(R.string.unit_item)+")");
-                    assemblyView.findViewById(R.id.detail_card_permissions).setVisibility(View.VISIBLE);
-                }
-                if(get_activities) {
-                    for(View view:activity_child_views)assemblyView.getLinearLayout_activity().addView(view);
-                    TextView att_activity=assemblyView.getTv_activity();
-                    att_activity.setText(activity.getResources().getString(R.string.activity_detail_activities)
-                            +"("+activity_child_views.size()+activity.getResources().getString(R.string.unit_item)+")");
-                    assemblyView.findViewById(R.id.detail_card_activities).setVisibility(View.VISIBLE);
-                }
-                if(get_receivers) {
-                    for(View view:receiver_child_views) assemblyView.getLinearLayout_receiver().addView(view);
-                    TextView att_receiver=assemblyView.getTv_receiver();
-                    att_receiver.setText(activity.getResources().getString(R.string.activity_detail_receivers)+"("+receiver_child_views.size()+activity.getResources().getString(R.string.unit_item)+")");
-                    assemblyView.findViewById(R.id.detail_card_receivers).setVisibility(View.VISIBLE);
-                }
-                if(get_static_loaders) {
-                    for(View view:loaders_child_views) assemblyView.getLinearLayout_loader().addView(view);
-                    TextView att_static_loader=assemblyView.getTv_loader();
-                    att_static_loader.setText(activity.getResources().getString(R.string.activity_detail_static_loaders)+"("+keys.size()+activity.getResources().getString(R.string.unit_item)+")");
-                    assemblyView.findViewById(R.id.detail_card_static_loaders).setVisibility(View.VISIBLE);
-                }
-                if(get_services){
-                    for(View view:service_child_views)assemblyView.getLinearLayout_service().addView(view);
-                    TextView att_service=assemblyView.getTv_service();
-                    att_service.setText(activity.getResources().getString(R.string.activity_detail_services)+"("+service_child_views.size()+activity.getResources().getString(R.string.unit_item)+")");
-                    assemblyView.findViewById(R.id.detail_card_services).setVisibility(View.VISIBLE);
-                }
-                if(get_providers){
-                    for(View view:provider_child_views)assemblyView.getLinearLayout_provider().addView(view);
-                    TextView att_providers=assemblyView.getTv_provider();
-                    att_providers.setText(activity.getResources().getString(R.string.activity_detail_providers)+"("+provider_child_views.size()+activity.getResources().getString(R.string.unit_item)+")");
-                    assemblyView.findViewById(R.id.detail_card_providers).setVisibility(View.VISIBLE);
-                }
-                callback.onViewsCreated();
+        // 在主线程更新UI
+        Global.handler.post {
+            if (get_permissions) {
+                for (view in permission_child_views) assemblyView.linearLayout_permission.addView(view)
+                val att_permission = assemblyView.tv_permission
+                att_permission.text = "${activity.resources.getString(R.string.activity_detail_permissions)}" +
+                        "(${permission_child_views.size}${activity.resources.getString(R.string.unit_item)})"
+                assemblyView.findViewById<View>(R.id.detail_card_permissions).visibility = View.VISIBLE
             }
-        });
+            if (get_activities) {
+                for (view in activity_child_views) assemblyView.linearLayout_activity.addView(view)
+                val att_activity = assemblyView.tv_activity
+                att_activity.text = "${activity.resources.getString(R.string.activity_detail_activities)}" +
+                        "(${activity_child_views.size}${activity.resources.getString(R.string.unit_item)})"
+                assemblyView.findViewById<View>(R.id.detail_card_activities).visibility = View.VISIBLE
+            }
+            if (get_receivers) {
+                for (view in receiver_child_views) assemblyView.linearLayout_receiver.addView(view)
+                val att_receiver = assemblyView.tv_receiver
+                att_receiver.text = "${activity.resources.getString(R.string.activity_detail_receivers)}" +
+                        "(${receiver_child_views.size}${activity.resources.getString(R.string.unit_item)})"
+                assemblyView.findViewById<View>(R.id.detail_card_receivers).visibility = View.VISIBLE
+            }
+            if (get_static_loaders) {
+                for (view in loaders_child_views) assemblyView.linearLayout_loader.addView(view)
+                val att_static_loader = assemblyView.tv_loader
+                att_static_loader.text = "${activity.resources.getString(R.string.activity_detail_static_loaders)}" +
+                        "(${keys.size}${activity.resources.getString(R.string.unit_item)})"
+                assemblyView.findViewById<View>(R.id.detail_card_static_loaders).visibility = View.VISIBLE
+            }
+            if (get_services) {
+                for (view in service_child_views) assemblyView.linearLayout_service.addView(view)
+                val att_service = assemblyView.tv_service
+                att_service.text = "${activity.resources.getString(R.string.activity_detail_services)}" +
+                        "(${service_child_views.size}${activity.resources.getString(R.string.unit_item)})"
+                assemblyView.findViewById<View>(R.id.detail_card_services).visibility = View.VISIBLE
+            }
+            if (get_providers) {
+                for (view in provider_child_views) assemblyView.linearLayout_provider.addView(view)
+                val att_providers = assemblyView.tv_provider
+                att_providers.text = "${activity.resources.getString(R.string.activity_detail_providers)}" +
+                        "(${provider_child_views.size}${activity.resources.getString(R.string.unit_item)})"
+                assemblyView.findViewById<View>(R.id.detail_card_providers).visibility = View.VISIBLE
+            }
+            callback.onViewsCreated()
+        }
     }
 
-    private View getSingleItemView(ViewGroup group, String text, View.OnClickListener clickListener, View.OnLongClickListener longClickListener){
-        View view= LayoutInflater.from(activity).inflate(R.layout.item_single_textview,group,false);
-        ((TextView)view.findViewById(R.id.item_textview)).setText(text);
-        view.setOnClickListener(clickListener);
-        view.setOnLongClickListener(longClickListener);
-        return view;
+    private fun getSingleItemView(
+        group: ViewGroup,
+        text: String,
+        clickListener: View.OnClickListener?,
+        longClickListener: View.OnLongClickListener?
+    ): View {
+        val view = LayoutInflater.from(activity).inflate(R.layout.item_single_textview, group, false)
+        view.findViewById<TextView>(R.id.item_textview).text = text
+        view.setOnClickListener(clickListener)
+        view.setOnLongClickListener(longClickListener)
+        return view
     }
 
-    private void clip2ClipboardAndShowSnackbar(String s){
-        try{
-            ClipboardManager manager=(ClipboardManager)activity.getSystemService(Context.CLIPBOARD_SERVICE);
-            manager.setPrimaryClip(ClipData.newPlainText("message",s));
-            Snackbar.make(activity.findViewById(android.R.id.content),activity.getResources().getString(R.string.snack_bar_clipboard),Snackbar.LENGTH_SHORT).show();
-        }catch (Exception e){e.printStackTrace();}
+    private fun clip2ClipboardAndShowSnackbar(s: String) {
+        try {
+            val manager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            manager.setPrimaryClip(ClipData.newPlainText("message", s))
+            Snackbar.make(
+                activity.findViewById(android.R.id.content),
+                activity.resources.getString(R.string.snack_bar_clipboard),
+                Snackbar.LENGTH_SHORT
+            ).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    public interface CompletedCallback{
-        void onViewsCreated();
+    interface CompletedCallback {
+        fun onViewsCreated()
     }
 }
+

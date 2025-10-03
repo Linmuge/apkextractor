@@ -1,5 +1,9 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-public interface SortConfigDialogCallback {
-    void onOptionSelected(int value);
+/**
+ * 排序配置对话框回调
+ */
+interface SortConfigDialogCallback {
+    fun onOptionSelected(value: Int)
 }
+

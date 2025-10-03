@@ -1,168 +1,153 @@
-package info.muge.appshare.tasks;
+package info.muge.appshare.tasks
 
-import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import androidx.annotation.NonNull;
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.pm.PackageInfo
+import android.view.View
+import com.google.android.material.snackbar.Snackbar
+import info.muge.appshare.Global
+import info.muge.appshare.R
+import info.muge.appshare.ui.SignatureView
+import info.muge.appshare.utils.EnvironmentUtil
 
-import com.google.android.material.snackbar.Snackbar;
-import android.view.View;
+/**
+ * 获取签名信息任务
+ */
+class GetSignatureInfoTask(
+    private val activity: Activity,
+    private val packageInfo: PackageInfo,
+    private val signatureView: SignatureView,
+    private val callback: CompletedCallback
+) : Thread() {
 
-import info.muge.appshare.Global;
-import info.muge.appshare.R;
-import info.muge.appshare.ui.SignatureView;
-import info.muge.appshare.utils.EnvironmentUtil;
+    companion object {
+        private val sign_infos_cache = HashMap<String, Array<String>>()
+        private val md5_cache = HashMap<PackageInfo, String>()
+        private val sha1_cache = HashMap<PackageInfo, String>()
+        private val sha256_cache = HashMap<PackageInfo, String>()
 
-import java.util.HashMap;
-
-public class GetSignatureInfoTask extends Thread {
-
-    private static final HashMap<String,String[]> sign_infos_cache=new HashMap<>();
-    private static final HashMap<PackageInfo,String> md5_cache=new HashMap<>();
-    private static final HashMap<PackageInfo,String> sha1_cache=new HashMap<>();
-    private static final HashMap<PackageInfo,String> sha256_cache=new HashMap<>();
-
-    private final Activity activity;
-    private final PackageInfo packageInfo;
-    private final SignatureView signatureView;
-    private final CompletedCallback callback;
-
-    public GetSignatureInfoTask(@NonNull Activity activity, @NonNull PackageInfo packageInfo, @NonNull SignatureView signatureView
-    ,@NonNull CompletedCallback callback) {
-        super();
-        this.activity=activity;
-        this.packageInfo=packageInfo;
-        this.signatureView=signatureView;
-        this.callback=callback;
+        @JvmStatic
+        @Synchronized
+        fun clearCache() {
+            sign_infos_cache.clear()
+            md5_cache.clear()
+            sha1_cache.clear()
+            sha256_cache.clear()
+        }
     }
 
-    @Override
-    public void run() {
-        super.run();
-        String[] sign_infos1;
-        String md5_1;
-        String sha1_1;
-        String sha256_1;
-        synchronized (sign_infos_cache){
-            if(sign_infos_cache.get(packageInfo.applicationInfo.sourceDir)!=null){
-                sign_infos1=sign_infos_cache.get(packageInfo.applicationInfo.sourceDir);
-            }else{
-                sign_infos1=EnvironmentUtil.getAPKSignInfo(packageInfo.applicationInfo.sourceDir);
-                sign_infos_cache.put(packageInfo.applicationInfo.sourceDir,sign_infos1);
-            }
-        }
-        synchronized (md5_cache){
-            if(md5_cache.get(packageInfo)!=null){
-                md5_1=md5_cache.get(packageInfo);
-            }else{
-                md5_1=EnvironmentUtil.getSignatureMD5StringOfPackageInfo(packageInfo);
-                md5_cache.put(packageInfo,md5_1);
-            }
-        }
-        synchronized (sha1_cache){
-            if(sha1_cache.get(packageInfo)!=null){
-                sha1_1=sha1_cache.get(packageInfo);
-            }else{
-                sha1_1=EnvironmentUtil.getSignatureSHA1OfPackageInfo(packageInfo);
-                sha1_cache.put(packageInfo,sha1_1);
-            }
-        }
-        synchronized (sha256_cache){
-            if(sha256_cache.get(packageInfo)!=null){
-                sha256_1=sha256_cache.get(packageInfo);
-            }else{
-                sha256_1=EnvironmentUtil.getSignatureSHA256OfPackageInfo(packageInfo);
-                sha256_cache.put(packageInfo,sha256_1);
-            }
-        }
-        final String[]sign_infos= sign_infos1;
-        final String md5=md5_1;
-        final String sha1=sha1_1;
-        final String sha256=sha256_1;
+    override fun run() {
+        super.run()
+        
+        val sign_infos1: Array<String>
+        val md5_1: String
+        val sha1_1: String
+        val sha256_1: String
 
-        Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                signatureView.getTv_sub_value().setText(sign_infos[0]);
-                signatureView.getTv_iss_value().setText(sign_infos[1]);
-                signatureView.getTv_serial_value().setText(sign_infos[2]);
-                signatureView.getTv_start().setText(sign_infos[3]);
-                signatureView.getTv_end().setText(sign_infos[4]);
-                signatureView.getTv_md5().setText(md5);
-                signatureView.getTv_sha1().setText(sha1);
-                signatureView.getTv_sha256().setText(sha256);
-                signatureView.getLinearLayout_sub().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_sub_value().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_iss().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_iss_value().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_serial().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_serial_value().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_start().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_start().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_end().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_end().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_md5().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_md5().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_sha1().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_sha1().getText().toString());
-                    }
-                });
-                signatureView.getLinearLayout_sha256().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        clip2ClipboardAndShowSnackbar(signatureView.getTv_sha256().getText().toString());
-                    }
-                });
-                signatureView.getRoot().setVisibility(View.VISIBLE);
-                callback.onCompleted();
+        synchronized(sign_infos_cache) {
+            val sourceDir = packageInfo.applicationInfo?.sourceDir ?: ""
+            sign_infos1 = if (sign_infos_cache[sourceDir] != null) {
+                sign_infos_cache[sourceDir]!!
+            } else {
+                val infos = EnvironmentUtil.getAPKSignInfo(sourceDir)
+                sign_infos_cache[sourceDir] = infos
+                infos
             }
-        });
+        }
+
+        synchronized(md5_cache) {
+            md5_1 = if (md5_cache[packageInfo] != null) {
+                md5_cache[packageInfo]!!
+            } else {
+                val md5 = EnvironmentUtil.getSignatureMD5StringOfPackageInfo(packageInfo)
+                md5_cache[packageInfo] = md5
+                md5
+            }
+        }
+
+        synchronized(sha1_cache) {
+            sha1_1 = if (sha1_cache[packageInfo] != null) {
+                sha1_cache[packageInfo]!!
+            } else {
+                val sha1 = EnvironmentUtil.getSignatureSHA1OfPackageInfo(packageInfo)
+                sha1_cache[packageInfo] = sha1
+                sha1
+            }
+        }
+
+        synchronized(sha256_cache) {
+            sha256_1 = if (sha256_cache[packageInfo] != null) {
+                sha256_cache[packageInfo]!!
+            } else {
+                val sha256 = EnvironmentUtil.getSignatureSHA256OfPackageInfo(packageInfo)
+                sha256_cache[packageInfo] = sha256
+                sha256
+            }
+        }
+
+        val sign_infos = sign_infos1
+        val md5 = md5_1
+        val sha1 = sha1_1
+        val sha256 = sha256_1
+
+        Global.handler.post {
+            signatureView.tv_sub_value.text = sign_infos[0]
+            signatureView.tv_iss_value.text = sign_infos[1]
+            signatureView.tv_serial_value.text = sign_infos[2]
+            signatureView.tv_start.text = sign_infos[3]
+            signatureView.tv_end.text = sign_infos[4]
+            signatureView.tv_md5.text = md5
+            signatureView.tv_sha1.text = sha1
+            signatureView.tv_sha256.text = sha256
+
+            signatureView.linearLayout_sub.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_sub_value.text.toString())
+            }
+            signatureView.linearLayout_iss.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_iss_value.text.toString())
+            }
+            signatureView.linearLayout_serial.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_serial_value.text.toString())
+            }
+            signatureView.linearLayout_start.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_start.text.toString())
+            }
+            signatureView.linearLayout_end.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_end.text.toString())
+            }
+            signatureView.linearLayout_md5.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_md5.text.toString())
+            }
+            signatureView.linearLayout_sha1.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_sha1.text.toString())
+            }
+            signatureView.linearLayout_sha256.setOnClickListener {
+                clip2ClipboardAndShowSnackbar(signatureView.tv_sha256.text.toString())
+            }
+            
+            signatureView.root.visibility = View.VISIBLE
+            callback.onCompleted()
+        }
     }
 
-    private void clip2ClipboardAndShowSnackbar(String s){
-        try{
-            ClipboardManager manager=(ClipboardManager)activity.getSystemService(Context.CLIPBOARD_SERVICE);
-            manager.setPrimaryClip(ClipData.newPlainText("message",s));
-            Snackbar.make(activity.findViewById(android.R.id.content),activity.getResources().getString(R.string.snack_bar_clipboard),Snackbar.LENGTH_SHORT).show();
-        }catch (Exception e){e.printStackTrace();}
+    private fun clip2ClipboardAndShowSnackbar(s: String) {
+        try {
+            val manager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            manager.setPrimaryClip(ClipData.newPlainText("message", s))
+            Snackbar.make(
+                activity.findViewById(android.R.id.content),
+                activity.resources.getString(R.string.snack_bar_clipboard),
+                Snackbar.LENGTH_SHORT
+            ).show()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    static synchronized void clearCache(){
-        sign_infos_cache.clear();
-        md5_cache.clear();
-        sha1_cache.clear();
-        sha256_cache.clear();
-    }
-
-    public interface CompletedCallback{
-        void onCompleted();
+    interface CompletedCallback {
+        fun onCompleted()
     }
 }
+

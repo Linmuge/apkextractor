@@ -1,35 +1,36 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-import android.content.Context;
-import androidx.annotation.NonNull;
-import android.text.format.Formatter;
+import android.content.Context
+import android.text.format.Formatter
+import info.muge.appshare.R
+import java.text.DecimalFormat
 
-import info.muge.appshare.R;
+/**
+ * 导入对话框
+ */
+class ImportingDialog(context: Context, private val total: Long) : ProgressDialog(
+    context,
+    context.resources.getString(R.string.dialog_import_title)
+) {
 
-import java.text.DecimalFormat;
-
-public class ImportingDialog extends ProgressDialog {
-    private final long total;
-
-    public ImportingDialog(@NonNull Context context,long total) {
-        super(context, context.getResources().getString(R.string.dialog_import_title));
-        this.total=total;
-        progressBar.setMax((int) (total/1024));
-        setCancelable(false);
+    init {
+        progressBar.max = (total / 1024).toInt()
+        setCancelable(false)
     }
 
-    public void setCurrentWritingName(String filename){
-        att.setText(getContext().getResources().getString(R.string.dialog_import_msg)+filename);
+    fun setCurrentWritingName(filename: String) {
+        att.text = "${context.resources.getString(R.string.dialog_import_msg)}$filename"
     }
 
-    public void setProgress(long progress){
-        progressBar.setProgress((int)(progress/1024));
-        DecimalFormat dm=new DecimalFormat("#.00");
-        int percent=(int)(Double.valueOf(dm.format((double)progress/total))*100);
-        att_right.setText(Formatter.formatFileSize(getContext(),progress)+"/"+Formatter.formatFileSize(getContext(),total)+"("+percent+"%)");
+    fun setProgress(progress: Long) {
+        progressBar.progress = (progress / 1024).toInt()
+        val dm = DecimalFormat("#.00")
+        val percent = (dm.format(progress.toDouble() / total).toDouble() * 100).toInt()
+        att_right.text = "${Formatter.formatFileSize(context, progress)}/${Formatter.formatFileSize(context, total)}($percent%)"
     }
 
-    public void setSpeed(long speed){
-        att_left.setText(Formatter.formatFileSize(getContext(),speed)+"/s");
+    fun setSpeed(speed: Long) {
+        att_left.text = "${Formatter.formatFileSize(context, speed)}/s"
     }
 }
+

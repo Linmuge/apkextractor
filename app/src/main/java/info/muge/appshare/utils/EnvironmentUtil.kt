@@ -1,128 +1,130 @@
-package info.muge.appshare.utils;
+package info.muge.appshare.utils
 
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
-import android.net.DhcpInfo;
-import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.format.Formatter;
-import android.text.style.ForegroundColorSpan;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
+import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.net.wifi.WifiManager
+import android.os.Bundle
+import android.provider.MediaStore
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.format.Formatter
+import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.annotation.ColorInt
+import androidx.core.content.FileProvider
+import info.muge.appshare.Constants
+import info.muge.appshare.R
+import info.muge.appshare.ui.ToastManager
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.InputStream
+import java.security.MessageDigest
+import java.security.cert.X509Certificate
+import java.util.Calendar
+import java.util.jar.JarFile
 
-import info.muge.appshare.Constants;
-import info.muge.appshare.R;
-import info.muge.appshare.ui.ToastManager;
+/**
+ * 环境工具类
+ */
+object EnvironmentUtil {
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.security.MessageDigest;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-
-public class EnvironmentUtil {
-
-    public static void showInputMethod(@NonNull View view){
-        try{
-            InputMethodManager inputMethodManager=(InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            view.requestFocus();
-            inputMethodManager.showSoftInput(view,0);
-        }catch (Exception e){
-            e.printStackTrace();
+    @JvmStatic
+    fun showInputMethod(view: View) {
+        try {
+            val inputMethodManager = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            view.requestFocus()
+            inputMethodManager.showSoftInput(view, 0)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    public static void hideInputMethod(@NonNull final Activity activity){
-        try{
-            ((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),0);
-        }catch (Exception e){e.printStackTrace();}
-    }
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(),
-                drawable.getOpacity()!=PixelFormat.OPAQUE?Bitmap.Config.ARGB_8888:Bitmap.Config.RGB_565);
-        Canvas canvas = new Canvas(bitmap);
-        //canvas.setBitmap(bitmap);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
-    public static @NonNull String getAppNameByPackageName(@NonNull Context context,@NonNull String package_name){
-        try{
-            final PackageManager packageManager=context.getPackageManager();
-            return String.valueOf(packageManager.getApplicationLabel(packageManager.getApplicationInfo(package_name,0)));
-        }catch (PackageManager.NameNotFoundException ne){
-            //Do nothing
-        }catch (Exception e){
-            e.printStackTrace();
+    @JvmStatic
+    fun hideInputMethod(activity: Activity) {
+        try {
+            (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(activity.currentFocus?.windowToken, 0)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return "";
+    }
+
+    @JvmStatic
+    fun drawableToBitmap(drawable: Drawable): Bitmap {
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            if (drawable.opacity != PixelFormat.OPAQUE) Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    @JvmStatic
+    fun getAppNameByPackageName(context: Context, package_name: String): String {
+        try {
+            val packageManager = context.packageManager
+            return packageManager.getApplicationLabel(packageManager.getApplicationInfo(package_name, 0)).toString()
+        } catch (ne: PackageManager.NameNotFoundException) {
+            // Do nothing
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     /**
      * 返回当前时间值
-     * @param field 参考{@link Calendar#YEAR} {@link Calendar#MONTH} {@link Calendar#MINUTE}
-     * {@link Calendar#HOUR_OF_DAY} {@link Calendar#MINUTE} {@link Calendar#SECOND}
+     * @param field 参考[Calendar.YEAR] [Calendar.MONTH] [Calendar.MINUTE]
+     * [Calendar.HOUR_OF_DAY] [Calendar.MINUTE] [Calendar.SECOND]
      */
-    public static @NonNull String getCurrentTimeValue(int field){
-        Calendar calendar=Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        int value=calendar.get(field);
-        if(field==Calendar.MONTH)value++;
-        return getFormatNumberWithZero(value);
+    @JvmStatic
+    fun getCurrentTimeValue(field: Int): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        var value = calendar.get(field)
+        if (field == Calendar.MONTH) value++
+        return getFormatNumberWithZero(value)
     }
 
-    private static @NonNull String getFormatNumberWithZero(int value){
-        if(value>=0&&value<=9){
-            return "0"+value;
+    private fun getFormatNumberWithZero(value: Int): String {
+        return if (value in 0..9) {
+            "0$value"
+        } else {
+            value.toString()
         }
-        return String.valueOf(value);
     }
 
-    public static String getEmptyVariableString(@NonNull String value){
-        value=value.replace(Constants.FONT_APP_NAME, "");
-        value=value.replace(Constants.FONT_APP_PACKAGE_NAME,"");
-        value=value.replace(Constants.FONT_APP_VERSIONNAME,"");
-        value=value.replace(Constants.FONT_APP_VERSIONCODE,"");
-        value=value.replace(Constants.FONT_YEAR,"");
-        value=value.replace(Constants.FONT_MONTH,"");
-        value=value.replace(Constants.FONT_DAY_OF_MONTH,"");
-        value=value.replace(Constants.FONT_HOUR_OF_DAY,"");
-        value=value.replace(Constants.FONT_MINUTE,"");
-        value=value.replace(Constants.FONT_SECOND,"");
-        value=value.replace(Constants.FONT_AUTO_SEQUENCE_NUMBER,"");
-        return value;
+    @JvmStatic
+    fun getEmptyVariableString(value: String): String {
+        var result = value
+        result = result.replace(Constants.FONT_APP_NAME, "")
+        result = result.replace(Constants.FONT_APP_PACKAGE_NAME, "")
+        result = result.replace(Constants.FONT_APP_VERSIONNAME, "")
+        result = result.replace(Constants.FONT_APP_VERSIONCODE, "")
+        result = result.replace(Constants.FONT_YEAR, "")
+        result = result.replace(Constants.FONT_MONTH, "")
+        result = result.replace(Constants.FONT_DAY_OF_MONTH, "")
+        result = result.replace(Constants.FONT_HOUR_OF_DAY, "")
+        result = result.replace(Constants.FONT_MINUTE, "")
+        result = result.replace(Constants.FONT_SECOND, "")
+        result = result.replace(Constants.FONT_AUTO_SEQUENCE_NUMBER, "")
+        return result
     }
 
     /**
@@ -130,155 +132,170 @@ public class EnvironmentUtil {
      * @return string[0]证书发行者,string[1]证书所有者,string[2]序列号
      * string[3]证书起始时间 string[4]证书结束时间
      */
-    public static @NonNull String[] getAPKSignInfo(String filePath) {
-        String subjectDN = "";
-        String issuerDN = "";
-        String serial = "";
-        String notBefore="";
-        String notAfter="";
+    @JvmStatic
+    fun getAPKSignInfo(filePath: String): Array<String> {
+        var subjectDN = ""
+        var issuerDN = ""
+        var serial = ""
+        var notBefore = ""
+        var notAfter = ""
         try {
-            JarFile JarFile = new JarFile(filePath);
-            JarEntry JarEntry = JarFile.getJarEntry("AndroidManifest.xml");
-            if (JarEntry != null) {
-                byte[] readBuffer = new byte[8192];
-                InputStream is = new BufferedInputStream(JarFile.getInputStream(JarEntry));
-                while (is.read(readBuffer, 0, readBuffer.length) != -1) {
-                    //notusing
+            val jarFile = JarFile(filePath)
+            val jarEntry = jarFile.getJarEntry("AndroidManifest.xml")
+            if (jarEntry != null) {
+                val readBuffer = ByteArray(8192)
+                val inputStream = BufferedInputStream(jarFile.getInputStream(jarEntry))
+                while (inputStream.read(readBuffer, 0, readBuffer.size) != -1) {
+                    // not using
                 }
-                Certificate[] certs = JarEntry.getCertificates();
-                if (certs != null && certs.length > 0) {
-                    //获取证书
-                    X509Certificate x509cert = (X509Certificate) certs[0];
-                    //获取证书发行者
-                    issuerDN = x509cert.getIssuerDN().toString();
-                    //System.out.println("发行者：" + issuerDN);
-                    //获取证书所有者
-                    subjectDN = x509cert.getSubjectDN().toString();
-                    //System.out.println("所有者：" + subjectDN);
-                    //证书序列号
-                    serial = x509cert.getSerialNumber().toString();
-                    //System.out.println("publicKey：" + publicKey);
-                    //证书起始有效期
-                    notBefore=x509cert.getNotBefore().toString();
-                    //证书结束有效期
-                    notAfter=x509cert.getNotAfter().toString();
+                val certs = jarEntry.certificates
+                if (certs != null && certs.isNotEmpty()) {
+                    // 获取证书
+                    val x509cert = certs[0] as X509Certificate
+                    // 获取证书发行者
+                    issuerDN = x509cert.issuerDN.toString()
+                    // 获取证书所有者
+                    subjectDN = x509cert.subjectDN.toString()
+                    // 证书序列号
+                    serial = x509cert.serialNumber.toString()
+                    // 证书起始有效期
+                    notBefore = x509cert.notBefore.toString()
+                    // 证书结束有效期
+                    notAfter = x509cert.notAfter.toString()
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return new String[]{subjectDN,issuerDN,serial,notBefore,notAfter};
+        return arrayOf(subjectDN, issuerDN, serial, notBefore, notAfter)
     }
 
-    public static @NonNull String hashMD5Value(@NonNull InputStream inputStream){
-        return getHashValue(inputStream,"MD5");
+    @JvmStatic
+    fun hashMD5Value(inputStream: InputStream): String {
+        return getHashValue(inputStream, "MD5")
     }
 
-    public static @NonNull String hashSHA256Value(@NonNull InputStream inputStream){
-        return getHashValue(inputStream,"SHA256");
+    @JvmStatic
+    fun hashSHA256Value(inputStream: InputStream): String {
+        return getHashValue(inputStream, "SHA256")
     }
 
-    public static @NonNull String hashSHA1Value(@NonNull InputStream inputStream){
-        return getHashValue(inputStream,"SHA1");
+    @JvmStatic
+    fun hashSHA1Value(inputStream: InputStream): String {
+        return getHashValue(inputStream, "SHA1")
     }
 
-    public static @NonNull String getSignatureMD5StringOfPackageInfo(@NonNull PackageInfo info){
-        return getSignatureStringOfPackageInfo(info,"MD5");
+    @JvmStatic
+    fun getSignatureMD5StringOfPackageInfo(info: PackageInfo): String {
+        return getSignatureStringOfPackageInfo(info, "MD5")
     }
 
-    public static @NonNull String getSignatureSHA1OfPackageInfo(@NonNull PackageInfo info){
-        return getSignatureStringOfPackageInfo(info,"SHA1");
+    @JvmStatic
+    fun getSignatureSHA1OfPackageInfo(info: PackageInfo): String {
+        return getSignatureStringOfPackageInfo(info, "SHA1")
     }
 
-    public static @NonNull String getSignatureSHA256OfPackageInfo(@NonNull PackageInfo info){
-        return getSignatureStringOfPackageInfo(info,"SHA256");
+    @JvmStatic
+    fun getSignatureSHA256OfPackageInfo(info: PackageInfo): String {
+        return getSignatureStringOfPackageInfo(info, "SHA256")
     }
 
-    private static @NonNull String getSignatureStringOfPackageInfo(@NonNull PackageInfo packageInfo,@NonNull String type){
-        try{
-            MessageDigest localMessageDigest = MessageDigest.getInstance(type);
-            localMessageDigest.update(packageInfo.signatures[0].toByteArray());
-            return getHexString(localMessageDigest.digest());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    private static @NonNull String getHashValue(@NonNull InputStream inputStream,@NonNull String type){
-        try{
-            MessageDigest messageDigest=MessageDigest.getInstance(type);
-            int length;
-            byte [] buffer=new byte[1024];
-            while ((length=inputStream.read(buffer))!=-1){
-                messageDigest.update(buffer,0,length);
+    private fun getSignatureStringOfPackageInfo(packageInfo: PackageInfo, type: String): String {
+        try {
+            val localMessageDigest = MessageDigest.getInstance(type)
+            packageInfo.signatures?.let { signatures ->
+                if (signatures.isNotEmpty()) {
+                    localMessageDigest.update(signatures[0].toByteArray())
+                    return getHexString(localMessageDigest.digest())
+                }
             }
-            inputStream.close();
-            return getHexString(messageDigest.digest());
-        }catch (Exception e){e.printStackTrace();}
-        return "";
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
-    private static @NonNull String getHexString(byte[] paramArrayOfByte){
+    private fun getHashValue(inputStream: InputStream, type: String): String {
+        try {
+            val messageDigest = MessageDigest.getInstance(type)
+            var length: Int
+            val buffer = ByteArray(1024)
+            while (inputStream.read(buffer).also { length = it } != -1) {
+                messageDigest.update(buffer, 0, length)
+            }
+            inputStream.close()
+            return getHexString(messageDigest.digest())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
+    private fun getHexString(paramArrayOfByte: ByteArray?): String {
         if (paramArrayOfByte == null) {
-            return "";
+            return ""
         }
-        StringBuilder localStringBuilder = new StringBuilder(2 * paramArrayOfByte.length);
-        for (int i = 0; ; i++) {
-            if (i >= paramArrayOfByte.length) {
-                return localStringBuilder.toString();
+        val localStringBuilder = StringBuilder(2 * paramArrayOfByte.size)
+        for (i in paramArrayOfByte.indices) {
+            var str = Integer.toString(0xFF and paramArrayOfByte[i].toInt(), 16)
+            if (str.length == 1) {
+                str = "0$str"
             }
-            String str = Integer.toString(0xFF & paramArrayOfByte[i], 16);
-            if (str.length() == 1) {
-                str = "0" + str;
-            }
-            localStringBuilder.append(str);
+            localStringBuilder.append(str)
         }
+        return localStringBuilder.toString()
     }
+
     /**
      * 当SharedPreference中设置了加载启动项的值，则会查询启动Receiver，否则会直接返回一个空Bundle（查询为耗时操作，此方法会阻塞）
      */
-    public static @NonNull Bundle getStaticRegisteredReceiversOfBundleTypeForPackageName(@NonNull Context context,@NonNull String package_name){
-        Bundle bundle=new Bundle();
-        if(!SPUtil.getGlobalSharedPreferences(context)
-                .getBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS,Constants.PREFERENCE_LOAD_STATIC_LOADERS_DEFAULT)){
-            return bundle;
+    @JvmStatic
+    fun getStaticRegisteredReceiversOfBundleTypeForPackageName(context: Context, package_name: String): Bundle {
+        val bundle = Bundle()
+        if (!SPUtil.getGlobalSharedPreferences(context)
+                .getBoolean(Constants.PREFERENCE_LOAD_STATIC_LOADERS, Constants.PREFERENCE_LOAD_STATIC_LOADERS_DEFAULT)
+        ) {
+            return bundle
         }
-        PackageManager packageManager=context.getPackageManager();
-        String[] static_filters=context.getResources().getStringArray(R.array.static_receiver_filters);
+        val packageManager = context.packageManager
+        val static_filters = context.resources.getStringArray(R.array.static_receiver_filters)
 
-        for(String s:static_filters){
-            List<ResolveInfo>list=packageManager.queryBroadcastReceivers(new Intent(s),0);
-            if(list==null)continue;
-            for(ResolveInfo info:list){
-                String pn=info.activityInfo.packageName;
-                if(pn==null)continue;
-                ArrayList<String> filters_class=bundle.getStringArrayList(info.activityInfo.name);
-                if(filters_class==null){
-                    filters_class=new ArrayList<>();
-                    filters_class.add(s);
-                    if(pn.equals(package_name))bundle.putStringArrayList(info.activityInfo.name,filters_class);
+        for (s in static_filters) {
+            val list = packageManager.queryBroadcastReceivers(Intent(s), 0)
+            if (list == null) continue
+            for (info in list) {
+                val pn = info.activityInfo.packageName ?: continue
+                var filters_class = bundle.getStringArrayList(info.activityInfo.name)
+                if (filters_class == null) {
+                    filters_class = ArrayList()
+                    filters_class.add(s)
+                    if (pn == package_name) bundle.putStringArrayList(info.activityInfo.name, filters_class)
+                } else {
+                    if (!filters_class.contains(s)) filters_class.add(s)
                 }
-                else{
-                    if(!filters_class.contains(s)) filters_class.add(s);
-                }
-
             }
         }
-        return bundle;
+        return bundle
     }
+
+
 
     /**
      * 判断一个字符串是否为标准Linux/Windows的标准合法文件名（不包含非法字符）
      * @param name 文件名称（仅文件名，不包含路径）
      * @return true-合法文件名  false-包含非法字符
      */
-    public static boolean isALegalFileName(@NonNull String name){
-        try{
-            if(name.contains("?")||name.contains("\\")||name.contains("/")||name.contains(":")||name.contains("*")||name.contains("\"")
-                    ||name.contains("<")||name.contains(">")||name.contains("|")) return false;
-        }catch (Exception e){e.printStackTrace();}
-        return true;
+    @JvmStatic
+    fun isALegalFileName(name: String): Boolean {
+        try {
+            if (name.contains("?") || name.contains("\\") || name.contains("/") ||
+                name.contains(":") || name.contains("*") || name.contains("\"") ||
+                name.contains("<") || name.contains(">") || name.contains("|")
+            ) return false
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return true
     }
 
     /**
@@ -286,187 +303,216 @@ public class EnvironmentUtil {
      * @param content 要处理的内容
      * @return 去掉了文件系统非法符号的内容
      */
-    static @NonNull String removeIllegalFileNameCharacters(@NonNull String content){
-        content=content.replace("?","");
-        content=content.replace("\\","");
-        content=content.replace("/","");
-        content=content.replace(":","");
-        content=content.replace("*","");
-        content=content.replace("\"","");
-        content=content.replace("<","");
-        content=content.replace(">","");
-        content=content.replace("|","");
-        return content;
+    internal fun removeIllegalFileNameCharacters(content: String): String {
+        var result = content
+        result = result.replace("?", "")
+        result = result.replace("\\", "")
+        result = result.replace("/", "")
+        result = result.replace(":", "")
+        result = result.replace("*", "")
+        result = result.replace("\"", "")
+        result = result.replace("<", "")
+        result = result.replace(">", "")
+        result = result.replace("|", "")
+        return result
     }
 
     /**
      * 截取文件扩展名，例如Test.apk 则返回 apk
      */
-    public static @NonNull String getFileExtensionName(@NonNull String fileName){
-        try{
-            return fileName.substring(fileName.lastIndexOf(".")+1);
-        }catch (Exception e){e.printStackTrace();}
-        return "";
+    @JvmStatic
+    fun getFileExtensionName(fileName: String): String {
+        try {
+            return fileName.substring(fileName.lastIndexOf(".") + 1)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     /**
      * 返回文件主体的文件名，例如 Test.File.java 则返回Test.File
      */
-    public static @NonNull String getFileMainName(@NonNull String fileName){
-        try{
-            final int lastIndex=fileName.lastIndexOf(".");
-            if(lastIndex==-1)return fileName;
-            return fileName.substring(0,lastIndex);
-        }catch (Exception e){e.printStackTrace();}
-        return "";
+    @JvmStatic
+    fun getFileMainName(fileName: String): String {
+        try {
+            val lastIndex = fileName.lastIndexOf(".")
+            if (lastIndex == -1) return fileName
+            return fileName.substring(0, lastIndex)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     /**
      * 判断当前是否连接了WiFi网络
      * @return true-连接了WiFi网络
      */
-    public static boolean isWifiConnected(@NonNull Context context){
-        try{
-            WifiInfo wifiInfo=((WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE)).getConnectionInfo();
-            return wifiInfo!=null&&wifiInfo.getIpAddress()!=0;
-        }catch (Exception e){e.printStackTrace();}
-        return false;
+    @JvmStatic
+    fun isWifiConnected(context: Context): Boolean {
+        try {
+            val wifiInfo = (context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).connectionInfo
+            return wifiInfo != null && wifiInfo.ipAddress != 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 
     /**
      * 获取系统热点是否开启
      */
-    public static boolean isAPEnabled(Context context){
-        try{
-            WifiManager wifiManager=(WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            Method method=wifiManager.getClass().getDeclaredMethod("getWifiApState");
-            Field field=wifiManager.getClass().getDeclaredField("WIFI_AP_STATE_ENABLED");
-            int value_wifi_enabled=(int)field.get(wifiManager);
-            return ((int)method.invoke(wifiManager))==value_wifi_enabled;
-        }catch (Exception e){e.printStackTrace();}
-        return false;
+    @JvmStatic
+    fun isAPEnabled(context: Context): Boolean {
+        try {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            val method = wifiManager.javaClass.getDeclaredMethod("getWifiApState")
+            val field = wifiManager.javaClass.getDeclaredField("WIFI_AP_STATE_ENABLED")
+            val value_wifi_enabled = field.get(wifiManager) as Int
+            return (method.invoke(wifiManager) as Int) == value_wifi_enabled
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 
     /**
      * 跳转到系统热点配置页
      */
-    public static void goToApPageActivity(@NonNull Context context){
-        try{
-            Intent intent = new Intent();
-            ComponentName cm = new ComponentName("com.android.settings",
-                    "com.android.settings.TetherSettings");
-            intent.setComponent(cm);
-            intent.setAction("android.intent.action.VIEW");
-            context.startActivity(intent);
-        }catch (Exception e){
-            e.printStackTrace();
-            ToastManager.showToast(context,e.toString(), Toast.LENGTH_SHORT);
+    @JvmStatic
+    fun goToApPageActivity(context: Context) {
+        try {
+            val intent = Intent()
+            val cm = ComponentName("com.android.settings", "com.android.settings.TetherSettings")
+            intent.component = cm
+            intent.action = "android.intent.action.VIEW"
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ToastManager.showToast(context, e.toString(), Toast.LENGTH_SHORT)
         }
     }
 
-    public static String getRouterIpAddress(@NonNull Context context){
-        try{
-            WifiManager wifiManager=(WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            DhcpInfo dhcpInfo=wifiManager.getDhcpInfo();
-            return Formatter.formatIpAddress(dhcpInfo.gateway);
-        }catch (Exception e){
-            e.printStackTrace();
+    @JvmStatic
+    fun getRouterIpAddress(context: Context): String {
+        try {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            val dhcpInfo = wifiManager.dhcpInfo
+            return Formatter.formatIpAddress(dhcpInfo.gateway)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return "192.168.1.1";
+        return "192.168.1.1"
     }
 
     /**
      * 获取本机连接WiFi网络的IP地址
      */
-    public static String getSelfIp(@NonNull Context context){
-        try{
-            WifiManager wifiManager=(WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            return Formatter.formatIpAddress(wifiManager.getDhcpInfo().ipAddress);
-        }catch (Exception e){e.printStackTrace();}
-        return "0.0.0.0";
+    @JvmStatic
+    fun getSelfIp(context: Context): String {
+        try {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return Formatter.formatIpAddress(wifiManager.dhcpInfo.ipAddress)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return "0.0.0.0"
     }
 
     /**
      * 获取本应用名称
      */
-    public static @NonNull String getAppName(@NonNull Context context){
-        return getAppNameByPackageName(context,context.getPackageName());
+    @JvmStatic
+    fun getAppName(context: Context): String {
+        return getAppNameByPackageName(context, context.packageName)
     }
 
     /**
      * 获取本应用版本名
      */
-    public static @NonNull String getAppVersionName(@NonNull Context context){
-        try{
-            PackageManager packageManager=context.getPackageManager();
-            return String.valueOf(packageManager.getPackageInfo(context.getPackageName(),0).versionName);
-        }catch (Exception e){e.printStackTrace();}
-        return "";
+    @JvmStatic
+    fun getAppVersionName(context: Context): String {
+        try {
+            val packageManager = context.packageManager
+            return packageManager.getPackageInfo(context.packageName, 0).versionName.toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     /**
      * 通过contentUri获取文件名
      */
-    public static @Nullable
-    String getFileNameFromContentUri(@NonNull Context context, @NonNull Uri contentUri){
-        return queryResultByContentResolver(context,contentUri,MediaStore.Files.FileColumns.DISPLAY_NAME);
+    @JvmStatic
+    fun getFileNameFromContentUri(context: Context, contentUri: Uri): String? {
+        return queryResultByContentResolver(context, contentUri, MediaStore.Files.FileColumns.DISPLAY_NAME)
     }
 
     /**
      * 通过contentUri获取文件路径
      */
-    public static @Nullable String getFilePathFromContentUri(@NonNull Context context,@NonNull Uri contentUri){
-        return queryResultByContentResolver(context,contentUri,MediaStore.Files.FileColumns.DATA);
+    @JvmStatic
+    fun getFilePathFromContentUri(context: Context, contentUri: Uri): String? {
+        return queryResultByContentResolver(context, contentUri, MediaStore.Files.FileColumns.DATA)
     }
 
     /**
      * 通过contentUri获取文件大小，返回字符串型长度，单位字节
      */
-    public static @Nullable String getFileLengthFromContentUri(@NonNull Context context,@NonNull Uri contentUri){
-        return queryResultByContentResolver(context,contentUri,MediaStore.Files.FileColumns.SIZE);
+    @JvmStatic
+    fun getFileLengthFromContentUri(context: Context, contentUri: Uri): String? {
+        return queryResultByContentResolver(context, contentUri, MediaStore.Files.FileColumns.SIZE)
     }
 
-    private static @Nullable String queryResultByContentResolver(@NonNull Context context,@NonNull Uri contentUri,@NonNull String selection){
-        try{
-            String result=null;
-            Cursor cursor = context.getContentResolver().query(contentUri,
-                    new String[]{selection},
-                    null, null, null);
-            if (cursor == null) return null;
+    private fun queryResultByContentResolver(context: Context, contentUri: Uri, selection: String): String? {
+        try {
+            var result: String? = null
+            val cursor: Cursor? = context.contentResolver.query(
+                contentUri,
+                arrayOf(selection),
+                null, null, null
+            )
+            if (cursor == null) return null
             else {
-                if(cursor.moveToFirst()){
-                    result = cursor.getString(cursor.getColumnIndex(selection));
+                if (cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(selection))
                 }
-                cursor.close();
+                cursor.close()
             }
-            return result;
-        }catch (Exception e){
-            e.printStackTrace();
+            return result
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return null;
+        return null
     }
 
     /**
      * 传入的file须为主存储下的文件，且对file有完整的读写权限
      */
-    public static Uri getUriForFileByFileProvider(@NonNull Context context,@NonNull File file){
-        return FileProvider.getUriForFile(context,"info.muge.appshare.FileProvider",file);
+    @JvmStatic
+    fun getUriForFileByFileProvider(context: Context, file: File): Uri {
+        return FileProvider.getUriForFile(context, "info.muge.appshare.FileProvider", file)
     }
 
     /**
      * 请求更新媒体数据库
      */
-    public static void requestUpdatingMediaDatabase(@NonNull Context context){
-        try{
-            Bundle bundle=new Bundle();
-            bundle.putString("volume","external");
-            Intent intent=new Intent();
-            intent.putExtras(bundle);
-            intent.setComponent(new ComponentName("com.android.providers.media",
-                    "com.android.providers.media.MediaScannerService"));
-            context.startService(intent);
-        }catch (Exception e){
-            e.printStackTrace();
+    @JvmStatic
+    fun requestUpdatingMediaDatabase(context: Context) {
+        try {
+            val bundle = Bundle()
+            bundle.putString("volume", "external")
+            val intent = Intent()
+            intent.putExtras(bundle)
+            intent.component = ComponentName(
+                "com.android.providers.media",
+                "com.android.providers.media.MediaScannerService"
+            )
+            context.startService(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -477,29 +523,30 @@ public class EnvironmentUtil {
      * @param contentView   window的内容布局
      * @return window显示的左上角的xOff,yOff坐标
      */
-    public static int[] calculatePopWindowPos(final View anchorView, final View contentView) {
-        final int[] windowPos = new int[2];
-        final int[] anchorLoc = new int[2];
+    @JvmStatic
+    fun calculatePopWindowPos(anchorView: View, contentView: View): IntArray {
+        val windowPos = IntArray(2)
+        val anchorLoc = IntArray(2)
         // 获取锚点View在屏幕上的左上角坐标位置
-        anchorView.getLocationOnScreen(anchorLoc);
-        final int anchorHeight = anchorView.getHeight();
+        anchorView.getLocationOnScreen(anchorLoc)
+        val anchorHeight = anchorView.height
         // 获取屏幕的高宽
-        final int screenHeight = anchorView.getContext().getResources().getDisplayMetrics().heightPixels;//ScreenUtils.getScreenHeight(anchorView.getContext());
-        final int screenWidth = anchorView.getResources().getDisplayMetrics().widthPixels;
-        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        val screenHeight = anchorView.context.resources.displayMetrics.heightPixels
+        val screenWidth = anchorView.resources.displayMetrics.widthPixels
+        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
         // 计算contentView的高宽
-        final int windowHeight = contentView.getMeasuredHeight();
-        final int windowWidth = contentView.getMeasuredWidth();
+        val windowHeight = contentView.measuredHeight
+        val windowWidth = contentView.measuredWidth
         // 判断需要向上弹出还是向下弹出显示
-        final boolean isNeedShowUp = (screenHeight - anchorLoc[1] - anchorHeight < windowHeight);
+        val isNeedShowUp = (screenHeight - anchorLoc[1] - anchorHeight < windowHeight)
         if (isNeedShowUp) {
-            windowPos[0] = anchorLoc[0];//screenWidth - windowWidth*3/2;
-            windowPos[1] = anchorLoc[1] - windowHeight;
+            windowPos[0] = anchorLoc[0]
+            windowPos[1] = anchorLoc[1] - windowHeight
         } else {
-            windowPos[0] = anchorLoc[0];//screenWidth - windowWidth*3/2;
-            windowPos[1] = anchorLoc[1] + anchorHeight;
+            windowPos[0] = anchorLoc[0]
+            windowPos[1] = anchorLoc[1] + anchorHeight
         }
-        return windowPos;
+        return windowPos
     }
 
     /**
@@ -509,133 +556,107 @@ public class EnvironmentUtil {
      * @param color 高亮颜色
      * @return 生成的Spannable
      */
-    public static SpannableStringBuilder getSpannableString(@NonNull String content, @Nullable String keyword, @ColorInt int color){
-        SpannableStringBuilder builder=new SpannableStringBuilder(content);
-        if(keyword==null||"".equals(keyword))return builder;
+    @JvmStatic
+    fun getSpannableString(content: String, keyword: String?, @ColorInt color: Int): SpannableStringBuilder {
+        val builder = SpannableStringBuilder(content)
+        if (keyword == null || keyword.isEmpty()) return builder
 
-        int index=content.toLowerCase().indexOf(keyword.toLowerCase());
-        if(index>=0){
-            builder.setSpan(new ForegroundColorSpan(color),index,index+keyword.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            return builder;
+        val index = content.lowercase().indexOf(keyword.lowercase())
+        if (index >= 0) {
+            builder.setSpan(
+                ForegroundColorSpan(color),
+                index,
+                index + keyword.length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            return builder
         }
-        keyword=keyword.toLowerCase();
-        final ArrayList<String>singleCharFullSpell=new ArrayList<>();
-        //final ArrayList<String>singleCharFirstSpell=new ArrayList<>();
-        final StringBuilder fullSpell= new StringBuilder();
-        final StringBuilder singleSpell= new StringBuilder();
-        final char[] chars_content=content.toCharArray();
-        for(int i=0;i<chars_content.length;i++){
-            if(PinyinUtil.isChineseChar(chars_content[i])){
-                fullSpell.append(PinyinUtil.getFullSpell(String.valueOf(chars_content[i])).toLowerCase());
-                singleSpell.append(PinyinUtil.getFirstSpell(String.valueOf(chars_content[i])).toLowerCase());
-                singleCharFullSpell.add(PinyinUtil.getFullSpell(String.valueOf(chars_content[i])).toLowerCase());
-                //singleCharFirstSpell.add(PinyinUtil.getFirstSpell(String.valueOf(chars_content[i])).toLowerCase());
-            }else{
-                fullSpell.append(String.valueOf(chars_content[i]).toLowerCase());
-                singleSpell.append(String.valueOf(chars_content[i]).toLowerCase());
-                singleCharFullSpell.add(String.valueOf(chars_content[i]).toLowerCase());
+
+        val keywordLower = keyword.lowercase()
+        val singleCharFullSpell = ArrayList<String>()
+        val fullSpell = StringBuilder()
+        val singleSpell = StringBuilder()
+        val chars_content = content.toCharArray()
+
+        for (i in chars_content.indices) {
+            if (PinyinUtil.isChineseChar(chars_content[i])) {
+                fullSpell.append(PinyinUtil.getFullSpell(chars_content[i].toString()).lowercase())
+                singleSpell.append(PinyinUtil.getFirstSpell(chars_content[i].toString()).lowercase())
+                singleCharFullSpell.add(PinyinUtil.getFullSpell(chars_content[i].toString()).lowercase())
+            } else {
+                fullSpell.append(chars_content[i].toString().lowercase())
+                singleSpell.append(chars_content[i].toString().lowercase())
+                singleCharFullSpell.add(chars_content[i].toString().lowercase())
             }
         }
 
-        int span_index_begin=-1,span_index_end=-1;
-        final int index_first_spell=singleSpell.indexOf(keyword);
-        if(index_first_spell>=0){
-            span_index_begin=index_first_spell;
-            span_index_end=index_first_spell+keyword.length();
-        }else{
-            int fullSpellCheck=0;
-            String keywordFullSpellCheck=keyword;
-            boolean flag_matched=false;
-            boolean flag_matched_end=true;
-            for(int i=0;i<singleCharFullSpell.size();i++){
-                if(keywordFullSpellCheck.trim().length()==0)break;
-                final String sp=singleCharFullSpell.get(i);
-                if(sp.contains(keyword)&&!flag_matched){
-                    span_index_begin=i;
-                    span_index_end=span_index_begin+1;
-                    break;
+        var span_index_begin = -1
+        var span_index_end = -1
+        val index_first_spell = singleSpell.indexOf(keywordLower)
+
+        if (index_first_spell >= 0) {
+            span_index_begin = index_first_spell
+            span_index_end = index_first_spell + keywordLower.length
+        } else {
+            var fullSpellCheck = 0
+            var keywordFullSpellCheck = keywordLower
+            var flag_matched = false
+            var flag_matched_end = true
+
+            for (i in singleCharFullSpell.indices) {
+                if (keywordFullSpellCheck.trim().isEmpty()) break
+                val sp = singleCharFullSpell[i]
+
+                if (sp.contains(keywordLower) && !flag_matched) {
+                    span_index_begin = i
+                    span_index_end = span_index_begin + 1
+                    break
                 }
 
-                final int index_2=keywordFullSpellCheck.indexOf(sp);
-                if(index_2>=0&&PinyinUtil.isChineseChar(chars_content[i])){
-                    flag_matched=true;
-                    if(span_index_begin==-1)span_index_begin=i;
-                    keywordFullSpellCheck=keywordFullSpellCheck.substring(index_2+sp.length());
-                    fullSpellCheck++;
-                    continue;
+                val index_2 = keywordFullSpellCheck.indexOf(sp)
+                if (index_2 >= 0 && PinyinUtil.isChineseChar(chars_content[i])) {
+                    flag_matched = true
+                    if (span_index_begin == -1) span_index_begin = i
+                    keywordFullSpellCheck = keywordFullSpellCheck.substring(index_2 + sp.length)
+                    fullSpellCheck++
+                    continue
                 }
 
-                final int index_1=sp.indexOf(keywordFullSpellCheck);
-                if(flag_matched){
-                    if(index_1>=0){
-                        fullSpellCheck++;
-                    }else{
-                        flag_matched_end=false;
+                val index_1 = sp.indexOf(keywordFullSpellCheck)
+                if (flag_matched) {
+                    if (index_1 >= 0) {
+                        fullSpellCheck++
+                    } else {
+                        flag_matched_end = false
                     }
-                    break;
+                    break
                 }
             }
-            if(fullSpellCheck>0)span_index_end=span_index_begin+fullSpellCheck;
-            if(!flag_matched_end){
-                span_index_begin=span_index_end=-1;
+
+            if (fullSpellCheck > 0) span_index_end = span_index_begin + fullSpellCheck
+            if (!flag_matched_end) {
+                span_index_begin = -1
+                span_index_end = -1
             }
         }
 
-        if(span_index_begin>=0&&span_index_end>=0){
-            builder.setSpan(new ForegroundColorSpan(color),span_index_begin,span_index_end,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (span_index_begin >= 0 && span_index_end >= 0) {
+            builder.setSpan(
+                ForegroundColorSpan(color),
+                span_index_begin,
+                span_index_end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
-        return builder;
+        return builder
     }
 
-    public static int dp2px(@NonNull Context context,int dp){
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    @JvmStatic
+    fun dp2px(context: Context, dp: Int): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp.toFloat(),
+            context.resources.displayMetrics
+        ).toInt()
     }
-
-    /*public static String getBroadCastIpAddress(@NonNull Context context){
-        try{
-            if(isAPEnabled(context)){
-                return getRouterIpAddress(context);
-            }else return "255.255.255.255";
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return "255.255.255.255";
-    }*/
-
-    /*
-     * 当本机热点作为路由时发送广播包请求在线设备的ip地址
-     */
-    /*public static String getApHostBroadcastAddress(){
-        try{
-            String ip=getApConnectedDeviceIp();
-            return ip.substring(0,ip.lastIndexOf("."))+".255";
-        }catch (Exception e){e.printStackTrace();}
-        return "";
-    }*/
-
-    /*
-     * 获取连接本机热点设备的其中一个ip地址
-     */
-    /*private static String getApConnectedDeviceIp(){
-        try{
-            //String anIP="";
-            BufferedReader reader = new BufferedReader(new FileReader("/proc/net/arp"));
-            String line;
-            //读取第一行信息，就是IP address HW type Flags HW address Mask Device
-            while ((line = reader.readLine()) != null) {
-                String[] tokens = line.split("[ ]+");
-                if (tokens.length < 6) {
-                    continue;
-                }
-                //String ip = tokens[0]; //ip
-                return tokens[0];
-                //    String mac = tokens[3];  //mac 地址
-                //  String flag = tokens[2];//表示连接状态
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return "";
-    }*/
-
 }

@@ -473,7 +473,7 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>(), View.OnClick
         if (Build.VERSION.SDK_INT >= 28) { //根布局项目太多时低版本Android会引发一个底层崩溃。版本号暂定28
             ActivityCompat.finishAfterTransition(this)
         } else {
-            if (contentBinding.appDetailAssembly.getIsExpanded()) {
+            if (contentBinding.appDetailAssembly.isExpanded) {
                 finish()
             } else {
                 ActivityCompat.finishAfterTransition(this)

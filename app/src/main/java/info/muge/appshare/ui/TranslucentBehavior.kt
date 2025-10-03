@@ -1,57 +1,60 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.appcompat.widget.Toolbar;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.TextView;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.View
+import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import info.muge.appshare.R
 
-import info.muge.appshare.R;
+/**
+ * 半透明行为
+ */
+class TranslucentBehavior(private val context: Context, attrs: AttributeSet?) : 
+    CoordinatorLayout.Behavior<Toolbar>(context, attrs) {
 
-public class TranslucentBehavior extends CoordinatorLayout.Behavior<Toolbar> {
+    /**
+     * 标题栏的高度
+     */
+    private var mToolbarHeight = 0
 
-    /**标题栏的高度*/
-    private int mToolbarHeight = 0;
-    private Context context;
-
-    public TranslucentBehavior(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        this.context=context;
-    }
-
-    @Override
-    public boolean layoutDependsOn(@NonNull CoordinatorLayout parent, @NonNull Toolbar child, @NonNull View dependency) {
-        return dependency instanceof TextView;
+    override fun layoutDependsOn(
+        parent: CoordinatorLayout,
+        child: Toolbar,
+        dependency: View
+    ): Boolean {
+        return dependency is TextView
     }
 
     /**
-     * 必须要加上  layout_anchor，对方也要layout_collapseMode才能使用
+     * 必须要加上 layout_anchor，对方也要layout_collapseMode才能使用
      */
-    @Override
-    public boolean onDependentViewChanged(@NonNull CoordinatorLayout parent, @NonNull Toolbar child, @NonNull View dependency) {
-
+    override fun onDependentViewChanged(
+        parent: CoordinatorLayout,
+        child: Toolbar,
+        dependency: View
+    ): Boolean {
         // 初始化高度
         if (mToolbarHeight == 0) {
-            mToolbarHeight = child.getBottom() * 2;//为了更慢的
+            mToolbarHeight = child.bottom * 2 // 为了更慢的
         }
-        //
-        //计算toolbar从开始移动到最后的百分比
-        float percent = dependency.getY() / mToolbarHeight;
+        
+        // 计算toolbar从开始移动到最后的百分比
+        var percent = dependency.y / mToolbarHeight
 
-        //百分大于1，直接赋值为1
+        // 百分大于1，直接赋值为1
         if (percent >= 1) {
-            percent = 1f;
+            percent = 1f
         }
 
         // 计算alpha通道值
-        float alpha = percent * 255;
+        val alpha = percent * 255
 
+        // 设置背景颜色
+        child.setBackgroundColor(context.resources.getColor(R.color.colorTitle))
 
-        //设置背景颜色
-        child.setBackgroundColor(context.getResources().getColor(R.color.colorTitle));
-
-        return true;
+        return true
     }
 }
+

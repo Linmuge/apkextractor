@@ -1,26 +1,34 @@
-package info.muge.appshare;
+package info.muge.appshare
 
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable
 
-public interface DisplayItem {
+/**
+ * 显示项接口
+ */
+interface DisplayItem {
     /**
      * @return 项目图标
      */
-    Drawable getIconDrawable();
+    fun getIconDrawable(): Drawable
+
     /**
      * @return 项目标题
      */
-    String getTitle();
+    fun getTitle(): String
+
     /**
      * @return 项目描述
      */
-    String getDescription();
+    fun getDescription(): String
+
     /**
      * @return 项目大小，单位字节
      */
-    long getSize();
+    fun getSize(): Long
+
     /**
      * @return 是否需要红色高亮标注
      */
-    boolean isRedMarked();
+    fun isRedMarked(): Boolean
 }
+

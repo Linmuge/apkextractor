@@ -1,27 +1,24 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-import android.content.Context;
-import androidx.annotation.NonNull;
-import android.widget.Toast;
+import android.content.Context
+import android.widget.Toast
+import info.muge.appshare.Global
 
-import info.muge.appshare.Global;
+/**
+ * Toast管理器
+ */
+object ToastManager {
 
-public class ToastManager {
+    private var toast: Toast? = null
 
-    private static Toast toast;
-
-    public static void showToast(@NonNull final Context context, @NonNull final String content, final int length){
-        Global.handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if(toast!=null){
-                    toast.cancel();
-                    toast=null;
-                }
-                toast=Toast.makeText(context,content,length);
-                toast.show();
-            }
-        });
+    @JvmStatic
+    fun showToast(context: Context, content: String, length: Int) {
+        Global.handler.post {
+            toast?.cancel()
+            toast = null
+            toast = Toast.makeText(context, content, length)
+            toast?.show()
+        }
     }
-
 }
+

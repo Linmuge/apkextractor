@@ -1,63 +1,71 @@
-package info.muge.appshare.ui;
+package info.muge.appshare.ui
 
-import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.appcompat.widget.Toolbar;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ImageView;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.View
+import android.widget.ImageView
+import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 
-public class TransferHeaderBehavior extends CoordinatorLayout.Behavior<ImageView> {
+/**
+ * 传输头部行为
+ */
+class TransferHeaderBehavior(context: Context, attrs: AttributeSet?) : 
+    CoordinatorLayout.Behavior<ImageView>(context, attrs) {
 
     /**
      * 处于中心时候原始X轴
      */
-    private int mOriginalHeaderX = 0;
+    private var mOriginalHeaderX = 0
+
     /**
      * 处于中心时候原始Y轴
      */
-    private int mOriginalHeaderY = 0;
+    private var mOriginalHeaderY = 0
 
-
-    public TransferHeaderBehavior(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    override fun layoutDependsOn(
+        parent: CoordinatorLayout,
+        child: ImageView,
+        dependency: View
+    ): Boolean {
+        return dependency is Toolbar
     }
 
-    @Override
-    public boolean layoutDependsOn(@NonNull CoordinatorLayout parent, @NonNull ImageView child, @NonNull View dependency) {
-        return dependency instanceof Toolbar;
-    }
-
-    @Override
-    public boolean onDependentViewChanged(@NonNull CoordinatorLayout parent, @NonNull ImageView child, @NonNull View dependency) {
+    override fun onDependentViewChanged(
+        parent: CoordinatorLayout,
+        child: ImageView,
+        dependency: View
+    ): Boolean {
         // 计算X轴坐标
         if (mOriginalHeaderX == 0) {
-            this.mOriginalHeaderX = dependency.getWidth() / 2 - child.getWidth() / 2;
+            mOriginalHeaderX = dependency.width / 2 - child.width / 2
         }
         // 计算Y轴坐标
         if (mOriginalHeaderY == 0) {
-            mOriginalHeaderY = dependency.getHeight() - child.getHeight();
+            mOriginalHeaderY = dependency.height - child.height
         }
-        //X轴百分比
-        float mPercentX = dependency.getY() / mOriginalHeaderX;
+        
+        // X轴百分比
+        var mPercentX = dependency.y / mOriginalHeaderX
         if (mPercentX >= 1) {
-            mPercentX = 1;
+            mPercentX = 1f
         }
-        //Y轴百分比
-        float mPercentY = dependency.getY() / mOriginalHeaderY;
+        
+        // Y轴百分比
+        var mPercentY = dependency.y / mOriginalHeaderY
         if (mPercentY >= 1) {
-            mPercentY = 1;
+            mPercentY = 1f
         }
 
-        float x = mOriginalHeaderX - mOriginalHeaderX * mPercentX;
-        if (x <= child.getWidth()) {
-            x = child.getWidth();
+        var x = mOriginalHeaderX - mOriginalHeaderX * mPercentX
+        if (x <= child.width) {
+            x = child.width.toFloat()
         }
         // TODO 头像的放大和缩小没做
 
-        child.setX(x);
-        child.setY(mOriginalHeaderY - mOriginalHeaderY * mPercentY);
-        return true;
+        child.x = x
+        child.y = mOriginalHeaderY - mOriginalHeaderY * mPercentY
+        return true
     }
 }
+
