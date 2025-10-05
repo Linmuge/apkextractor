@@ -4,9 +4,7 @@ import android.app.Activity
 import android.graphics.Color
 import android.text.format.Formatter
 import android.view.View
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +13,11 @@ import com.drake.brv.utils.models
 import com.drake.brv.utils.setup
 import info.muge.appshare.DisplayItem
 import info.muge.appshare.R
+import info.muge.appshare.databinding.ItemAppInfoGridBinding
+import info.muge.appshare.databinding.ItemAppInfoLinearBinding
 import info.muge.appshare.utils.EnvironmentUtil
+import info.muge.appshare.utils.colorPrimary
+import info.muge.appshare.utils.colorSurfaceContainer
 
 /**
  * 应用列表适配器包装类
@@ -37,9 +39,15 @@ class AppListAdapter<T : DisplayItem>(
     private var adapter: BindingAdapter
     
     init {
-        // 设置LayoutManager
-        setLayoutManagerAndView(viewMode)
-        
+        // 先设置 LayoutManager（不调用完整的 setLayoutManagerAndView，避免在 adapter 创建前操作）
+        recyclerView.layoutManager = if (viewMode == 1) {
+            GridLayoutManager(activity, 4)
+        } else {
+            LinearLayoutManager(activity).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
+        }
+
         // 配置BRV适配器
         adapter = recyclerView.setup {
             // 根据viewMode添加不同的布局类型
@@ -49,96 +57,29 @@ class AppListAdapter<T : DisplayItem>(
             onBind {
                 val item = getModel<DisplayItem>() as T
                 val position = layoutPosition
-                
-                // 获取视图
-                val root = itemView.findViewById<View>(R.id.item_app_root)
-                val icon = itemView.findViewById<ImageView>(R.id.item_app_icon)
-                val title = itemView.findViewById<TextView>(R.id.item_app_title)
-                
-                // 设置图标
-                icon.setImageDrawable(item.getIconDrawable())
 
-                // 设置标题颜色
-                val titleColor = if (item.isRedMarked()) {
-                    activity.resources.getColor(R.color.colorSystemAppTitleColor)
+                // 获取高亮颜色
+                val typedValue = android.util.TypedValue()
+                val highlightColor = if (activity.theme.resolveAttribute(
+                        androidx.appcompat.R.attr.colorPrimary,
+                        typedValue,
+                        true
+                    )) {
+                    typedValue.data
                 } else {
-                    activity.resources.getColor(R.color.colorHighLightText)
+                    Color.parseColor("#4285F4") // 备用颜色
                 }
-                title.setTextColor(titleColor)
 
-                // 设置标题文本（支持高亮）
-                try {
-                    // 使用主题的 primary 颜色进行高亮
-                    val typedValue = android.util.TypedValue()
-                    val highlightColor = if (activity.theme.resolveAttribute(
-                            androidx.appcompat.R.attr.colorPrimary,
-                            typedValue,
-                            true
-                        )) {
-                        typedValue.data
-                    } else {
-                        Color.parseColor("#4285F4") // 备用颜色
+                // 根据布局类型使用不同的 ViewBinding
+                // 使用 itemViewType 而不是 viewMode 来判断，因为 itemViewType 是当前 ViewHolder 实际使用的布局
+                when (itemViewType) {
+                    R.layout.item_app_info_linear -> {
+                        // 列表模式 - 使用 ItemAppInfoLinearBinding
+                        bindLinearItem(item, position, highlightColor)
                     }
-                    title.text = EnvironmentUtil.getSpannableString(
-                        item.getTitle(),
-                        highlightKeyword,
-                        highlightColor
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    title.text = item.getTitle()
-                }
-                
-                // 列表模式特有的视图
-                if (this@AppListAdapter.viewMode == 0) {
-                    val description = itemView.findViewById<TextView>(R.id.item_app_description)
-                    val right = itemView.findViewById<TextView>(R.id.item_app_right)
-                    val cb = itemView.findViewById<CheckBox>(R.id.item_app_cb)
-                    
-                    // 设置描述（支持高亮）
-                    try {
-                        // 使用主题的 primary 颜色进行高亮
-                        val typedValue = android.util.TypedValue()
-                        val highlightColor = if (activity.theme.resolveAttribute(
-                                androidx.appcompat.R.attr.colorPrimary,
-                                typedValue,
-                                true
-                            )) {
-                            typedValue.data
-                        } else {
-                            Color.parseColor("#4285F4") // 备用颜色
-                        }
-                        description.text = EnvironmentUtil.getSpannableString(
-                            item.getDescription(),
-                            highlightKeyword,
-                            highlightColor
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        description.text = item.getDescription()
-                    }
-
-                    // 设置大小
-                    right.text = Formatter.formatFileSize(activity, item.getSize())
-                    
-                    // 多选模式处理
-                    right.visibility = if (isMultiSelectMode) View.GONE else View.VISIBLE
-                    cb.visibility = if (isMultiSelectMode) View.VISIBLE else View.GONE
-                    
-                    if (isMultiSelectMode) {
-                        cb.isChecked = selectedPositions?.getOrNull(position) ?: false
-                    }
-                } else {
-                    // 网格模式的背景处理
-                    if (isMultiSelectMode) {
-                        val selected = selectedPositions?.getOrNull(position) ?: false
-                        root.setBackgroundColor(
-                            activity.resources.getColor(
-                                if (selected) R.color.colorSelectedBackground else R.color.colorCardArea
-                            )
-                        )
-                    } else {
-                        root.setBackgroundColor(activity.resources.getColor(R.color.colorCardArea))
+                    R.layout.item_app_info_grid -> {
+                        // 网格模式 - 使用 ItemAppInfoGridBinding
+                        bindGridItem(item, position, highlightColor)
                     }
                 }
             }
@@ -194,7 +135,14 @@ class AppListAdapter<T : DisplayItem>(
      * 设置LayoutManager和视图模式
      */
     fun setLayoutManagerAndView(mode: Int) {
+        if (this.viewMode == mode) return // 如果模式相同，不需要切换
+
         this.viewMode = mode
+
+        // 保存当前数据
+        val currentModels = adapter.models
+
+        // 更新 LayoutManager
         recyclerView.layoutManager = if (mode == 1) {
             GridLayoutManager(activity, 4)
         } else {
@@ -202,6 +150,14 @@ class AppListAdapter<T : DisplayItem>(
                 orientation = LinearLayoutManager.VERTICAL
             }
         }
+
+        // 重新配置 adapter 的布局类型
+        adapter.typePool.clear() // 清除旧的类型池
+        adapter.addType<DisplayItem>(if (mode == 0) R.layout.item_app_info_linear else R.layout.item_app_info_grid)
+
+        // 恢复数据并刷新
+        adapter.models = currentModels
+        adapter.notifyDataSetChanged()
     }
     
     /**
@@ -295,6 +251,109 @@ class AppListAdapter<T : DisplayItem>(
      */
     fun notifyDataSetChanged() {
         adapter.notifyDataSetChanged()
+    }
+
+    /**
+     * 绑定列表模式的项目
+     */
+    private fun BindingAdapter.BindingViewHolder.bindLinearItem(
+        item: T,
+        position: Int,
+        highlightColor: Int
+    ) {
+        // 使用 BRV 的 getBinding 方法获取 ViewBinding
+        val binding = getBinding<ItemAppInfoLinearBinding>()
+
+        // 设置图标
+        binding.itemAppIcon.setImageDrawable(item.getIconDrawable())
+
+        // 设置标题颜色
+        val titleColor = if (item.isRedMarked()) {
+            activity.resources.getColor(R.color.colorSystemAppTitleColor)
+        } else {
+            activity.resources.getColor(R.color.colorHighLightText)
+        }
+        binding.itemAppTitle.setTextColor(titleColor)
+
+        // 设置标题文本（支持高亮）
+        try {
+            binding.itemAppTitle.text = EnvironmentUtil.getSpannableString(
+                item.getTitle(),
+                highlightKeyword,
+                highlightColor
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            binding.itemAppTitle.text = item.getTitle()
+        }
+
+        // 设置描述（支持高亮）
+        try {
+            binding.itemAppDescription.text = EnvironmentUtil.getSpannableString(
+                item.getDescription(),
+                highlightKeyword,
+                highlightColor
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            binding.itemAppDescription.text = item.getDescription()
+        }
+
+        // 设置大小
+        binding.itemAppRight.text = Formatter.formatFileSize(activity, item.getSize())
+
+        // 多选模式处理
+        binding.itemAppRight.isVisible = !isMultiSelectMode
+        binding.itemAppCb.isVisible = isMultiSelectMode
+
+        if (isMultiSelectMode) {
+            binding.itemAppCb.isChecked = selectedPositions?.getOrNull(position) ?: false
+        }
+    }
+
+    /**
+     * 绑定网格模式的项目
+     */
+    private fun BindingAdapter.BindingViewHolder.bindGridItem(
+        item: T,
+        position: Int,
+        highlightColor: Int
+    ) {
+        // 使用 BRV 的 getBinding 方法获取 ViewBinding
+        val binding = getBinding<ItemAppInfoGridBinding>()
+
+        // 设置图标
+        binding.itemAppIcon.setImageDrawable(item.getIconDrawable())
+
+        // 设置标题颜色
+        val titleColor = if (item.isRedMarked()) {
+            activity.resources.getColor(R.color.colorSystemAppTitleColor)
+        } else {
+            activity.resources.getColor(R.color.colorHighLightText)
+        }
+        binding.itemAppTitle.setTextColor(titleColor)
+
+        // 设置标题文本（支持高亮）
+        try {
+            binding.itemAppTitle.text = EnvironmentUtil.getSpannableString(
+                item.getTitle(),
+                highlightKeyword,
+                highlightColor
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            binding.itemAppTitle.text = item.getTitle()
+        }
+
+        // 网格模式的背景处理
+        if (isMultiSelectMode) {
+            val selected = selectedPositions?.getOrNull(position) ?: false
+            binding.itemAppRoot.setCardBackgroundColor(
+                if (selected) context.colorPrimary else context.colorSurfaceContainer
+            )
+        } else {
+            binding.itemAppRoot.setCardBackgroundColor(activity.colorSurfaceContainer)
+        }
     }
 }
 

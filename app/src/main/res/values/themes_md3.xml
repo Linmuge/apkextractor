@@ -53,8 +53,10 @@
         
         <!-- Window settings -->
         <item name="android:windowBackground">?attr/colorSurface</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
         
         <!-- Material components -->
         <item name="materialCardViewStyle">@style/materialCardViewStyle</item>

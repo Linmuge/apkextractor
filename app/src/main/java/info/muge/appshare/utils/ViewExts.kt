@@ -20,6 +20,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.marginBottom
+import androidx.core.view.marginEnd
+import androidx.core.view.marginStart
+import androidx.core.view.marginTop
 import androidx.fragment.app.FragmentActivity
 import info.muge.appshare.MyApplication
 import java.io.IOException
@@ -157,34 +163,98 @@ fun View.setHeight(heightAsPx: Int) {
  * 设置状态栏图标颜色模式，根据当前主题自动调整
  */
 fun FragmentActivity.setStatusBarIconColorMode() {
+    // 获取当前主题是否是夜间模式
+    val nightMode = AppCompatDelegate.getDefaultNightMode()
+    val isNightMode = nightMode == AppCompatDelegate.MODE_NIGHT_YES ||
+            (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                    (resources.configuration.uiMode and
+                            Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES)
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         // Android 11 (API 30)及以上版本使用WindowInsetsController
-        window.decorView.getWindowInsetsController()?.setSystemBarsAppearance(
-            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-        )
-    } else {
+        val insetsController = window.insetsController
+        if (!isNightMode) {
+            // 浅色模式，使用深色状态栏图标
+            insetsController?.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        } else {
+            // 深色模式，使用浅色状态栏图标
+            insetsController?.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        }
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         // Android 6.0 (API 23)及以上版本使用SYSTEM_UI_FLAG
-        val decorView: View = getWindow().getDecorView()
-        var flags = decorView.getSystemUiVisibility()
-
-
-        // 获取当前主题是否是夜间模式
-        val nightMode = AppCompatDelegate.getDefaultNightMode()
-        val isNightMode = nightMode == AppCompatDelegate.MODE_NIGHT_YES ||
-                (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                        (getResources().getConfiguration().uiMode and
-                                Configuration.UI_MODE_NIGHT_MASK) ==
-                        Configuration.UI_MODE_NIGHT_YES)
+        val decorView: View = window.decorView
+        var flags = decorView.systemUiVisibility
 
         if (!isNightMode) {
-            // 非夜间模式，使用深色状态栏图标
+            // 浅色模式，使用深色状态栏图标
             flags = flags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         } else {
-            // 夜间模式，使用浅色状态栏图标
+            // 深色模式，使用浅色状态栏图标
             flags = flags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
         }
 
-        decorView.setSystemUiVisibility(flags)
+        decorView.systemUiVisibility = flags
+    }
+}
+
+
+/**
+ * 为任意 ViewGroup 适配系统栏 insets
+ * @param applyStatusBar 是否适配状态栏
+ * @param applyNavigationBar 是否适配导航栏
+ */
+fun ViewGroup.setupSystemBarInsets(
+    applyStatusBar: Boolean = false,
+    applyNavigationBar: Boolean = true,
+    paddingTop : Int = 0,
+    paddingBottom : Int = 0,
+) {
+    if (applyNavigationBar && !applyStatusBar){
+        clipToPadding = false
+    }
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+        val statusBars = if (applyStatusBar) insets.getInsets(WindowInsetsCompat.Type.statusBars()) else null
+        val navigationBars = if (applyNavigationBar) insets.getInsets(WindowInsetsCompat.Type.navigationBars()) else null
+
+        view.setPadding(
+            view.paddingLeft,
+            if (applyStatusBar) (statusBars?.top?:0) + paddingTop else view.paddingTop,
+            view.paddingRight,
+            if (applyNavigationBar) (navigationBars?.bottom?:0) + paddingBottom else view.paddingBottom
+        )
+
+        insets
+    }
+}
+/**
+ * 为任意 View 适配系统栏 insets
+ * @param applyStatusBar 是否适配状态栏
+ * @param applyNavigationBar 是否适配导航栏
+ */
+fun View.setupSystemBarInsets(
+    applyStatusBar: Boolean = false,
+    applyNavigationBar: Boolean = true,
+    marginTop : Int = 0,
+    marginBottom : Int = 0,
+) {
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+        val statusBars = if (applyStatusBar) insets.getInsets(WindowInsetsCompat.Type.statusBars()) else null
+        val navigationBars = if (applyNavigationBar) insets.getInsets(WindowInsetsCompat.Type.navigationBars()) else null
+        view.setMargins(
+            view.marginStart,
+            if (applyStatusBar) (statusBars?.top?:0) + marginTop else view.marginTop,
+            view.marginEnd,
+            if (applyNavigationBar) (navigationBars?.bottom?:0) + marginBottom else view.marginBottom
+
+        )
+
+        insets
     }
 }

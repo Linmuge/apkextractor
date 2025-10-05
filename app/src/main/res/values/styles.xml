@@ -1,21 +1,33 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.Material3.DayNight">
+    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight">
         <item name="android:windowBackground">?attr/colorSurface</item>
         <item name="materialCardViewStyle">@style/materialCardViewStyle</item>
         <item name="materialAlertDialogTheme">@style/materialDialog</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
-        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <!-- 状态栏设置 - 透明状态栏 -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- 菜单样式 - 适配深色模式 -->
+        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>
     </style>
 
     <style name="materialCardViewStyle" parent="Widget.Material3.CardView.Filled">
         <item name="cardElevation">0dp</item>
         <item name="cardMaxElevation">0dp</item>
     </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <!-- 状态栏设置 - 透明状态栏 -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- 菜单样式 - 适配深色模式 -->
+        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>
     </style>
 
     <!--更新样式-->
@@ -47,9 +59,16 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
+    <!-- PopupOverlay 样式 - 自动适配深色模式 -->
+    <style name="AppTheme.PopupOverlay" parent="">
+        <item name="android:popupBackground">@drawable/bg_material_dialog</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="android:colorBackground">?attr/colorSurfaceContainer</item>
+    </style>
 
     <style name="MyTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="textAllCaps">false</item>
@@ -65,11 +84,61 @@
         <item name="android:outlineSpotShadowColor" tools:targetApi="p">@color/standardHintColor</item>
     </style>
 
-    <style name="ThemeOverlay.Material3.Surface" parent="Theme.Material3.DayNight">
-        <item name="colorSurface">@color/md_theme_surface</item>
+    <!-- ShapeableImageView 圆角样式 -->
+    <style name="shapeImageCircle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+        <item name="android:scaleType">centerCrop</item>
     </style>
 
-    <style name="ThemeOverlay.Material3.PopupMenu" parent="ThemeOverlay.Material3.Surface">
-        <item name="popupMenuStyle">@style/Widget.Material3.PopupMenu</item>
+    <style name="shapeImage4dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">4dp</item>
+    </style>
+
+    <style name="shapeImage8dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="shapeImage10dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
+    </style>
+
+    <style name="shapeImage12dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="shapeImage16dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="shapeImage18dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">18dp</item>
+    </style>
+
+    <style name="shapeImage28dp">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style>
+
+    <!-- 文本样式 -->
+    <style name="bold600" parent="Widget.AppCompat.TextView">
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontWeight" tools:targetApi="o">600</item>
+    </style>
+
+    <style name="tabSelectText" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="tabUnSelectText" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
     </style>
 </resources>

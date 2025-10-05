@@ -1,6 +1,39 @@
 <resources>
+    <!-- 标准间距值 (8dp 栅格系统) -->
+    <dimen name="dp_4">4dp</dimen>
+    <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_12">12dp</dimen>
+    <dimen name="dp_16">16dp</dimen>
+    <dimen name="dp_20">20dp</dimen>
+    <dimen name="dp_24">24dp</dimen>
+    <dimen name="dp_32">32dp</dimen>
+
+    <!-- Activity 边距 -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- 圆角半径 -->
+    <dimen name="corner_radius_4dp">4dp</dimen>
+    <dimen name="corner_radius_8dp">8dp</dimen>
+    <dimen name="corner_radius_10dp">10dp</dimen>
+    <dimen name="corner_radius_12dp">12dp</dimen>
+    <dimen name="corner_radius_16dp">16dp</dimen>
+    <dimen name="corner_radius_18dp">18dp</dimen>
+    <dimen name="corner_radius_28dp">28dp</dimen>
+
+    <!-- MD3 卡片圆角 -->
     <dimen name="md3_card_corner_radius">12dp</dimen>
     <dimen name="md3_card_corner_radius_large">16dp</dimen>
+
+    <!-- 图标尺寸 -->
+    <dimen name="icon_size_small">20dp</dimen>
+    <dimen name="icon_size_standard">24dp</dimen>
+    <dimen name="icon_size_medium">40dp</dimen>
+    <dimen name="icon_size_app_icon">44dp</dimen>
+    <dimen name="icon_size_large">48dp</dimen>
+
+    <!-- 触摸目标最小尺寸 -->
+    <dimen name="min_touch_target">48dp</dimen>
 </resources>
 
 

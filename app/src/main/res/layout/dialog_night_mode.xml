@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:paddingTop="@dimen/dp_8"
+        android:paddingBottom="@dimen/dp_8">
 
         <RelativeLayout
             android:id="@+id/night_mode_enabled"
@@ -38,10 +38,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="@dimen/dp_12"
                 android:layout_toRightOf="@+id/night_mode_enabled_ra"
                 android:text="@string/night_mode_enabled"
-                android:textAppearance="?attr/textAppearanceBodyLarge" />
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -67,10 +68,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="@dimen/dp_12"
                 android:layout_toRightOf="@+id/night_mode_disabled_ra"
                 android:text="@string/night_mode_disabled"
-                android:textAppearance="?attr/textAppearanceBodyLarge" />
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -96,10 +98,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="@dimen/dp_12"
                 android:layout_toRightOf="@+id/night_mode_follow_system_ra"
                 android:text="@string/night_mode_follow_system"
-                android:textAppearance="?attr/textAppearanceBodyLarge" />
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface" />
         </RelativeLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

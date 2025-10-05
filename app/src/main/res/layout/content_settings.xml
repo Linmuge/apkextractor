@@ -20,12 +20,13 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="4dp"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginVertical="@dimen/dp_4"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="@dimen/corner_radius_16dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp"
-            app:cardCornerRadius="16dp"
-            style="@style/Widget.Material3.CardView.Elevated">
+            app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
             <RelativeLayout
                 android:id="@+id/settings_path_area"
@@ -33,8 +34,8 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackground">
+                android:padding="@dimen/dp_16"
+                android:background="@drawable/ripple_16dp_surfacecontainer">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -76,12 +77,13 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="4dp"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginVertical="@dimen/dp_4"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="@dimen/corner_radius_16dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp"
-            app:cardCornerRadius="16dp"
-            style="@style/Widget.Material3.CardView.Elevated">
+            app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,8 +97,8 @@
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp"
-                    android:background="?attr/selectableItemBackground">
+                    android:padding="@dimen/dp_16"
+                    android:background="@drawable/ripple_16dp_surfacecontainer">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -126,8 +128,8 @@
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginHorizontal="16dp"
-                    app:dividerColor="?attr/colorOutline"/>
+                    android:layout_marginHorizontal="@dimen/dp_16"
+                    app:dividerColor="?attr/colorOutlineVariant"/>
 
                 <!-- 夜间模式设置 -->
                 <RelativeLayout
@@ -136,8 +138,8 @@
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp"
-                    android:background="?attr/selectableItemBackground">
+                    android:padding="@dimen/dp_16"
+                    android:background="@drawable/ripple_16dp_surfacecontainer">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -177,8 +179,8 @@
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginHorizontal="16dp"
-                    app:dividerColor="?attr/colorOutline"/>
+                    android:layout_marginHorizontal="@dimen/dp_16"
+                    app:dividerColor="?attr/colorOutlineVariant"/>
 
                 <!-- 加载选项设置 -->
                 <RelativeLayout
@@ -187,8 +189,8 @@
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp"
-                    android:background="?attr/selectableItemBackground">
+                    android:padding="@dimen/dp_16"
+                    android:background="@drawable/ripple_16dp_surfacecontainer">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -228,8 +230,8 @@
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginHorizontal="16dp"
-                    app:dividerColor="?attr/colorOutline"/>
+                    android:layout_marginHorizontal="@dimen/dp_16"
+                    app:dividerColor="?attr/colorOutlineVariant"/>
 
                 <!-- 包名分隔符设置 -->
                 <RelativeLayout
@@ -238,8 +240,8 @@
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp"
-                    android:background="?attr/selectableItemBackground">
+                    android:padding="@dimen/dp_16"
+                    android:background="@drawable/ripple_16dp_surfacecontainer">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -279,8 +281,8 @@
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginHorizontal="16dp"
-                    app:dividerColor="?attr/colorOutline"/>
+                    android:layout_marginHorizontal="@dimen/dp_16"
+                    app:dividerColor="?attr/colorOutlineVariant"/>
 
                 <!-- 语言设置 -->
                 <RelativeLayout
@@ -289,8 +291,8 @@
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp"
-                    android:background="?attr/selectableItemBackground">
+                    android:padding="@dimen/dp_16"
+                    android:background="@drawable/ripple_16dp_surfacecontainer">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -333,12 +335,13 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="4dp"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginVertical="@dimen/dp_4"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="@dimen/corner_radius_16dp"
             app:cardElevation="0dp"
             app:strokeWidth="0dp"
-            app:cardCornerRadius="16dp"
-            style="@style/Widget.Material3.CardView.Elevated">
+            app:cardBackgroundColor="?attr/colorSurfaceContainer">
 
             <RelativeLayout
                 android:id="@+id/settings_about_area"
@@ -346,8 +349,8 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackground">
+                android:padding="@dimen/dp_16"
+                android:background="@drawable/ripple_16dp_surfacecontainer">
 
                 <LinearLayout
                     android:layout_width="wrap_content"

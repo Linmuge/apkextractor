@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 应用详情页布局 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
+    android:background="?attr/colorSurface"
     tools:context=".activities.AppDetailActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
+        android:background="?attr/colorSurface"
         app:elevation="0dp"
-        android:backgroundTint="@android:color/transparent"
-        style="@style/Widget.MaterialComponents.AppBarLayout.Surface">
+        style="@style/Widget.Material3.AppBarLayout">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="280dp"
-            android:background="@drawable/bg_10dp_bottom"
-            android:backgroundTint="?attr/colorSurface"
-            android:fitsSystemWindows="true"
+            android:background="?attr/colorSurface"
             app:contentScrim="?attr/colorSurface"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
@@ -28,13 +26,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="60dp"
-                android:orientation="vertical">
-                <ImageView
+                android:layout_marginTop="80dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <!-- 应用图标 -->
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/app_detail_icon"
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:layout_gravity="center"
+                    app:shapeAppearance="@style/shapeImage16dp"
+                    android:scaleType="centerCrop"
                     tools:src="@mipmap/ic_launcher"
                     android:transitionName="icon"/>
                 <info.muge.appshare.ui.AutoMarqueeTextView

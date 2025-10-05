@@ -25,6 +25,7 @@ import info.muge.appshare.ui.ExportRuleDialog
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.setStatusBarIconColorMode
+import info.muge.appshare.utils.setupSystemBarInsets
 import info.muge.appshare.utils.toast
 
 /**
@@ -50,6 +51,9 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
     override fun ActivitySettingsBinding.initView() {
         settings = SPUtil.getGlobalSharedPreferences(this@SettingActivity)
 
+        // 适配状态栏
+        appbarSettings.setupSystemBarInsets(true, false)
+
         // 绑定included布局
         // activity_settings.xml 包含 <include android:id="@+id/content_settings_include" layout="@layout/content_settings" />
         // content_settings.xml 的根元素是 ScrollView
@@ -71,9 +75,6 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
             finish()
             return
         }
-
-        // 设置状态栏图标颜色模式
-        setStatusBarIconColorMode()
 
         // 设置Toolbar
         setSupportActionBar(toolbarSettings)

@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 启动页布局 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/titleViewBgColor"
+    android:background="?attr/colorSurface"
     tools:context=".activities.LaunchActivity">
 
+    <!-- 应用图标 -->
     <ImageView
         android:id="@+id/ivIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:src="@drawable/ic_launcher_foreground_launch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="100dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.35"/>
+
+    <!-- 应用名称 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivIcon"
-        android:textColor="@color/standardTextColor"
-        android:text="AppShare"
-        android:textSize="16sp"
-        android:textStyle="bold"/>
+        android:layout_marginTop="@dimen/dp_16"
+        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:textColor="?attr/colorPrimary"
+        android:textStyle="bold"
+        android:text="AppShare"/>
     <RelativeLayout
         android:id="@+id/rlAd"
         android:layout_width="match_parent"

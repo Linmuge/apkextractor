@@ -2,6 +2,7 @@ package info.muge.appshare.activities
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,6 +11,7 @@ import android.view.View
 import android.widget.CompoundButton
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.PermissionChecker
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,6 +27,8 @@ import info.muge.appshare.ui.AppItemSortConfigDialog
 import info.muge.appshare.ui.SortConfigDialogCallback
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
+import info.muge.appshare.utils.setStatusBarIconColorMode
+import info.muge.appshare.utils.setupSystemBarInsets
 
 /**
  * 主Activity
@@ -44,6 +48,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
     private var tabLayoutMediator: TabLayoutMediator? = null
 
     override fun ActivityMainBinding.initView() {
+        // 设置边到边显示（Edge-to-Edge）
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        appbar.setupSystemBarInsets(true,false)
+
+        // 禁用 AppBarLayout 的 lift 行为（防止滚动时状态栏变色）
+        appbar.setLiftable(false)
+        appbar.isLiftOnScroll = false
+
+        // 设置状态栏背景色为透明（防止滚动时变色）
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+
+        // 禁用状态栏对比度强制（防止系统自动改变状态栏颜色）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
+        }
+
         // 设置Toolbar
         setSupportActionBar(toolbar)
         try {

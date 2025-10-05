@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -44,21 +45,19 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/loading_pg"
-                android:layout_marginTop="30dp"
-                android:layout_marginStart="40dp"
-                android:layout_marginEnd="40dp"
-                android:textColor="@color/colorHighLightText"
-                android:textSize="18sp"
+                android:layout_marginTop="@dimen/dp_24"
+                android:layout_marginStart="@dimen/dp_32"
+                android:layout_marginEnd="@dimen/dp_32"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:text="@string/att_loading"
                 android:gravity="center_horizontal"
                 android:maxLines="5"
                 android:ellipsize="middle"
-                tools:text="正在扫描 /storage/emulated/0/Backup/info.muge.appshare-12.apk
-            正在扫描 /storage/emulated/0/Backup/info.muge.appshare-12.apk
-            正在扫描 /storage/emulated/0/Backup/info.muge.appshare-12.apk
-            正在扫描 /storage/emulated/0/Backup/info.muge.appshare-12.apk" />
+                tools:text="正在扫描 /storage/emulated/0/Backup/info.muge.appshare-12.apk" />
         </RelativeLayout>
 
+        <!-- 空内容提示 -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,15 +68,17 @@
             android:visibility="gone">
 
             <ImageView
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:src="@drawable/icon_face_neutral" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/icon_face_neutral"
+                app:tint="?attr/colorOnSurfaceVariant" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@color/colorHighLightText"
+                android:layout_marginStart="@dimen/dp_12"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:text="@string/word_content_blank" />
         </LinearLayout>
     </RelativeLayout>

@@ -118,9 +118,6 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>(), View.OnClick
             finish()
             return
         }
-
-        setupStatusBar()
-
         setSupportActionBar(toolbarAppDetail)
         getSupportActionBar()!!.setDisplayHomeAsUpEnabled(true)
         getSupportActionBar()!!.setTitle(appItem!!.getAppName())
@@ -261,21 +258,6 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>(), View.OnClick
         }
     }
 
-    /**
-     * 设置状态栏亮色模式
-     */
-    private fun setupStatusBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), false)
-            getWindow().getInsetsController()!!.setSystemBarsAppearance(
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-            )
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val decorView = getWindow().getDecorView()
-            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        }
-    }
 
     override fun onClick(v: View) {
         val id = v.getId()

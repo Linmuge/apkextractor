@@ -11,6 +11,7 @@ import info.muge.appshare.Constants
 import info.muge.appshare.R
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.ThemeUtil
+import info.muge.appshare.utils.setStatusBarIconColorMode
 import java.lang.reflect.ParameterizedType
 import java.util.Locale
 
@@ -33,6 +34,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity(), BaseViewBin
         val window = window
         setContentView(binding.root)
         setAndRefreshLanguage()
+        setStatusBarIconColorMode()
 
         binding.initView()
     }
