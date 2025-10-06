@@ -9,13 +9,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingTop="@dimen/dp_8"
+        android:paddingBottom="@dimen/dp_16">
+
+        <!-- APK文件名标题 - 使用MD3文本样式 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="15sp"
-            android:textColor="@color/colorFirstAttention"
+            android:layout_marginTop="@dimen/dp_8"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
             android:text="@string/dialog_filename_apk_att"/>
 
         <RelativeLayout
@@ -36,47 +41,53 @@
                     android:singleLine="true"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- 文件扩展名 - 使用主题颜色 -->
             <TextView
                 android:id="@+id/filename_apk_end"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:textSize="16sp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:gravity="center_vertical"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:layout_marginEnd="5dp"
-                android:textColor="@color/colorHighLightText"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold"
                 android:text=".apk"/>
         </RelativeLayout>
 
+        <!-- 警告信息 - 使用主题颜色 -->
         <LinearLayout
             android:id="@+id/filename_apk_warn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_marginStart="15dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="@dimen/dp_16"
             android:orientation="horizontal"
             android:visibility="gone">
             <ImageView
                 android:layout_width="14dp"
                 android:layout_height="14dp"
-                android:src="@drawable/icon_warn"/>
+                android:src="@drawable/icon_warn"
+                app:tint="?attr/colorError"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="3dp"
-                android:textSize="9sp"
-                android:textColor="@color/colorWarnText"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorError"
                 android:text="@string/dialog_filename_warn_no_variables"/>
         </LinearLayout>
 
+        <!-- ZIP文件名标题 - 使用MD3文本样式 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textSize="15sp"
-            android:textColor="@color/colorFirstAttention"
+            android:layout_marginTop="@dimen/dp_16"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
             android:text="@string/dialog_filename_zip_att"/>
 
         <RelativeLayout
@@ -97,62 +108,69 @@
                     android:singleLine="true"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- 文件扩展名 - 使用主题颜色 -->
             <TextView
                 android:id="@+id/filename_zip_end"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:textSize="16sp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:gravity="center_vertical"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:layout_marginEnd="5dp"
-                android:textColor="@color/colorHighLightText"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold"
                 android:text=".zip"/>
         </RelativeLayout>
 
+        <!-- 警告信息 - 使用主题颜色 -->
         <LinearLayout
             android:id="@+id/filename_zip_warn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_marginStart="15dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="@dimen/dp_16"
             android:orientation="horizontal"
             android:visibility="gone">
             <ImageView
                 android:layout_width="14dp"
                 android:layout_height="14dp"
-                android:src="@drawable/icon_warn"/>
+                android:src="@drawable/icon_warn"
+                app:tint="?attr/colorError"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="3dp"
-                android:textSize="9sp"
-                android:textColor="@color/colorWarnText"
+                android:layout_marginStart="4dp"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorError"
                 android:text="@string/dialog_filename_warn_no_variables"/>
         </LinearLayout>
 
+        <!-- 压缩级别选择区域 -->
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="@dimen/dp_16">
 
+            <!-- 压缩级别标签 - 使用MD3文本样式 -->
             <TextView
                 android:id="@+id/zip_level_att"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:layout_centerVertical="true"
-                android:textSize="14sp"
-                android:textColor="@color/colorFirstAttention"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
                 android:text="@string/zip_level_att"/>
 
+            <!-- 压缩级别下拉选择器 -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/zip_level_att"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="@dimen/dp_12"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -165,13 +183,16 @@
             </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
+        <!-- 变量标题 - 使用MD3文本样式 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            android:textColor="@color/colorFirstAttention"
+            android:layout_marginTop="@dimen/dp_16"
+            android:layout_marginBottom="@dimen/dp_8"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
             android:text="@string/dialog_filename_variables"/>
 
         <HorizontalScrollView
@@ -275,20 +296,25 @@
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
+        <!-- 预览卡片 - 使用MD3样式和主题颜色 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            style="@style/Widget.Material3.CardView.Elevated">
-            
+            android:layout_marginTop="@dimen/dp_16"
+            android:layout_marginBottom="@dimen/dp_8"
+            style="@style/Widget.Material3.CardView.Filled"
+            app:cardCornerRadius="@dimen/md3_card_corner_radius"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
             <TextView
                 android:id="@+id/filename_preview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:textSize="15sp"
-                android:textColor="@color/colorFirstAttention"
+                android:padding="@dimen/dp_16"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
                 android:text="@string/word_preview"/>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

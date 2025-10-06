@@ -23,6 +23,7 @@ import info.muge.appshare.Constants
 import info.muge.appshare.R
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
+import info.muge.appshare.utils.colorSurfaceContainer
 import java.util.Calendar
 
 /**
@@ -183,8 +184,9 @@ class ExportRuleDialog(private val context: Context, style: Int) {
                 .build()
 
             val shapeDrawable = MaterialShapeDrawable(shapeAppearanceModel)
+            // 使用主题颜色属性替代硬编码白色
             shapeDrawable.fillColor = android.content.res.ColorStateList.valueOf(
-                context.resources.getColor(android.R.color.white)
+                context.colorSurfaceContainer
             )
 
             window.setBackgroundDrawable(shapeDrawable)
