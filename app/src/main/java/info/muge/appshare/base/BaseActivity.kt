@@ -30,6 +30,8 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity(), BaseViewBin
         // 应用主题（必须在 super.onCreate 之前调用）
         applyTheme()
 
+        enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
         val window = window
         setContentView(binding.root)
@@ -54,10 +56,47 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity(), BaseViewBin
 
 
     fun <VB: ViewBinding> Any.getViewBinding(inflater: LayoutInflater): VB {
-        val vbClass =  (javaClass.genericSuperclass as ParameterizedType).actualTypeArguments.filterIsInstance<Class<VB>>()
+        // 获取泛型父类
+        val genericSuperclass = javaClass.genericSuperclass
+
+        // 检查是否为 ParameterizedType，如果不是则尝试从父类链中查找
+        val parameterizedType = if (genericSuperclass is ParameterizedType) {
+            genericSuperclass
+        } else {
+            // 如果直接父类不是 ParameterizedType，尝试查找父类链
+            var currentClass: Class<*>? = javaClass.superclass
+            var foundType: ParameterizedType? = null
+
+            while (currentClass != null && foundType == null) {
+                val superType = currentClass.genericSuperclass
+                if (superType is ParameterizedType) {
+                    foundType = superType
+                    break
+                }
+                currentClass = currentClass.superclass
+            }
+
+            foundType ?: throw IllegalStateException(
+                "无法获取 ViewBinding 泛型参数。请确保 ${javaClass.simpleName} 正确继承了 BaseActivity<VB>"
+            )
+        }
+
+        // 获取泛型参数
+        val vbClass = parameterizedType.actualTypeArguments
+            .filterIsInstance<Class<VB>>()
+
+        if (vbClass.isEmpty()) {
+            throw IllegalStateException(
+                "无法找到 ViewBinding 类型参数。请确保 ${javaClass.simpleName} 正确指定了泛型参数"
+            )
+        }
+
+        // 反射调用 inflate 方法
         val inflate = vbClass[0].getDeclaredMethod("inflate", LayoutInflater::class.java)
-        return  inflate.invoke(null, inflater) as VB
-    }    fun setAndRefreshLanguage() {
+        return inflate.invoke(null, inflater) as VB
+    }
+
+    fun setAndRefreshLanguage() {
         // 获得res资源对象
         val resources = resources
         // 获得屏幕参数：主要是分辨率，像素等。
