@@ -2,25 +2,22 @@ package info.muge.appshare.activities
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.RadioButton
-import android.widget.ScrollView
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.widget.NestedScrollView
+import androidx.core.view.WindowCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import info.muge.appshare.Constants
 import info.muge.appshare.R
 import info.muge.appshare.base.BaseActivity
 import info.muge.appshare.databinding.ActivitySettingsBinding
-import info.muge.appshare.databinding.ContentSettingsBinding
 import info.muge.appshare.ui.ExportRuleDialog
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
@@ -29,15 +26,13 @@ import info.muge.appshare.utils.setupSystemBarInsets
 import info.muge.appshare.utils.toast
 
 /**
- * 设置Activity
+ * 设置Activity - Material Design 3 重构版
  * 包含夜间模式、语言、加载选项等设置
  */
 class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
 
     private var resultCode = RESULT_CANCELED
     private lateinit var settings: SharedPreferences
-    private lateinit var contentBinding: ContentSettingsBinding
-    private var isInitialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,30 +46,31 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
     override fun ActivitySettingsBinding.initView() {
         settings = SPUtil.getGlobalSharedPreferences(this@SettingActivity)
 
+        // 设置边到边显示
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         // 适配状态栏
         appbarSettings.setupSystemBarInsets(true, false)
 
-        // 绑定included布局
-        // activity_settings.xml 包含 <include android:id="@+id/content_settings_include" layout="@layout/content_settings" />
-        // content_settings.xml 的根元素是 ScrollView
-        try {
-            // 通过 include 的 ID 获取 ScrollView
-            val scrollView = this@SettingActivity.findViewById<ScrollView>(R.id.content_settings_include)
-            if (scrollView == null) {
-                android.util.Log.e("SettingActivity", "ScrollView not found by ID")
-                finish()
-                return
-            }
+        // 禁用 AppBarLayout 的 lift 行为
+        appbarSettings.setLiftable(false)
+        appbarSettings.isLiftOnScroll = false
 
-            contentBinding = ContentSettingsBinding.bind(scrollView)
-            isInitialized = true
-            android.util.Log.d("SettingActivity", "ContentSettingsBinding bound successfully")
-        } catch (e: Exception) {
-            android.util.Log.e("SettingActivity", "Failed to bind ContentSettingsBinding", e)
-            e.printStackTrace()
-            finish()
-            return
+        // 设置状态栏背景色为透明
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+
+        // 禁用状态栏对比度强制
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isStatusBarContrastEnforced = false
         }
+
+        // 设置状态栏图标颜色
+        setStatusBarIconColorMode()
+
+        // 加载内容布局
+        val contentContainer = contentSettingsContainer
+        LayoutInflater.from(this@SettingActivity)
+            .inflate(R.layout.content_settings, contentContainer, true)
 
         // 设置Toolbar
         setSupportActionBar(toolbarSettings)
@@ -99,27 +95,10 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
     }
 
     /**
-     * 递归查找ScrollView
-     */
-    private fun findScrollView(viewGroup: ViewGroup): View? {
-        for (i in 0 until viewGroup.childCount) {
-            val child = viewGroup.getChildAt(i)
-            if (child is androidx.core.widget.NestedScrollView) {
-                return child
-            }
-            if (child is ViewGroup) {
-                val result = findScrollView(child)
-                if (result != null) return result
-            }
-        }
-        return null
-    }
-
-    /**
      * 设置夜间模式选项
      */
     private fun ActivitySettingsBinding.setupNightModeOption() {
-        contentBinding.settingsNightModeArea.setOnClickListener {
+        findViewById<View>(R.id.settings_night_mode_area).setOnClickListener {
             val editor = settings.edit()
             val dialogView = LayoutInflater.from(this@SettingActivity)
                 .inflate(R.layout.dialog_night_mode, null)
@@ -171,7 +150,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 设置加载选项
      */
     private fun ActivitySettingsBinding.setupLoadingOptionsOption() {
-        contentBinding.settingsLoadingOptionsArea.setOnClickListener {
+        findViewById<View>(R.id.settings_loading_options_area).setOnClickListener {
             val editor = settings.edit()
             val dialogView = LayoutInflater.from(this@SettingActivity)
                 .inflate(R.layout.dialog_loading_selection, null)
@@ -246,7 +225,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 设置规则选项
      */
     private fun ActivitySettingsBinding.setupRulesOption() {
-        contentBinding.settingsRulesArea.setOnClickListener {
+        findViewById<View>(R.id.settings_rules_area).setOnClickListener {
             ExportRuleDialog(this@SettingActivity, R.style.materialDialog).show()
         }
     }
@@ -255,7 +234,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 设置路径选项
      */
     private fun ActivitySettingsBinding.setupPathOption() {
-        contentBinding.settingsPathArea.setOnClickListener {
+        findViewById<View>(R.id.settings_path_area).setOnClickListener {
             "暂不支持修改".toast()
         }
     }
@@ -264,7 +243,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 设置关于选项
      */
     private fun ActivitySettingsBinding.setupAboutOption() {
-        contentBinding.settingsAboutArea.setOnClickListener {
+        findViewById<View>(R.id.settings_about_area).setOnClickListener {
             val dialogView = LayoutInflater.from(this@SettingActivity)
                 .inflate(R.layout.dialog_about, null)
             
@@ -285,7 +264,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 设置语言选项
      */
     private fun ActivitySettingsBinding.setupLanguageOption() {
-        contentBinding.settingsLanguageArea.setOnClickListener {
+        findViewById<View>(R.id.settings_language_area).setOnClickListener {
             val dialogView = LayoutInflater.from(this@SettingActivity)
                 .inflate(R.layout.dialog_language, null)
             
@@ -337,7 +316,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 设置包名分隔符选项
      */
     private fun ActivitySettingsBinding.setupPackageNameSeparatorOption() {
-        contentBinding.settingsPackageNameSeparatorArea.setOnClickListener {
+        findViewById<View>(R.id.settings_package_name_separator_area).setOnClickListener {
             val editor = settings.edit()
             val dialogView = LayoutInflater.from(this@SettingActivity)
                 .inflate(R.layout.dialog_package_name_split, null)
@@ -390,12 +369,8 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
      * 刷新设置值显示
      */
     private fun refreshSettingValues() {
-        if (!isInitialized) {
-            android.util.Log.w("SettingActivity", "Cannot refresh settings - not initialized")
-            return
-        }
-
-        contentBinding.settingsPathValue.text = SPUtil.getDisplayingExportPath()
+        // 导出路径
+        findViewById<TextView>(R.id.settings_path_value)?.text = SPUtil.getDisplayingExportPath()
 
         // 夜间模式
         val nightModeValue = when (settings.getInt(
@@ -407,7 +382,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
             AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> resources.getString(R.string.night_mode_follow_system)
             else -> ""
         }
-        contentBinding.settingsNightModeValue.text = nightModeValue
+        findViewById<TextView>(R.id.settings_night_mode_value)?.text = nightModeValue
 
         // 加载选项
         val readOptions = buildString {
@@ -444,7 +419,7 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
             }
         }.ifEmpty { resources.getString(R.string.word_blank) }
 
-        contentBinding.settingsLoadingOptionsValue.text = readOptions
+        findViewById<TextView>(R.id.settings_loading_options_value)?.text = readOptions
 
         // 语言
         val languageValue = when (SPUtil.getGlobalSharedPreferences(this)
@@ -454,10 +429,10 @@ class SettingActivity : BaseActivity<ActivitySettingsBinding>() {
             Constants.LANGUAGE_ENGLISH -> resources.getString(R.string.language_english)
             else -> ""
         }
-        contentBinding.settingsLanguageValue.text = languageValue
+        findViewById<TextView>(R.id.settings_language_value)?.text = languageValue
 
         // 包名分隔符
-        contentBinding.settingsPackageNameSeparatorValue.text = settings.getString(
+        findViewById<TextView>(R.id.settings_package_name_separator_value)?.text = settings.getString(
             Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,
             Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT
         )

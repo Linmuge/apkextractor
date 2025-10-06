@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 设置页面主布局 - Material Design 3 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="?attr/colorSurface"
     tools:context=".activities.SettingActivity">
 
+    <!-- AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar_settings"
         android:layout_width="match_parent"
@@ -14,6 +17,7 @@
         android:background="?attr/colorSurface"
         android:fitsSystemWindows="true"
         app:elevation="0dp"
+        app:liftOnScroll="false"
         style="@style/Widget.Material3.AppBarLayout">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -22,14 +26,33 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorSurface"
             android:elevation="0dp"
-            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
             app:titleTextColor="?attr/colorOnSurface"
             app:navigationIconTint="?attr/colorOnSurface"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include
-        android:id="@+id/content_settings_include"
-        layout="@layout/content_settings" />
+    <!-- 内容区域 -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/content_settings_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <LinearLayout
+            android:id="@+id/content_settings_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
+
+            <!-- 内容将在这里动态添加或通过 include 引入 -->
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
