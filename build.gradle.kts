@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.application") version "9.0.0-alpha09" apply false
-    id("com.android.legacy-kapt") version "9.0.0-alpha09" apply false
+    id("com.android.application") version "9.0.0-beta03" apply false
+    id("com.android.legacy-kapt") version "9.0.0-beta03" apply false
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 

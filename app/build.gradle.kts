@@ -3,7 +3,7 @@ plugins {
     id("com.android.legacy-kapt")
 }
 android {
-    val versionBase = "5.0.0"
+    val versionBase = "5.0.1"
 
     compileSdk{
         version = release(36)
@@ -20,7 +20,7 @@ android {
             version = release(36)
         }
 
-        versionCode = 363
+        versionCode = 364
         versionName = versionBase
 
         multiDexEnabled = true
