@@ -3,7 +3,7 @@ plugins {
     id("com.android.legacy-kapt")
 }
 android {
-    val versionBase = "5.0.1"
+    val versionBase = "5.0.2"
 
     compileSdk{
         version = release(36)
@@ -20,7 +20,7 @@ android {
             version = release(36)
         }
 
-        versionCode = 364
+        versionCode = 370
         versionName = versionBase
 
         multiDexEnabled = true
@@ -116,7 +116,7 @@ dependencies {
     implementation("com.google.android.material:material:1.13.0")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.emoji2:emoji2:1.6.0") // 使用合适的版本号
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.3.0")
     implementation("com.belerweb:pinyin4j:2.5.1")
     implementation("androidx.core:core-ktx:1.17.0")
@@ -128,4 +128,7 @@ dependencies {
 
     // BRV - 强大的RecyclerView框架
     implementation("com.github.liangjingkanji:BRV:1.6.1")
+
+    // MPAndroidChart - 图表库
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

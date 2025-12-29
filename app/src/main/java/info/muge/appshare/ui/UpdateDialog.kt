@@ -11,26 +11,34 @@ import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import info.muge.appshare.R
 import info.muge.appshare.activities.MainActivity
 import info.muge.appshare.databinding.DialogUpdateBinding
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.anko.browse
 import info.muge.appshare.utils.anko.startActivity
+import info.muge.appshare.utils.colorPrimary
 
 
-private var updateDialog: AlertDialog? = null
+private var updateDialog: BottomSheetDialog? = null
 
 fun Activity.showPrivacyDialog() {
-    updateDialog = MaterialAlertDialogBuilder(this)
-        .setView(getView())
-        .setCancelable(false)
-        .create()
+    // 使用 Material3 BottomSheetDialog 作为隐私弹窗，从底部弹出
+    val dialog = BottomSheetDialog(
+        this,
+        com.google.android.material.R.style.ThemeOverlay_Material3_BottomSheetDialog
+    ).apply {
+        // 不允许点击空白区域或返回键关闭，保持与原实现一致
+        setCancelable(false)
+        // 复用原有布局与初始化逻辑
+        setContentView(getView())
+    }
 
-    updateDialog?.show()
+    // 保存引用，便于在按钮点击时关闭
+    updateDialog = dialog
+    dialog.show()
 }
 
 @SuppressLint("ClickableViewAccessibility")
@@ -50,12 +58,12 @@ private fun Activity.getView(): View {
         }
 
         // 拼接字符串
-        val spanBuilder = SpannableStringBuilder("感谢您使用AppShare\n我们非常重视您的个人信息及隐私保护,在您使用我们的产品前，请您认真阅读  ")
+        val spanBuilder = SpannableStringBuilder("感谢您使用${getString(R.string.app_name)}\n我们非常重视您的个人信息及隐私保护,在您使用我们的产品前，请您认真阅读  ")
 
         // 获取主题的 primary 颜色用于链接
         val typedValue = android.util.TypedValue()
         val linkColor = if (theme.resolveAttribute(
-                androidx.appcompat.R.attr.colorPrimary,
+                colorPrimary,
                 typedValue,
                 true
             )) {

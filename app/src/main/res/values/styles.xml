@@ -41,12 +41,12 @@
     </style>
     <!--更新样式-->
     <style name="updateDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/bg_10dp</item>
-        <item name="android:windowMinWidthMinor">300dp</item>
-        <item name="android:windowMinWidthMajor">300dp</item>
+        <item name="android:windowBackground">@drawable/bg_update_dialog_md3</item>
+        <item name="android:windowMinWidthMinor">340dp</item>
+        <item name="android:windowMinWidthMajor">340dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="windowFixedWidthMinor">300dp</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="windowFixedWidthMinor">340dp</item>
     </style>
     <style name="CommonTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/colorTitle</item>

@@ -137,6 +137,19 @@
     <string name="activity_detail_services">服务</string>
     <string name="activity_detail_providers">内容提供者</string>
 
+    <!-- Tab titles for app detail page -->
+    <string name="tab_app_info">应用信息</string>
+    <string name="tab_signature">签名</string>
+    <string name="tab_hash">哈希</string>
+    <string name="tab_permissions">权限</string>
+    <string name="tab_activities">活动</string>
+    <string name="tab_services">服务</string>
+    <string name="tab_receivers">接收器</string>
+    <string name="tab_providers">提供者</string>
+    <string name="tab_static_loaders">自启</string>
+    <string name="detail_empty_data">暂无数据</string>
+    <string name="activity_detail_market_short">商店</string>
+
     <string name="dialog_loading_selection_att">勾选项越多，加载速度越慢 -_-</string>
     <string name="dialog_loading_selection_permissions">权限(uses-permissions)</string>
     <string name="dialog_loading_selection_activities">活动组件(activity)</string>

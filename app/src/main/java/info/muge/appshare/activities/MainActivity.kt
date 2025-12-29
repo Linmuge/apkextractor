@@ -4,18 +4,16 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.CompoundButton
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.PermissionChecker
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 import info.muge.appshare.Constants
 import info.muge.appshare.R
 import info.muge.appshare.adapters.MyViewPager2Adapter
@@ -23,18 +21,18 @@ import info.muge.appshare.base.BaseActivity
 import info.muge.appshare.databinding.ActivityMainBinding
 import info.muge.appshare.fragments.AppFragment
 import info.muge.appshare.fragments.OperationCallback
+import info.muge.appshare.fragments.SettingsFragment
+import info.muge.appshare.fragments.StatisticsFragment
 import info.muge.appshare.ui.AppItemSortConfigDialog
 import info.muge.appshare.ui.SortConfigDialogCallback
-import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.setStatusBarIconColorMode
 import info.muge.appshare.utils.setupSystemBarInsets
 
 /**
  * 主Activity
- * 包含应用列表、搜索功能、设置等
- *
- * 已升级到 ViewPager2，提供更好的性能和功能
+ * 包含应用列表、统计、设置三个页面
+ * 使用底部导航栏进行页面切换
  */
 class MainActivity : BaseActivity<ActivityMainBinding>(),
     View.OnClickListener,
@@ -42,16 +40,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
     OperationCallback {
 
     private val appFragment = AppFragment()
+    private val statisticsFragment = StatisticsFragment()
+    private val settingsFragment = SettingsFragment()
     private var currentSelection = 0
     private var isSearchMode = false
     private lateinit var pagerAdapter: MyViewPager2Adapter
-    private var tabLayoutMediator: TabLayoutMediator? = null
 
     override fun ActivityMainBinding.initView() {
         // 设置边到边显示（Edge-to-Edge）
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        appbar.setupSystemBarInsets(true,false)
+        appbar.setupSystemBarInsets(true, false)
 
         // 禁用 AppBarLayout 的 lift 行为（防止滚动时状态栏变色）
         appbar.setLiftable(false)
@@ -79,48 +78,104 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         // 设置SearchView
         setupSearchView()
 
-        // 设置ViewPager2和TabLayout
-        setupViewPager()
+        // 设置ViewPager2和底部导航栏
+        setupViewPagerAndBottomNav()
     }
 
     /**
-     * 设置 ViewPager2 和 TabLayout
+     * 设置 ViewPager2 和底部导航栏
      */
-    private fun ActivityMainBinding.setupViewPager() {
-        // 创建适配器
-        pagerAdapter = MyViewPager2Adapter(this@MainActivity, appFragment)
+    private fun ActivityMainBinding.setupViewPagerAndBottomNav() {
+        // 创建适配器，包含三个Fragment
+        pagerAdapter = MyViewPager2Adapter(this@MainActivity, appFragment, statisticsFragment, settingsFragment)
         mainViewpager.adapter = pagerAdapter
-
-        // 使用 TabLayoutMediator 连接 TabLayout 和 ViewPager2
-        tabLayoutMediator = TabLayoutMediator(mainTablayout, mainViewpager) { tab, position ->
-            tab.text = pagerAdapter.getPageTitle(position)
-        }
-        tabLayoutMediator?.attach()
+        mainViewpager.isUserInputEnabled = false // 禁用滑动切换，使用底部导航栏切换
 
         // 注册页面变化回调
         mainViewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 currentSelection = position
+                updateToolbarTitle(position)
+                updateSearchViewVisibility(position)
+                updateMenuVisibility()
             }
         })
+
+        // 设置底部导航栏
+        bottomNavigation.setOnItemSelectedListener(NavigationBarView.OnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    mainViewpager.setCurrentItem(0, false)
+                    return@OnItemSelectedListener true
+                }
+                R.id.nav_statistics -> {
+                    mainViewpager.setCurrentItem(1, false)
+                    return@OnItemSelectedListener true
+                }
+                R.id.nav_settings -> {
+                    mainViewpager.setCurrentItem(2, false)
+                    return@OnItemSelectedListener true
+                }
+            }
+            false
+        })
+    }
+
+    /**
+     * 更新Toolbar标题
+     */
+    private fun updateToolbarTitle(position: Int) {
+        supportActionBar?.title = when (position) {
+            0 -> resources.getString(R.string.app_name)
+            1 -> "统计"
+            2 -> resources.getString(R.string.action_settings)
+            else -> resources.getString(R.string.app_name)
+        }
+    }
+
+    /**
+     * 更新SearchView可见性
+     */
+    private fun updateSearchViewVisibility(position: Int) {
+        binding.toolbar.findViewById<SearchView>(R.id.searchview).visibility =
+            if (position == 0) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * 更新菜单可见性（仅在首页显示）
+     */
+    private fun updateMenuVisibility() {
+        invalidateOptionsMenu()
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        // 只在首页显示菜单项
+        menu.findItem(R.id.action_sort)?.isVisible = (currentSelection == 0)
+        menu.findItem(R.id.action_view)?.isVisible = (currentSelection == 0)
+        return true
     }
 
     /**
      * 设置搜索视图
      */
-    private fun ActivityMainBinding.setupSearchView() {
-        searchview.setOnSearchClickListener {
-            openSearchMode()
+    private fun setupSearchView() {
+        val searchView = binding.toolbar.findViewById<SearchView>(R.id.searchview)
+        searchView.setOnSearchClickListener {
+            if (currentSelection == 0) {
+                openSearchMode()
+            } else {
+                searchView.isIconified = true
+            }
         }
-        
-        searchview.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 return false
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                if (isSearchMode) {
+                if (isSearchMode && currentSelection == 0) {
                     if (newText.isBlank()) {
                         appFragment.setSearchMode(false)
                     } else {
@@ -130,22 +185,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
                 return true
             }
         })
-        
-        searchview.setOnCloseListener {
-            closeSearchMode()
+
+        searchView.setOnCloseListener {
+            if (currentSelection == 0) {
+                closeSearchMode()
+            }
             false
         }
     }
 
     override fun onResume() {
         super.onResume()
+        // 确保底部导航栏状态正确
+        updateBottomNavigationSelection()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // 清理 TabLayoutMediator，避免内存泄漏
-        tabLayoutMediator?.detach()
-        tabLayoutMediator = null
     }
 
     // View.OnClickListener 实现
@@ -156,20 +212,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
 
     // OperationCallback 实现
     override fun onItemLongClickedAndMultiSelectModeOpened(fragment: Fragment) {}
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 0) {
-            if (grantResults.isEmpty()) return
-            if (grantResults[0] == PermissionChecker.PERMISSION_GRANTED) {
-                sendBroadcast(Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST))
-            }
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -182,9 +224,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         when (id) {
             R.id.action_view -> {
                 if (isSearchMode) return false
-                val settings = SPUtil.getGlobalSharedPreferences(this)
-                val editor = settings.edit()
                 if (currentSelection == 0) {
+                    val settings = SPUtil.getGlobalSharedPreferences(this)
+                    val editor = settings.edit()
                     val modeApp = settings.getInt(
                         Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE,
                         Constants.PREFERENCE_MAIN_PAGE_VIEW_MODE_DEFAULT
@@ -195,7 +237,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
                     appFragment.setViewMode(resultApp)
                 }
             }
-            
+
             R.id.action_sort -> {
                 if (currentSelection == 0) {
                     val dialog = AppItemSortConfigDialog(this, object : SortConfigDialogCallback {
@@ -206,63 +248,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
                     dialog.show()
                 }
             }
-            
-            R.id.action_settings -> {
-                startActivityForResult(
-                    Intent(this, SettingActivity::class.java),
-                    REQUEST_CODE_SETTINGS
-                )
-            }
-            
-            R.id.action_about -> {
-                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_about, null)
-                MaterialAlertDialogBuilder(
-                    this,
-                    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
-                )
-                    .setTitle("${EnvironmentUtil.getAppName(this)}(${EnvironmentUtil.getAppVersionName(this)})")
-                    .setIcon(R.mipmap.ic_launcher_round)
-                    .setCancelable(true)
-                    .setView(dialogView)
-                    .setPositiveButton(resources.getString(R.string.dialog_button_confirm)) { _, _ -> }
-                    .show()
-            }
         }
-        
+
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            REQUEST_CODE_SETTINGS -> {
-                if (resultCode == RESULT_OK) {
-                    finish()
-                    startActivity(Intent(this, MainActivity::class.java))
-                }
-            }
-            REQUEST_CODE_RECEIVING_FILES -> {
-                if (resultCode == RESULT_OK) {
-                    sendBroadcast(Intent(Constants.ACTION_REFRESH_IMPORT_ITEMS_LIST))
-                }
-            }
-        }
-    }
-
-    /**
-     * 打开搜索模式
-     */
-    private fun openSearchMode() {
-        isSearchMode = true
-        appFragment.setSearchMode(true)
-    }
-
-    /**
-     * 关闭搜索模式
-     */
-    private fun closeSearchMode() {
-        isSearchMode = false
-        appFragment.setSearchMode(false)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -295,9 +283,35 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         finish()
     }
 
+    /**
+     * 打开搜索模式
+     */
+    private fun openSearchMode() {
+        isSearchMode = true
+        appFragment.setSearchMode(true)
+    }
+
+    /**
+     * 关闭搜索模式
+     */
+    private fun closeSearchMode() {
+        isSearchMode = false
+        appFragment.setSearchMode(false)
+    }
+
+    /**
+     * 更新底部导航栏选中状态
+     */
+    private fun updateBottomNavigationSelection() {
+        when (currentSelection) {
+            0 -> binding.bottomNavigation.selectedItemId = R.id.nav_home
+            1 -> binding.bottomNavigation.selectedItemId = R.id.nav_statistics
+            2 -> binding.bottomNavigation.selectedItemId = R.id.nav_settings
+        }
+    }
+
     companion object {
         private const val REQUEST_CODE_SETTINGS = 0
         private const val REQUEST_CODE_RECEIVING_FILES = 1
     }
 }
-

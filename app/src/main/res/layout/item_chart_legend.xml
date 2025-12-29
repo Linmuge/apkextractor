@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 图例Item布局 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:background="?attr/colorSurfaceVariant"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- 颜色指示器 -->
+    <View
+        android:id="@+id/legend_color"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:background="@drawable/legend_color_circle"
+        tools:backgroundTint="#FF6B6B" />
+
+    <!-- 标签 -->
+    <TextView
+        android:id="@+id/legend_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textSize="14sp"
+        android:textColor="?attr/colorOnSurface"
+        tools:text="API 34" />
+
+    <!-- 数量 -->
+    <TextView
+        android:id="@+id/legend_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        tools:text="(50)" />
+
+</LinearLayout>
