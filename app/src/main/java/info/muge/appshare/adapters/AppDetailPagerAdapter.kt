@@ -20,7 +20,7 @@ class AppDetailPagerAdapter(
 ) : FragmentStateAdapter(activity) {
 
     companion object {
-        const val TAB_COUNT = 9
+        const val TAB_COUNT = 11
         
         const val TAB_APP_INFO = 0
         const val TAB_SIGNATURE = 1
@@ -31,6 +31,8 @@ class AppDetailPagerAdapter(
         const val TAB_RECEIVERS = 6
         const val TAB_PROVIDERS = 7
         const val TAB_STATIC_LOADERS = 8
+        const val TAB_NATIVE_LIBS = 9
+        const val TAB_MANIFEST = 10
     }
 
     private val tabTitles = intArrayOf(
@@ -42,7 +44,9 @@ class AppDetailPagerAdapter(
         R.string.tab_services,
         R.string.tab_receivers,
         R.string.tab_providers,
-        R.string.tab_static_loaders
+        R.string.tab_static_loaders,
+        R.string.tab_native_libs,
+        R.string.tab_manifest
     )
 
     override fun getItemCount(): Int = TAB_COUNT
@@ -58,6 +62,8 @@ class AppDetailPagerAdapter(
             TAB_RECEIVERS -> ComponentListFragment.newInstance(packageName, ComponentType.RECEIVER)
             TAB_PROVIDERS -> ComponentListFragment.newInstance(packageName, ComponentType.PROVIDER)
             TAB_STATIC_LOADERS -> ComponentListFragment.newInstance(packageName, ComponentType.STATIC_LOADER)
+            TAB_NATIVE_LIBS -> info.muge.appshare.fragments.detail.SoLibFragment.newInstance(packageName)
+            TAB_MANIFEST -> info.muge.appshare.fragments.detail.ManifestFragment.newInstance(packageName)
             else -> AppInfoFragment.newInstance(packageName)
         }
     }

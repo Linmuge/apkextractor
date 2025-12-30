@@ -46,6 +46,7 @@ class AppItem : Comparable<AppItem>, DisplayItem {
     private val installSource: String
     private val launchingClass: String
     private val static_receivers_bundle: Bundle
+    private val splitSourceDirs: Array<String>?
 
     // 仅当构造ExportTask时用
     @Transient
@@ -93,6 +94,7 @@ class AppItem : Comparable<AppItem>, DisplayItem {
         }
         this.launchingClass = launchingClass
         this.static_receivers_bundle = EnvironmentUtil.getStaticRegisteredReceiversOfBundleTypeForPackageName(context, info.packageName!!)
+        this.splitSourceDirs = info.applicationInfo?.splitSourceDirs
     }
 
     /**
@@ -112,6 +114,47 @@ class AppItem : Comparable<AppItem>, DisplayItem {
         this.exportObb = flag_obb
         this.fileItem = wrapper.fileItem
         this.static_receivers_bundle = wrapper.static_receivers_bundle
+        this.splitSourceDirs = wrapper.splitSourceDirs
+    }
+
+    /**
+     * 构造一个AppItem，用于显示未安装的APK文件信息
+     */
+    constructor(context: Context, filePath: String) {
+        val packageManager = context.packageManager
+        val packageInfo = packageManager.getPackageArchiveInfo(filePath, 0)
+        
+        // 由于是未安装的APK，我们需要手动设置 applicationInfo
+        packageInfo!!.applicationInfo!!.sourceDir = filePath
+        packageInfo!!.applicationInfo!!.publicSourceDir = filePath
+        
+        this.info = packageInfo
+        this.fileItem = FileItem(File(filePath))
+        
+        // 尝试获取应用名称和图标
+        // 注意：未安装的应用可能无法直接通过 getApplicationLabel 获取正确的名称
+        // 需要创建一个 assetManager 来读取资源
+        var appName = packageInfo.packageName
+        var appIcon = packageManager.defaultActivityIcon
+        
+        try {
+            val appInfo = packageInfo.applicationInfo!!
+            appInfo.sourceDir = filePath
+            appInfo.publicSourceDir = filePath
+            
+            appName = packageManager.getApplicationLabel(appInfo).toString()
+            appIcon = packageManager.getApplicationIcon(appInfo)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        
+        this.title = appName ?: ""
+        this.drawable = appIcon
+        this.size = File(filePath).length()
+        this.installSource = "External File"
+        this.launchingClass = ""
+        this.static_receivers_bundle = Bundle()
+        this.splitSourceDirs = null
     }
 
     override fun getIconDrawable(): Drawable = drawable
@@ -169,6 +212,8 @@ class AppItem : Comparable<AppItem>, DisplayItem {
     fun getFileItem(): FileItem = fileItem
 
     fun getStaticReceiversBundle(): Bundle = static_receivers_bundle
+
+    fun getSplitSourceDirs(): Array<String>? = splitSourceDirs
 
     /**
      * 排序模式。

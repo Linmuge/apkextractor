@@ -85,8 +85,11 @@ class ExportTask(
                 val item = list[i]
                 val order_this_loop = i + 1
 
-                if (!item.exportData && !item.exportObb) {
-                    // 导出单个APK文件
+                val splits = item.getSplitSourceDirs()
+                val hasSplits = !splits.isNullOrEmpty()
+
+                if (!item.exportData && !item.exportObb && !hasSplits) {
+                    // Export single Base APK
                     val outputStream: OutputStream
                     if (isExternal) {
                         val documentFile = OutputUtil.getWritingDocumentFileForAppItem(context, item, "apk", i + 1)!!
@@ -140,23 +143,24 @@ class ExportTask(
                     write_paths.add(currentWritingFile!!)
                     if (!isInterrupted) currentWritingFile = null
                 } else {
-                    // 导出ZIP文件（包含Data/Obb）
+                    // Export ZIP (Contains Base APK + Splits + Data/Obb)
                     val outputStream: OutputStream
+                    val ext = if (hasSplits) "apks" else SPUtil.getCompressingExtensionName(context)
                     if (isExternal) {
                         val documentFile = OutputUtil.getWritingDocumentFileForAppItem(
-                            context, item, SPUtil.getCompressingExtensionName(context), i + 1
+                            context, item, ext, i + 1
                         )!!
                         currentWritingFile = FileItem(context, documentFile)
                         currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
                         outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
                     } else {
                         val writePath = OutputUtil.getAbsoluteWritePath(
-                            context, item, SPUtil.getCompressingExtensionName(context), i + 1
+                            context, item, ext, i + 1
                         )
                         currentWritingFile = FileItem(writePath)
                         currentWritingPath = writePath
                         outputStream = FileOutputStream(
-                            File(OutputUtil.getAbsoluteWritePath(context, item, SPUtil.getCompressingExtensionName(context), i + 1))
+                            File(OutputUtil.getAbsoluteWritePath(context, item, ext, i + 1))
                         )
                     }
                     
@@ -171,7 +175,20 @@ class ExportTask(
 
                     if (zip_level in 0..9) zos.setLevel(zip_level)
 
-                    writeZip(File(item.getSourcePath()), "", zos, zip_level)
+                    // Write Base APK
+                    if (hasSplits) {
+                         // Write Base APK as base.apk
+                         writeZipFileWithName(File(item.getSourcePath()), "base.apk", zos, zip_level)
+                         // Write Splits
+                         for (splitPath in splits!!) {
+                             val splitFile = File(splitPath)
+                             writeZipFileWithName(splitFile, splitFile.name, zos, zip_level)
+                         }
+                    } else {
+                         // Original behavior
+                         writeZip(File(item.getSourcePath()), "", zos, zip_level)
+                    }
+
                     if (item.exportData) {
                         writeZip(
                             File("${StorageUtil.getMainExternalStoragePath()}/android/data/${item.getPackageName()}"),
@@ -248,6 +265,13 @@ class ExportTask(
                 total += FileUtil.getFileOrFolderSize(
                     File("${StorageUtil.getMainExternalStoragePath()}/android/obb/${item.getPackageName()}")
                 )
+            }
+            // Add size of split APKs
+            val splits = item.getSplitSourceDirs()
+            if (splits != null) {
+                for (split in splits) {
+                    total += File(split).length()
+                }
             }
         }
         return total
@@ -328,6 +352,62 @@ class ExportTask(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    /**
+     * 写入单个文件到 ZIP，允许自定义 ZIP 中的文件名
+     */
+    private fun writeZipFileWithName(file: File, entryName: String, zos: ZipOutputStream, zip_level: Int) {
+        if (isInterrupted || !file.exists() || file.isDirectory) return
+
+        try {
+            val inputStream = FileInputStream(file)
+            val zipentry = ZipEntry(entryName)
+
+            if (zip_level == Constants.ZIP_LEVEL_STORED) {
+                zipentry.method = ZipOutputStream.STORED
+                zipentry.compressedSize = file.length()
+                zipentry.size = file.length()
+                zipentry.crc = FileUtil.getCRC32FromFile(file).value
+            }
+
+            zos.putNextEntry(zipentry)
+            val buffer = ByteArray(1024)
+            var length: Int
+
+            postCallback2Listener {
+                listener?.onExportZipProgressUpdated(file.absolutePath)
+            }
+
+            while (inputStream.read(buffer).also { length = it } != -1 && !isInterrupted) {
+                zos.write(buffer, 0, length)
+                progress += length
+                zipWriteLength_second += length
+
+                val endTime = System.currentTimeMillis()
+                if (endTime - zipTime > 1000) {
+                    zipTime = endTime
+                    val zip_speed = zipWriteLength_second
+
+                    postCallback2Listener {
+                        listener?.onExportSpeedUpdated(zip_speed)
+                    }
+                    zipWriteLength_second = 0
+                }
+
+                if (progress - progress_check_zip > 100 * 1024) {
+                    progress_check_zip = progress
+                    postCallback2Listener {
+                        listener?.onExportProgressUpdated(progress, total, file.absolutePath)
+                    }
+                }
+            }
+
+            zos.flush()
+            inputStream.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

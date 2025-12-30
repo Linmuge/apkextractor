@@ -95,7 +95,15 @@ private fun Activity.getView(): View {
         spanBuilder.append(span)
 
         spanBuilder.append(
-            " 的全部内容，同意后开始使用我们的产品\n若选择不同意，将无法使用我们的产品和服务，并会退出应用\n以下是我们使用的唯一一条权限\nandroid.permission.QUERY_ALL_PACKAGES\n此条权限仅获取本机已安装应用信息用来展示在首页或应用详情页，且只存储在本地"
+            " 的全部内容，同意后开始使用我们的产品。\n\n" +
+            "郑重承诺：\n" +
+            "1. 本应用不申请网络权限，无法连接互联网。\n" +
+            "2. 您所有的操作、生成的APK/图片均只保存在您的手机本地。\n" +
+            "3. 我们不收集、不上传任何用户数据。\n\n" +
+            "权限说明：\n" +
+            "1. android.permission.QUERY_ALL_PACKAGES\n" +
+            "2. com.android.permission.GET_INSTALLED_APPS\n" +
+            "以上权限仅用于获取本机已安装应用列表以展示及导出，数据绝不上传。"
         )
 
         // 赋值给TextView

@@ -410,6 +410,129 @@
                         tools:text="com.example.app.MainActivity"/>
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:background="?attr/colorOutlineVariant"
+                    android:alpha="0.4"/>
+
+                <!-- 数据目录 -->
+                <LinearLayout
+                    android:id="@+id/app_detail_data_dir_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:text="@string/activity_detail_data_dir"/>
+                    <TextView
+                        android:id="@+id/app_detail_data_dir_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:breakStrategy="balanced"
+                        tools:text="/data/data/com.example.app"/>
+                </LinearLayout>
+
+                <!-- Native库目录 -->
+                <LinearLayout
+                    android:id="@+id/app_detail_native_lib_dir_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:text="@string/activity_detail_native_lib_dir"/>
+                    <TextView
+                        android:id="@+id/app_detail_native_lib_dir_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:breakStrategy="balanced"
+                        tools:text="/data/app/com.example.app-xxxx/lib/arm64"/>
+                </LinearLayout>
+
+                <!-- 进程名 -->
+                <LinearLayout
+                    android:id="@+id/app_detail_process_name_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:text="@string/activity_detail_process_name"/>
+                    <TextView
+                        android:id="@+id/app_detail_process_name_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:breakStrategy="balanced"
+                        tools:text="com.example.app"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:background="?attr/colorOutlineVariant"
+                    android:alpha="0.4"/>
+
+                <!-- Flags -->
+                <LinearLayout
+                    android:id="@+id/app_detail_flags_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:text="@string/activity_detail_flags"/>
+                    <TextView
+                        android:id="@+id/app_detail_flags_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:lineSpacingExtra="4dp"
+                        tools:text="DEBUGGABLE, SYSTEM, LARGE_HEAP"/>
+                </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -19,6 +19,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AlertDialog
+import android.content.DialogInterface
+import info.muge.appshare.ui.ToastManager
 import info.muge.appshare.Constants
 import info.muge.appshare.Global
 import info.muge.appshare.R
@@ -59,6 +62,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
     private lateinit var btn_select_all: Button
     private lateinit var btn_export: Button
     private lateinit var btn_more: Button
+    private lateinit var btn_analyze_apk: Button
     private var popupWindow: PopupWindow? = null
     private var isScrollable = false
     private var isSearchMode = false
@@ -143,6 +147,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         btn_select_all = mainSelectAll
         btn_export = mainExport
         btn_more = mainMore
+        btn_analyze_apk = mainAnalyzeApk
         llPermission.isVisible = !SPUtil.getGlobalSharedPreferences(requireActivity()).getBoolean("show_app", false)
         btRequestPermission.setOnClickListener{
             PermissionExts.requestreadInstallApps(requireActivity()) {
@@ -208,6 +213,7 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         btn_select_all!!.setOnClickListener(this)
         btn_export!!.setOnClickListener(this)
         btn_more!!.setOnClickListener(this)
+        btn_analyze_apk.setOnClickListener(this)
         recyclerView!!.addOnScrollListener(onScrollListener)
         swipeRefreshLayout!!.setOnRefreshListener(OnRefreshListener {
             if (activity == null) return@OnRefreshListener
@@ -253,30 +259,32 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                 if (adapter != null) adapter!!.toggleSelectAll()
             }
             R.id.main_export -> {
-                /*if (adapter == null) return
+                if (adapter == null) return
                 val arrayList = ArrayList(
-                    adapter!!.selectedItems
+                    adapter!!.getSelectedItems()
                 )
                 Global.checkAndExportCertainAppItemsToSetPathWithoutShare(
-                    requireActivity(), arrayList, true, ExportTaskFinishedListener { error_message ->
-                        if (activity == null) return@ExportTaskFinishedListener
-                        if (error_message.trim { it <= ' ' } != "") {
-                            AlertDialog.Builder(requireActivity())
-                                .setTitle(resources.getString(R.string.exception_title))
-                                .setMessage(resources.getString(R.string.exception_message) + error_message)
-                                .setPositiveButton(resources.getString(R.string.dialog_button_confirm)) { dialog, which -> }
-                                .show()
-                        } else {
-                            ToastManager.showToast(
-                                requireActivity(),
-                                resources.getString(R.string.toast_export_complete) + " "
-                                        + SPUtil.getDisplayingExportPath(),
-                                Toast.LENGTH_SHORT
-                            )
+                    requireActivity(), arrayList, true, object : Global.ExportTaskFinishedListener {
+                        override fun onFinished(error_message: String) {
+                            if (activity == null) return
+                            if (error_message.trim { it <= ' ' } != "") {
+                                AlertDialog.Builder(requireActivity())
+                                    .setTitle(resources.getString(R.string.exception_title))
+                                    .setMessage(resources.getString(R.string.exception_message) + error_message)
+                                    .setPositiveButton(resources.getString(R.string.dialog_button_confirm)) { dialog: DialogInterface, _: Int -> }
+                                    .show()
+                            } else {
+                                ToastManager.showToast(
+                                    requireActivity(),
+                                    resources.getString(R.string.toast_export_complete) + " "
+                                            + SPUtil.getDisplayingExportPath(),
+                                    Toast.LENGTH_SHORT
+                                )
+                            }
+                            closeMultiSelectMode()
+                            refreshAvailableStorage()
                         }
-                        closeMultiSelectMode()
-                        refreshAvailableStorage()
-                    })*/
+                    })
             }
             R.id.main_more -> {
                 val appItemList = adapter!!.getSelectedItems()
@@ -289,23 +297,30 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
                     return
                 }
                 popupWindow!!.dismiss()
-                val stringBuilder = StringBuilder()
-                for (appItem in appItemList) {
-                    if (stringBuilder.toString().length > 0) stringBuilder.append(
-                        SPUtil.getGlobalSharedPreferences(
-                            requireActivity()
-                        )
-                            .getString(
-                                Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,
-                                Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT
-                            )
-                    )
-                    stringBuilder.append(appItem.getPackageName())
-                }
+
+                val separator = SPUtil.getGlobalSharedPreferences(requireActivity())
+                    .getString(
+                        Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR,
+                        Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR_DEFAULT
+                    ) ?: ""
+
+                val packageNames = appItemList.map { it.getPackageName() }
+                val resultString = packageNames.joinToString(separator = separator)
                 //closeMultiSelectMode();
-                clip2ClipboardAndShowSnackbar(stringBuilder.toString())
+                clip2ClipboardAndShowSnackbar(resultString)
+            }
+            R.id.main_analyze_apk -> {
+                pickApkFileLauncher.launch(arrayOf("application/vnd.android.package-archive"))
             }
             else -> {}
+        }
+    }
+
+    private val pickApkFileLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            val intent = Intent(requireContext(), AppDetailActivity::class.java)
+            intent.putExtra(AppDetailActivity.EXTRA_APK_URI, uri.toString())
+            startActivity(intent)
         }
     }
 
@@ -562,6 +577,5 @@ class AppFragment : BaseFragment<PageExportBinding>(), View.OnClickListener, Ref
         get() = "首页"
     override val fragment: Fragment
         get() = AppFragment()
-
 }
 

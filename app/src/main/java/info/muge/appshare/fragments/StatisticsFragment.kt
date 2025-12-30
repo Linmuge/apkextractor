@@ -47,7 +47,7 @@ class StatisticsFragment : Fragment() {
 
     // 统计类型
     private enum class StatisticsType {
-        TARGET_SDK, MIN_SDK, COMPILE_SDK, KOTLIN, ABI, PAGE_SIZE_16K, APP_BUNDLE
+        TARGET_SDK, MIN_SDK, COMPILE_SDK, KOTLIN, ABI, PAGE_SIZE_16K, APP_BUNDLE, INSTALLER, APP_TYPE
     }
 
     private var currentType = StatisticsType.TARGET_SDK
@@ -239,6 +239,14 @@ class StatisticsFragment : Fragment() {
             selectType(StatisticsType.APP_BUNDLE)
         }
 
+        view.findViewById<Chip>(R.id.chip_installer).setOnClickListener {
+            selectType(StatisticsType.INSTALLER)
+        }
+
+        view.findViewById<Chip>(R.id.chip_app_type).setOnClickListener {
+            selectType(StatisticsType.APP_TYPE)
+        }
+
         // 图表类型切换
         chartToggleButton.setOnClickListener {
             isPieChart = !isPieChart
@@ -278,6 +286,10 @@ class StatisticsFragment : Fragment() {
                 currentType == StatisticsType.PAGE_SIZE_16K
             v.findViewById<Chip>(R.id.chip_app_bundle).isChecked =
                 currentType == StatisticsType.APP_BUNDLE
+            v.findViewById<Chip>(R.id.chip_installer).isChecked =
+                currentType == StatisticsType.INSTALLER
+            v.findViewById<Chip>(R.id.chip_app_type).isChecked =
+                currentType == StatisticsType.APP_TYPE
         }
     }
 
@@ -342,6 +354,14 @@ class StatisticsFragment : Fragment() {
 
                         StatisticsType.APP_BUNDLE -> {
                             if (isAppBundle(app)) "Bundle" else "APK"
+                        }
+
+                        StatisticsType.INSTALLER -> {
+                            app.getInstallSource()
+                        }
+
+                        StatisticsType.APP_TYPE -> {
+                            if (app.isRedMarked()) "系统应用" else "用户应用"
                         }
                     }
 

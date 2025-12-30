@@ -22,6 +22,7 @@ import info.muge.appshare.base.BaseActivity
 import info.muge.appshare.databinding.ActivityAppDetailBinding
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.ui.ToastManager
+import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.OutputUtil
 import info.muge.appshare.utils.SPUtil
 
@@ -58,27 +59,36 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>() {
             ?: intent.getStringExtra(EXTRA_PACKAGE_NAME)
 
         if (packageName == null) {
-            ToastManager.showToast(
-                this@AppDetailActivity,
-                "无法获取应用信息",
-                Toast.LENGTH_SHORT
-            )
-            finish()
-            return
-        }
+            // 尝试获取 APK URI
+            val apkUriString = intent.getStringExtra(EXTRA_APK_URI)
+            if (apkUriString != null) {
+                // 处理外部 APK
+                val apkUri = Uri.parse(apkUriString)
+                handleExternalApk(apkUri)
+            } else {
+                ToastManager.showToast(
+                    this@AppDetailActivity,
+                    "无法获取应用信息",
+                    Toast.LENGTH_SHORT
+                )
+                finish()
+                return
+            }
+        } else {
+            // 处理已安装应用
+            synchronized(Global.app_list) {
+                appItem = Global.getAppItemByPackageNameFromList(Global.app_list, packageName)
+            }
 
-        synchronized(Global.app_list) {
-            appItem = Global.getAppItemByPackageNameFromList(Global.app_list, packageName)
-        }
-
-        if (appItem == null) {
-            ToastManager.showToast(
-                this@AppDetailActivity,
-                "(-_-)The AppItem info is null, try to restart this application.",
-                Toast.LENGTH_SHORT
-            )
-            finish()
-            return
+            if (appItem == null) {
+                ToastManager.showToast(
+                    this@AppDetailActivity,
+                    "(-_-)The AppItem info is null, try to restart this application.",
+                    Toast.LENGTH_SHORT
+                )
+                finish()
+                return
+            }
         }
 
         // 设置 Toolbar
@@ -92,12 +102,35 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>() {
         appDetailIcon.setImageDrawable(appItem!!.getIcon())
 
         // 点击图标进入系统详情
+        // 点击图标显示选项
+        // 点击图标显示选项
         appDetailIcon.setOnClickListener {
-            openSystemAppDetails()
+            val isExternal = appItem?.getInstallSource() == "External File"
+            val items = if (isExternal) {
+                arrayOf(getString(R.string.action_save_icon))
+            } else {
+                arrayOf(
+                    getString(R.string.menu_open_system_settings),
+                    getString(R.string.action_save_icon)
+                )
+            }
+            
+            AlertDialog.Builder(this@AppDetailActivity)
+                .setItems(items) { _, which ->
+                    if (isExternal) {
+                        if (which == 0) EnvironmentUtil.saveDrawableToGallery(this@AppDetailActivity, appItem!!.getIcon(), appItem!!.getAppName())
+                    } else {
+                        when (which) {
+                            0 -> openSystemAppDetails()
+                            1 -> EnvironmentUtil.saveDrawableToGallery(this@AppDetailActivity, appItem!!.getIcon(), appItem!!.getAppName())
+                        }
+                    }
+                }
+                .show()
         }
 
         // 设置 ViewPager2 和 TabLayout
-        setupViewPager(packageName)
+        setupViewPager(appItem?.getPackageName() ?: "")
 
         // 注册广播接收器
         registerUninstallReceiver()
@@ -105,6 +138,9 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_app_detail, menu)
+        if (appItem?.getInstallSource() == "External File") {
+            menu.findItem(R.id.action_run)?.isVisible = false
+        }
         return true
     }
 
@@ -129,6 +165,28 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>() {
             isReceiverRegistered = true
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun handleExternalApk(uri: Uri) {
+        try {
+            // 需要将文件复制到缓存目录，因为 getPackageArchiveInfo 需要文件路径
+            val cacheFile = java.io.File(externalCacheDir, "temp_analysis.apk")
+            contentResolver.openInputStream(uri)?.use { input ->
+                java.io.FileOutputStream(cacheFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            
+            appItem = AppItem(this, cacheFile.absolutePath)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ToastManager.showToast(
+                this,
+                "解析 APK 失败: ${e.message}",
+                Toast.LENGTH_SHORT
+            )
+            finish()
         }
     }
 
@@ -232,5 +290,6 @@ class AppDetailActivity : BaseActivity<ActivityAppDetailBinding>() {
 
     companion object {
         const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
+        const val EXTRA_APK_URI = "EXTRA_APK_URI"
     }
 }

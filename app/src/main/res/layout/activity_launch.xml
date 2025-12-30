@@ -31,7 +31,7 @@
         android:textAppearance="?attr/textAppearanceTitleLarge"
         android:textColor="?attr/colorPrimary"
         android:textStyle="bold"
-        android:text="AppShare"/>
+        android:text="@string/app_name"/>
     <RelativeLayout
         android:id="@+id/rlAd"
         android:layout_width="match_parent"

@@ -22,6 +22,7 @@ import info.muge.appshare.ui.ExportingDialog
 import info.muge.appshare.ui.ImportingDialog
 import info.muge.appshare.ui.ToastManager
 import info.muge.appshare.utils.DocumentFileUtil
+import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.OutputUtil
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.toast
@@ -259,7 +260,15 @@ object Global {
      */
     @JvmStatic
     fun shareCertainAppsByItems(activity: Activity, items: List<AppItem>) {
-        "分享应用List".toast()
+        if (items.isEmpty()) return
+        val uris = ArrayList<Uri>()
+        for (item in items) {
+            val file = File(item.getSourcePath())
+            if (file.exists()) {
+                uris.add(EnvironmentUtil.getUriForFileByFileProvider(activity, file))
+            }
+        }
+        shareCertainFiles(activity, uris, activity.getString(R.string.share_title))
     }
 
     /**
@@ -363,7 +372,15 @@ object Global {
 
     @JvmStatic
     fun shareImportItems(activity: Activity, importItems: List<ImportItem>) {
-        "分享应用".toast()
+        if (importItems.isEmpty()) return
+        val uris = ArrayList<Uri>()
+        for (item in importItems) {
+            val uri = item.getUri()
+            if (uri != null) {
+                uris.add(uri)
+            }
+        }
+        shareCertainFiles(activity, uris, activity.getString(R.string.share_title))
     }
 
     /**

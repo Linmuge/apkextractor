@@ -65,9 +65,40 @@ class AppInfoFragment : BaseDetailFragment() {
             binding.appDetailUid.text = packageInfo.applicationInfo?.uid?.toString() ?: "-"
             binding.appDetailLauncherValue.text = item.getLaunchingClass() ?: "-"
             
+            // New fields
+            binding.appDetailDataDirValue.text = packageInfo.applicationInfo?.dataDir ?: "-"
+            binding.appDetailNativeLibDirValue.text = packageInfo.applicationInfo?.nativeLibraryDir ?: "-"
+            binding.appDetailProcessNameValue.text = packageInfo.applicationInfo?.processName ?: "-"
+            binding.appDetailFlagsValue.text = getFlagsString(packageInfo.applicationInfo?.flags ?: 0)
+            
             // 设置点击复制功能
             setupClickListeners()
         }
+    }
+
+    private fun getFlagsString(flags: Int): String {
+        val flagList = mutableListOf<String>()
+        if (flags and ApplicationInfo.FLAG_SYSTEM != 0) flagList.add("SYSTEM")
+        if (flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) flagList.add("DEBUGGABLE")
+        if (flags and ApplicationInfo.FLAG_HAS_CODE != 0) flagList.add("HAS_CODE")
+        if (flags and ApplicationInfo.FLAG_PERSISTENT != 0) flagList.add("PERSISTENT")
+        if (flags and ApplicationInfo.FLAG_FACTORY_TEST != 0) flagList.add("FACTORY_TEST")
+        if (flags and ApplicationInfo.FLAG_ALLOW_TASK_REPARENTING != 0) flagList.add("ALLOW_TASK_REPARENTING")
+        if (flags and ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA != 0) flagList.add("ALLOW_CLEAR_USER_DATA")
+        if (flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP != 0) flagList.add("UPDATED_SYSTEM_APP")
+        if (flags and ApplicationInfo.FLAG_TEST_ONLY != 0) flagList.add("TEST_ONLY")
+        if (flags and ApplicationInfo.FLAG_VM_SAFE_MODE != 0) flagList.add("VM_SAFE_MODE")
+        if (flags and ApplicationInfo.FLAG_ALLOW_BACKUP != 0) flagList.add("ALLOW_BACKUP")
+        if (flags and ApplicationInfo.FLAG_KILL_AFTER_RESTORE != 0) flagList.add("KILL_AFTER_RESTORE")
+        if (flags and ApplicationInfo.FLAG_RESTORE_ANY_VERSION != 0) flagList.add("RESTORE_ANY_VERSION")
+        if (flags and ApplicationInfo.FLAG_EXTERNAL_STORAGE != 0) flagList.add("EXTERNAL_STORAGE")
+        if (flags and ApplicationInfo.FLAG_LARGE_HEAP != 0) flagList.add("LARGE_HEAP")
+        if (flags and ApplicationInfo.FLAG_STOPPED != 0) flagList.add("STOPPED")
+        if (flags and ApplicationInfo.FLAG_SUPPORTS_RTL != 0) flagList.add("SUPPORTS_RTL")
+        if (flags and ApplicationInfo.FLAG_INSTALLED != 0) flagList.add("INSTALLED")
+        if (flags and ApplicationInfo.FLAG_IS_DATA_ONLY != 0) flagList.add("IS_DATA_ONLY")
+        
+        return if (flagList.isEmpty()) "-" else flagList.joinToString(", ")
     }
 
     private fun setupClickListeners() {
@@ -109,6 +140,20 @@ class AppInfoFragment : BaseDetailFragment() {
         }
         binding.appDetailLauncherArea.setOnClickListener {
             copyToClipboard(binding.appDetailLauncherValue.text?.toString())
+        }
+        
+        // New click listeners
+        binding.appDetailDataDirArea.setOnClickListener {
+            copyToClipboard(binding.appDetailDataDirValue.text?.toString())
+        }
+        binding.appDetailNativeLibDirArea.setOnClickListener {
+            copyToClipboard(binding.appDetailNativeLibDirValue.text?.toString())
+        }
+        binding.appDetailProcessNameArea.setOnClickListener {
+            copyToClipboard(binding.appDetailProcessNameValue.text?.toString())
+        }
+        binding.appDetailFlagsArea.setOnClickListener {
+            copyToClipboard(binding.appDetailFlagsValue.text?.toString())
         }
     }
 

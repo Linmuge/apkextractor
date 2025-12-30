@@ -147,6 +147,8 @@
     <string name="tab_receivers">接收器</string>
     <string name="tab_providers">提供者</string>
     <string name="tab_static_loaders">自启</string>
+    <string name="tab_native_libs">Native 库</string>
+    <string name="tab_manifest">Manifest</string>
     <string name="detail_empty_data">暂无数据</string>
     <string name="activity_detail_market_short">商店</string>
 
@@ -262,4 +264,10 @@
         </string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="activity_detail_data_dir">数据数据目录</string>
+    <string name="activity_detail_native_lib_dir">Native库目录</string>
+    <string name="activity_detail_process_name">进程名</string>
+    <string name="activity_detail_flags">Flags</string>
+    <string name="menu_open_system_settings">查看系统详情</string>
+    <string name="action_save_icon">保存应用图标</string>
 </resources>
