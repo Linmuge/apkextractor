@@ -76,6 +76,7 @@
     <string name="activity_settings_night_mode">Night mode</string>
     <string name="activity_settings_loading_options">Loading options</string>
     <string name="activity_settings_about">About</string>
+    <string name="activity_settings_feedback">Feedback</string>
 
     <string name="activity_folder_selector_title">Selecting path</string>
 

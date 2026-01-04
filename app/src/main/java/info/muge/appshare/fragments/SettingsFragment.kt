@@ -1,5 +1,8 @@
 package info.muge.appshare.fragments
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -51,6 +54,7 @@ class SettingsFragment : Fragment() {
         setupAboutOption(view)
         setupLanguageOption(view)
         setupPackageNameSeparatorOption(view)
+        setupFeedbackOption(view)
 
         // 刷新设置值显示
         refreshSettingValues(view)
@@ -304,6 +308,30 @@ class SettingsFragment : Fragment() {
                     this.view?.let { refreshSettingValues(it) }
                 }
                 .setNegativeButton(resources.getString(R.string.action_cancel)) { _, _ -> }
+                .show()
+        }
+    }
+
+    /**
+     * 设置反馈选项
+     */
+    private fun setupFeedbackOption(view: View) {
+        view.findViewById<View>(R.id.settings_feedback_area).setOnClickListener {
+            val feedbackEmail = "1206083231@qq.com"
+            
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
+            )
+                .setTitle("意见反馈")
+                .setMessage("如您在使用过程中遇到任何问题或有任何建议，欢迎发送邮件至以下邮箱进行反馈：\n\n$feedbackEmail\n\n我们将在15个工作日内回复您的反馈。")
+                .setPositiveButton("复制邮箱") { _, _ ->
+                    val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("feedback_email", feedbackEmail)
+                    clipboard.setPrimaryClip(clip)
+                    "邮箱已复制到剪贴板".toast()
+                }
+                .setNegativeButton(resources.getString(R.string.dialog_button_cancel)) { _, _ -> }
                 .show()
         }
     }

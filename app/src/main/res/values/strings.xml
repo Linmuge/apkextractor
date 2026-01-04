@@ -86,6 +86,7 @@
     <string name="activity_settings_package_name_separator">包名分隔内容</string>
     <string name="activity_settings_language" translatable="false">Language</string>
     <string name="activity_settings_about">关于</string>
+    <string name="activity_settings_feedback">反馈</string>
 
     <string name="activity_folder_selector_title">选择路径</string>
 
