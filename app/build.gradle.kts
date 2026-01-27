@@ -54,10 +54,23 @@ android {
         }
     }
 
+    flavorDimensions += "default"
+    productFlavors {
+        create("apkkit") {
+            dimension = "default"
+            resValue("string", "app_name", "牧歌App工具箱")
+        }
+        create("appshare") {
+            dimension = "default"
+            resValue("string", "app_name", "AppShare")
+        }
+    }
+
     buildFeatures {
         viewBinding = true
         dataBinding = true
         buildConfig = true
+        resValues = true
     }
 
     compileOptions {
@@ -101,8 +114,12 @@ androidComponents {
                 if (it.outputFileName.get().endsWith(".apk")) {
                     val debug = variant.outputs.first().versionName.get().split(".")
                     var fileType = ".apk"
-                    if (debug.size >= 5) { fileType = ".APK" }
-                    val newName = "appkit-${variant.outputs.first().versionName.get()}(${variant.outputs.first().versionCode.get()})${fileType}"
+                    if (debug.size >= 5) {
+                        fileType = ".APK"
+                    }
+                    
+                    val prefix = if (variant.name.contains("apkkit", ignoreCase = true)) "apkkit" else "appshare"
+                    val newName = "$prefix-${variant.outputs.first().versionName.get()}(${variant.outputs.first().versionCode.get()})${fileType}"
                     output.outputFileName.set(newName)
                 }
             }
@@ -131,4 +148,51 @@ dependencies {
 
     // MPAndroidChart - 图表库
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+}
+
+// 注册自动导出逻辑
+// 使用 afterEvaluate 确保所有 Android 只读任务已创建
+// 注册自动导出逻辑
+// 使用 androidComponents API 替代旧版 API
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        val variantName = variant.name // 例如：apkkitRelease
+        val capName = variantName.replaceFirstChar { it.uppercase() } 
+        // 自动推断 Flavor 名称 (移除后缀 Release)
+        val flavorName = variantName.removeSuffix("Release")
+        
+        val exportTaskName = "export${capName}Apk"
+        val packageTaskName = "package$capName"
+        val outputDir = layout.buildDirectory.dir("outputs/apk/$flavorName/release")
+        
+        // 注册导出任务
+        tasks.register<Copy>(exportTaskName) {
+            description = "Export APK for $variantName"
+            group = "build"
+            
+            from(outputDir)
+            include("*.apk")
+            exclude("**/*unaligned*", "**/*unsigned*")
+            into(layout.projectDirectory.dir("release"))
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            
+            // 显式依赖打包任务 (通过名称引用，避免未找到任务异常)
+            dependsOn(packageTaskName)
+            
+            doFirst {
+                println("Exporting APK from: $outputDir")
+            }
+            doLast {
+                println("Exported to: ${layout.projectDirectory.dir("release").asFile.absolutePath}")
+            }
+        }
+        
+        // 通过配置规则关联 assemble 任务
+        // 使用 configureEach 确保即使 assemble 任务后创建也能生效
+        project.tasks.configureEach { 
+            if (name == "assemble$capName") {
+                finalizedBy(exportTaskName)
+            }
+        }
+    }
 }

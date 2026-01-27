@@ -40,7 +40,11 @@ class StatisticsFragment : Fragment() {
     private lateinit var pieChart: PieChart
     private lateinit var barChart: BarChart
     private lateinit var emptyLayout: View
+
     private lateinit var chartToggleButton: com.google.android.material.button.MaterialButton
+    private lateinit var recyclerDetail: androidx.recyclerview.widget.RecyclerView
+    private lateinit var tvTotalApps: android.widget.TextView
+    private lateinit var detailAdapter: StatisticsDetailAdapter
 
     // 图表类型：true = 饼状图, false = 条形图
     private var isPieChart = true
@@ -96,7 +100,13 @@ class StatisticsFragment : Fragment() {
         pieChart = view.findViewById(R.id.pie_chart)
         barChart = view.findViewById(R.id.bar_chart)
         emptyLayout = view.findViewById(R.id.statistics_empty_layout)
+
         chartToggleButton = view.findViewById(R.id.btn_chart_toggle)
+        recyclerDetail = view.findViewById(R.id.recycler_statistics_detail)
+        tvTotalApps = view.findViewById(R.id.tv_total_apps)
+
+        // 设置列表
+        setupRecyclerView()
 
         // 设置图表
         setupCharts()
@@ -207,6 +217,14 @@ class StatisticsFragment : Fragment() {
                 override fun onNothingSelected() {}
             })
         }
+    }
+
+    private fun setupRecyclerView() {
+        detailAdapter = StatisticsDetailAdapter { label ->
+            showAppListForLabel(label)
+        }
+        recyclerDetail.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        recyclerDetail.adapter = detailAdapter
     }
 
     private fun setupClickListeners(view: View) {
@@ -398,6 +416,13 @@ class StatisticsFragment : Fragment() {
         } else {
             updateBarChart(sortedEntries)
         }
+        
+        // 更新列表
+        updateDetailList(sortedEntries)
+        
+        // 更新总数
+        val totalCount = sortedEntries.sumOf { it.value.size }
+        tvTotalApps.text = totalCount.toString()
     }
 
     private fun updatePieChart(sortedEntries: List<Map.Entry<String, List<AppItem>>>) {
@@ -531,5 +556,76 @@ class StatisticsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
+    }
+
+
+    data class StatisticsItem(
+        val label: String,
+        val count: Int,
+        val percentage: Float
+    )
+
+    /**
+     * 统计详情列表适配器
+     */
+    inner class StatisticsDetailAdapter(
+        private val onItemClicked: (String) -> Unit
+    ) : androidx.recyclerview.widget.RecyclerView.Adapter<StatisticsDetailAdapter.ViewHolder>() {
+
+        private var items: List<StatisticsItem> = listOf()
+        private var maxCount: Int = 1
+        fun submitList(entries: List<Map.Entry<String, List<AppItem>>>) {
+            val total = entries.sumOf { it.value.size }.toFloat()
+            maxCount = entries.maxOfOrNull { it.value.size } ?: 1
+            
+            items = entries.map { entry ->
+                StatisticsItem(
+                    label = entry.key,
+                    count = entry.value.size,
+                    percentage = if (total > 0) entry.value.size / total * 100f else 0f
+                )
+            }
+            notifyDataSetChanged()
+        }
+
+        inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+            val name: android.widget.TextView = view.findViewById(R.id.stat_name)
+            val percentage: android.widget.TextView = view.findViewById(R.id.stat_percentage)
+            val count: android.widget.TextView = view.findViewById(R.id.stat_count)
+            val progress: com.google.android.material.progressindicator.LinearProgressIndicator = view.findViewById(R.id.stat_progress)
+            val indicator: View = view.findViewById(R.id.indicator_dot)
+            val root: View = view.findViewById(R.id.card_root)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_statistics, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = items[position]
+            val color = chartColors[position % chartColors.size]
+
+            holder.name.text = item.label
+            holder.percentage.text = String.format("%.1f%%", item.percentage)
+            holder.count.text = "${item.count} 个应用"
+            
+            holder.progress.max = maxCount
+            holder.progress.progress = item.count
+            holder.progress.setIndicatorColor(color)
+            holder.indicator.background.setTint(color)
+            holder.percentage.setTextColor(color)
+
+            holder.root.setOnClickListener {
+                onItemClicked(item.label)
+            }
+        }
+
+        override fun getItemCount(): Int = items.size
+    }
+
+    private fun updateDetailList(sortedEntries: List<Map.Entry<String, List<AppItem>>>) {
+        detailAdapter.submitList(sortedEntries)
     }
 }

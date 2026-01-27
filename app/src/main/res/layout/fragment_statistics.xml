@@ -27,6 +27,45 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp">
 
+                <!-- 概览卡片 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    app:cardBackgroundColor="?attr/colorPrimaryContainer"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="应用总数"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:alpha="0.8"/>
+
+                        <TextView
+                            android:id="@+id/tv_total_apps"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="48sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:textColor="?attr/colorOnPrimaryContainer"/>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
                 <!-- 统计类型选择卡片 -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
@@ -34,14 +73,13 @@
                     android:layout_margin="8dp"
                     style="@style/Widget.Material3.CardView.Filled"
                     app:cardBackgroundColor="?attr/colorSurfaceContainer"
-                    app:cardCornerRadius="28dp"
+                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-
                         android:padding="16dp">
 
                         <!-- 统计类型Chip组 -->
@@ -54,93 +92,66 @@
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_target_sdk"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="Target SDK"
-                                app:chipCornerRadius="16dp" />
+                                android:text="Target SDK" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_min_sdk"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="Min SDK"
-                                app:chipCornerRadius="16dp" />
+                                android:text="Min SDK" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_compile_sdk"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="Compile SDK"
-                                app:chipCornerRadius="16dp" />
+                                android:text="Compile SDK" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_kotlin"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="Kotlin"
-                                app:chipCornerRadius="16dp" />
+                                android:text="Kotlin" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_abi"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="ABI"
-                                app:chipCornerRadius="16dp" />
+                                android:text="ABI" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_16k"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="16K"
-                                app:chipCornerRadius="16dp" />
+                                android:text="16K" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_app_bundle"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="Bundle"
-                                app:chipCornerRadius="16dp" />
+                                android:text="Bundle" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_installer"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="Installer"
-                                app:chipCornerRadius="16dp" />
+                                android:text="Installer" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_app_type"
-                                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                                style="@style/Widget.Material3.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                app:chipBackgroundColor="?attr/colorSurface"
-                                android:elevation="0dp"
-                                android:text="App Type"
-                                app:chipCornerRadius="16dp" />
+                                android:text="App Type" />
 
                         </com.google.android.material.chip.ChipGroup>
 
@@ -155,7 +166,7 @@
                     android:layout_margin="8dp"
                     style="@style/Widget.Material3.CardView.Filled"
                     app:cardBackgroundColor="?attr/colorSurfaceContainer"
-                    app:cardCornerRadius="28dp"
+                    app:cardCornerRadius="24dp"
                     app:cardElevation="0dp">
 
                     <FrameLayout
@@ -173,14 +184,14 @@
                             <com.github.mikephil.charting.charts.PieChart
                                 android:id="@+id/pie_chart"
                                 android:layout_width="match_parent"
-                                android:layout_height="380dp"
+                                android:layout_height="320dp"
                                 android:visibility="visible" />
 
                             <!-- 条形图 -->
                             <com.github.mikephil.charting.charts.BarChart
                                 android:id="@+id/bar_chart"
                                 android:layout_width="match_parent"
-                                android:layout_height="380dp"
+                                android:layout_height="320dp"
                                 android:visibility="gone" />
 
                             <!-- 空状态 -->
@@ -215,56 +226,37 @@
                         <!-- 图表切换按钮 - 右上角 -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_chart_toggle"
-                            style="@style/Widget.Material3.Button.IconButton.Filled"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:layout_gravity="top|end"
                             android:layout_margin="8dp"
                             android:contentDescription="切换图表类型"
-                            app:icon="@drawable/ic_chart_pie"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:icon="@drawable/ic_chart_pie" />
 
                     </FrameLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- 统计提示卡片 -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/statistics_hint_card"
+                <!-- 统计详情列表 -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    style="@style/Widget.Material3.CardView.Filled"
-                    app:cardCornerRadius="20dp"
-                    app:cardBackgroundColor="?attr/colorPrimaryContainer">
+                    android:paddingHorizontal="24dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="详细数据"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
-
-                            <com.google.android.material.imageview.ShapeableImageView
-                                android:layout_width="40dp"
-                                android:layout_height="40dp"
-                                android:src="@drawable/ic_rule"
-                                app:shapeAppearance="@style/shapeImage10dp"
-                                app:tint="?attr/colorOnPrimaryContainer"
-                                android:layout_marginEnd="16dp" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="点击图表区域查看详细应用列表"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:textColor="?attr/colorOnPrimaryContainer" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_statistics_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_statistics"/>
 
             </LinearLayout>
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">牧歌App工具箱</string>
+
     <string name="action_settings">设置</string>
     <string name="action_search">搜索</string>
     <string name="action_sort">排序</string>
