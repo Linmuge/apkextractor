@@ -137,7 +137,7 @@ dependencies {
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.3.0")
     implementation("com.belerweb:pinyin4j:2.5.1")
     implementation("androidx.core:core-ktx:1.17.0")
-    implementation("com.github.getActivity:XXPermissions:26.5")
+    implementation("com.github.getActivity:XXPermissions:28.0")
     implementation("androidx.documentfile:documentfile:1.1.0")
 
     // ViewPager2 - 现代化的页面滑动组件
