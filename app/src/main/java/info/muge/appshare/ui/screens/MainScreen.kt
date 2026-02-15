@@ -14,9 +14,12 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -74,6 +77,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import info.muge.appshare.R
+import info.muge.appshare.ui.theme.AppDimens
 
 /**
  * 底部导航项
@@ -124,19 +128,13 @@ fun MainScreen(
         )
     )
 
-    // 返回键处理
-    BackHandler(enabled = true) {
-        when {
-            isMultiSelectMode -> {
-                isMultiSelectMode = false
-            }
-            isSearchMode -> {
-                isSearchMode = false
-                searchText = ""
-            }
-            else -> {
-                // 退出应用
-            }
+    // 返回键处理：仅在可关闭的页面态拦截
+    BackHandler(enabled = isMultiSelectMode || isSearchMode) {
+        if (isMultiSelectMode) {
+            isMultiSelectMode = false
+        } else if (isSearchMode) {
+            isSearchMode = false
+            searchText = ""
         }
     }
 
@@ -290,12 +288,12 @@ private fun SearchTopBar(
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.statusBars),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 3.dp
+        tonalElevation = AppDimens.Elevation.none
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .padding(horizontal = AppDimens.Space.sm, vertical = AppDimens.Space.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onClose) {
@@ -332,7 +330,7 @@ private fun SearchTopBar(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
-                        shape = RoundedCornerShape(28.dp),
+                        shape = RoundedCornerShape(AppDimens.Radius.xl),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -340,21 +338,21 @@ private fun SearchTopBar(
                             unfocusedIndicatorColor = Color.Transparent
                         ),
                         contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(
-                            start = 16.dp,
-                            end = if (searchText.isNotEmpty()) 4.dp else 16.dp,
-                            top = 12.dp,
-                            bottom = 12.dp
+                            start = AppDimens.Space.lg,
+                            end = if (searchText.isNotEmpty()) AppDimens.Space.xs else AppDimens.Space.lg,
+                            top = AppDimens.Space.md,
+                            bottom = AppDimens.Space.md
                         ),
                         trailingIcon = {
                             if (searchText.isNotEmpty()) {
                                 IconButton(
                                     onClick = { onSearchTextChange("") },
-                                    modifier = Modifier.clip(RoundedCornerShape(50))
+                                    modifier = Modifier.clip(RoundedCornerShape(AppDimens.Radius.full))
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "清除",
-                                        modifier = Modifier.padding(4.dp),
+                                        modifier = Modifier.padding(AppDimens.Space.xs),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -364,7 +362,7 @@ private fun SearchTopBar(
                 }
             )
 
-            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+            Spacer(modifier = Modifier.padding(horizontal = AppDimens.Space.xs))
         }
     }
 }
@@ -375,34 +373,40 @@ private fun MainNavigationBar(
     currentSelection: Int,
     onSelectionChange: (Int) -> Unit
 ) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 0.dp
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                selected = currentSelection == index,
-                onClick = { onSelectionChange(index) },
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.title
+        Column {
+            NavigationBar(
+                modifier = Modifier.height(60.dp),
+                containerColor = Color.Transparent,
+                tonalElevation = AppDimens.Elevation.none,
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            ) {
+                items.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        selected = currentSelection == index,
+                        onClick = { onSelectionChange(index) },
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.title
+                            )
+                        },
+                        alwaysShowLabel = false,
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     )
-                },
-                label = {
-                    Text(
-                        text = item.title,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                }
+            }
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
             )
         }
     }

@@ -44,7 +44,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.Composable
@@ -72,11 +71,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import info.muge.appshare.Global
 import info.muge.appshare.R
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.ui.dialogs.AppBottomSheet
+import info.muge.appshare.ui.theme.AppDimens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -226,8 +226,11 @@ fun StatisticsScreen(
 
     LazyColumn(
         state = listState,
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(
+            horizontal = AppDimens.Space.lg,
+            vertical = AppDimens.Space.md
+        ),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Space.sm),
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
@@ -268,11 +271,11 @@ fun StatisticsScreen(
         item {
             Text(
                 text = "详细数据 (${visibleEntries.size}/${sortedEntries.size})",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 2.dp, vertical = 2.dp)
+                    .padding(horizontal = AppDimens.Space.xs, vertical = AppDimens.Space.xs)
             )
         }
 
@@ -285,13 +288,13 @@ fun StatisticsScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
                 ) {
                     Text(
                         text = "当前筛选条件下没有数据",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(AppDimens.Space.lg),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -316,7 +319,7 @@ fun StatisticsScreen(
             }
         }
 
-        item { Spacer(modifier = Modifier.height(4.dp)) }
+        item { Spacer(modifier = Modifier.height(AppDimens.Space.xs)) }
     }
 
     // 应用列表底部弹窗
@@ -345,19 +348,19 @@ private fun StatisticsFilterPanel(
     onLimitChange: (Int) -> Unit,
     onToggleHideSingleItems: () -> Unit
 ) {
-    StatsPanel(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+    StatsPanel(containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
         Text(
             text = "统计维度",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.md))
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space.sm),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Space.sm)
         ) {
             StatisticsType.values().forEach { type ->
                 FilterChip(
@@ -368,7 +371,7 @@ private fun StatisticsFilterPanel(
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.md))
 
         Text(
             text = "显示范围",
@@ -376,12 +379,12 @@ private fun StatisticsFilterPanel(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.sm))
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Space.sm),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Space.sm)
         ) {
             FilterChip(
                 selected = displayLimit == 5,
@@ -410,18 +413,17 @@ private fun StatisticsFilterPanel(
 @Composable
 private fun StatsPanel(
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
+    Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        color = containerColor,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = AppDimens.Space.lg, vertical = AppDimens.Space.md),
             content = content
         )
     }
@@ -441,7 +443,7 @@ private fun SummaryCard(
     onRefresh: () -> Unit
 ) {
     StatsPanel(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f)
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -475,9 +477,9 @@ private fun SummaryCard(
                 Text(
                     text = "分类: $categoryCount",
                     style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(end = 6.dp)
-                    )
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = AppDimens.Space.sm)
+                )
                 if (isRefreshing) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
@@ -523,7 +525,7 @@ private fun ChartCard(
     onChartToggle: () -> Unit,
     onSliceClick: (String) -> Unit
 ) {
-    StatsPanel(containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f)) {
+    StatsPanel(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -544,9 +546,9 @@ private fun ChartCard(
                         painter = painterResource(id = R.drawable.ic_rule),
                         contentDescription = null,
                         modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(AppDimens.Space.lg))
                     Text(
                         text = "暂无数据",
                         style = MaterialTheme.typography.bodyLarge,
@@ -587,7 +589,7 @@ private fun ChartCard(
                 onClick = onChartToggle,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 4.dp, end = 4.dp)
+                    .padding(top = AppDimens.Space.xs, end = AppDimens.Space.xs)
             ) {
                 Icon(
                     imageVector = if (isPieChart) Icons.Default.BarChart else Icons.Default.PieChart,
@@ -702,7 +704,7 @@ private fun ComposePieChart(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
+            .padding(top = AppDimens.Space.lg)
     ) {
         sortedEntries.take(6).forEachIndexed { index, entry ->
             val color = chartColors[index % chartColors.size]
@@ -712,7 +714,7 @@ private fun ComposePieChart(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onSliceClick(entry.key) }
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = AppDimens.Space.xs),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -721,7 +723,7 @@ private fun ComposePieChart(
                         .clip(CircleShape)
                         .background(color)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(AppDimens.Space.sm))
                 Text(
                     text = entry.key,
                     style = MaterialTheme.typography.bodySmall,
@@ -768,7 +770,7 @@ private fun ComposeBarChart(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onBarClick(entry.key) }
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = AppDimens.Space.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // 标签
@@ -781,26 +783,26 @@ private fun ComposeBarChart(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(AppDimens.Space.sm))
 
                 // 条形
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(24.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(RoundedCornerShape(AppDimens.Radius.xs))
                         .background(color.copy(alpha = 0.3f))
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(percentage)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(AppDimens.Radius.xs))
                             .background(color)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(AppDimens.Space.sm))
 
                 // 数值
                 Text(
@@ -830,16 +832,16 @@ private fun StatisticsDetailItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable(onClick = onClick),
+            .padding(vertical = 2.dp),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none),
+        onClick = onClick
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(AppDimens.Space.lg)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -853,7 +855,7 @@ private fun StatisticsDetailItem(
                         .background(color)
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(AppDimens.Space.md))
 
                 // 标签
                 Text(
@@ -868,12 +870,12 @@ private fun StatisticsDetailItem(
                 Text(
                     text = String.format("%.1f%%", percentage),
                     style = MaterialTheme.typography.labelLarge,
-                    color = color,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(AppDimens.Space.md))
 
             // 进度条
             LinearProgressIndicator(
@@ -883,7 +885,7 @@ private fun StatisticsDetailItem(
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHigh
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(AppDimens.Space.sm))
 
             // 数量
             Text(
@@ -922,7 +924,7 @@ private fun StatisticsAppListBottomSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = AppDimens.Space.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -937,7 +939,9 @@ private fun StatisticsAppListBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = AppDimens.Space.xs),
+                contentPadding = PaddingValues(vertical = AppDimens.Space.xs),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Space.xs)
             ) {
                 items(sortedApps) { app ->
                     AppListItem(
@@ -963,20 +967,18 @@ private fun AppListItem(
     val isSystemApp = remember { app.isRedMarked() }
 
     Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(AppDimens.Space.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 应用图标
@@ -985,10 +987,10 @@ private fun AppListItem(
                 contentDescription = null,
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(AppDimens.Radius.md))
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(AppDimens.Space.md))
 
             // 文本信息
             Column(
@@ -997,13 +999,13 @@ private fun AppListItem(
                 Text(
                     text = app.getAppName(),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (isSystemApp) Color(0xFFE91E63)
+                    color = if (isSystemApp) MaterialTheme.colorScheme.error
                             else MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(AppDimens.Space.xs))
 
                 Text(
                     text = app.getPackageName(),

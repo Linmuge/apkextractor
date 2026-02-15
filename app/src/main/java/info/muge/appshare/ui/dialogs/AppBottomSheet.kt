@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import info.muge.appshare.ui.theme.AppDimens
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,15 +40,15 @@ fun AppBottomSheet(
             }
         },
         sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        tonalElevation = 0.dp,
+        shape = RoundedCornerShape(topStart = AppDimens.Radius.xl, topEnd = AppDimens.Radius.xl),
+        tonalElevation = AppDimens.Elevation.none,
         dragHandle = {
             Surface(
                 modifier = Modifier
-                    .padding(top = 10.dp)
-                    .height(4.dp)
+                    .padding(top = AppDimens.Space.md)
+                    .height(AppDimens.Space.xs)
                     .fillMaxWidth(0.14f),
-                shape = RoundedCornerShape(999.dp),
+                shape = RoundedCornerShape(AppDimens.Radius.full),
                 color = MaterialTheme.colorScheme.outlineVariant
             ) {}
         }
@@ -56,7 +56,7 @@ fun AppBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 12.dp)
+                .padding(horizontal = AppDimens.Space.xl, vertical = AppDimens.Space.md)
         ) {
             Text(
                 text = title,
@@ -68,7 +68,7 @@ fun AppBottomSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 14.dp)
+                    .padding(top = AppDimens.Space.lg)
             ) {
                 content()
             }
@@ -77,7 +77,7 @@ fun AppBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 18.dp, bottom = 10.dp),
+                        .padding(top = AppDimens.Space.xl, bottom = AppDimens.Space.md),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -118,7 +118,7 @@ fun AppBottomSheetDualActions(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.Space.md)
     ) {
         OutlinedButton(
             onClick = onDismiss,

@@ -12,7 +12,7 @@ import info.muge.appshare.Constants
 object SPUtil {
 
     @JvmStatic
-    fun getDisplayingExportPath(): String {
+    fun getDisplayingExportPath(context: Context): String {
         return "内置存储/Download/AppKit/"
     }
 
@@ -39,10 +39,7 @@ object SPUtil {
      */
     @JvmStatic
     fun getIsSaved2ExternalStorage(context: Context): Boolean {
-        return getGlobalSharedPreferences(context).getBoolean(
-            Constants.PREFERENCE_STORAGE_PATH_EXTERNAL,
-            Constants.PREFERENCE_STORAGE_PATH_EXTERNAL_DEFAULT
-        )
+        return false
     }
 
     /**
@@ -90,4 +87,3 @@ object SPUtil {
         }
     }
 }
-

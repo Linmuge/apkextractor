@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import info.muge.appshare.ui.theme.AppDimens
 
 /**
  * 跑马灯文本组件
@@ -87,7 +88,7 @@ fun ExpandableCard(
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(AppDimens.Space.lg)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -114,7 +115,7 @@ fun ExpandableCard(
 
             AnimatedVisibility(visible = isExpanded) {
                 Column {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(AppDimens.Space.sm))
                     content()
                 }
             }
@@ -134,7 +135,7 @@ fun SignatureInfoCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = AppDimens.Space.xs)
     ) {
         Text(
             text = label,
@@ -175,7 +176,7 @@ fun ProgressBarItem(
         )
     ) {
         Column(
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier.padding(AppDimens.Space.md)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -184,12 +185,12 @@ fun ProgressBarItem(
                 // 颜色指示器
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier
-                        .width(4.dp)
+                        .width(AppDimens.Space.xs)
                         .height(24.dp)
-                        .background(color, RoundedCornerShape(2.dp))
+                        .background(color, RoundedCornerShape(AppDimens.Radius.xs))
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(AppDimens.Space.sm))
 
                 Text(
                     text = label,
@@ -204,24 +205,24 @@ fun ProgressBarItem(
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(AppDimens.Space.xs))
 
             // 进度条背景
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp)
+                    .height(AppDimens.Space.xs)
                     .background(
                         MaterialTheme.colorScheme.surfaceVariant,
-                        RoundedCornerShape(2.dp)
+                        RoundedCornerShape(AppDimens.Radius.xs)
                     )
             ) {
                 // 进度条前景
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier
                         .fillMaxWidth(percentage)
-                        .height(4.dp)
-                        .background(color, RoundedCornerShape(2.dp))
+                        .height(AppDimens.Space.xs)
+                        .background(color, RoundedCornerShape(AppDimens.Radius.xs))
                 )
             }
         }

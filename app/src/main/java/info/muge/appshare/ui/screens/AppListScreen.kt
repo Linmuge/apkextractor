@@ -3,24 +3,20 @@ package info.muge.appshare.ui.screens
 import android.content.Context
 import android.text.format.Formatter
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +35,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,12 +43,11 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -80,8 +74,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import info.muge.appshare.Constants
 import info.muge.appshare.Global
 import info.muge.appshare.R
@@ -90,9 +85,9 @@ import info.muge.appshare.tasks.RefreshInstalledListTask
 import info.muge.appshare.tasks.SearchAppItemTask
 import info.muge.appshare.ui.ToastManager
 import info.muge.appshare.ui.dialogs.SortConfigDialog
+import info.muge.appshare.ui.theme.AppDimens
 import info.muge.appshare.utils.PermissionExts
 import info.muge.appshare.utils.SPUtil
-import info.muge.appshare.utils.StorageUtil
 import kotlinx.coroutines.launch
 import java.util.Collections
 import java.util.Locale
@@ -125,17 +120,6 @@ fun AppListScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     var loadingProgress by remember { mutableStateOf(0 to 0) }
 
-    // 显示系统应用
-    var showSystemApp by remember {
-        mutableStateOf(
-            SPUtil.getGlobalSharedPreferences(context).getBoolean(
-                Constants.PREFERENCE_SHOW_SYSTEM_APP,
-                Constants.PREFERENCE_SHOW_SYSTEM_APP_DEFAULT
-            )
-        )
-    }
-    var isShowSystemAppEnabled by remember { mutableStateOf(true) }
-
     // 权限状态
     var hasPermission by remember {
         mutableStateOf(
@@ -150,14 +134,6 @@ fun AppListScreen(
     // 高亮关键词
     var highlightKeyword by remember { mutableStateOf<String?>(null) }
 
-    // 可用存储空间
-    var availableStorage by remember { mutableStateOf("") }
-
-    // 滚动状态 - 与原实现一致
-    var isScrollable by remember { mutableStateOf(false) }
-    var isBottomCardVisible by remember { mutableStateOf(true) }
-    var isMultiSelectCardVisible by remember { mutableStateOf(false) }
-
     // 刷新任务
     var refreshTask by remember { mutableStateOf<RefreshInstalledListTask?>(null) }
     var searchTask by remember { mutableStateOf<SearchAppItemTask?>(null) }
@@ -169,9 +145,7 @@ fun AppListScreen(
         refreshTask?.setInterrupted()
         isLoading = true
         loadingProgress = 0 to 0
-        isScrollable = false
         appList = emptyList()
-        isShowSystemAppEnabled = false
 
         refreshTask = RefreshInstalledListTask(context, object : RefreshInstalledListTask.RefreshInstalledListTaskCallback {
             override fun onRefreshProgressStarted(total: Int) {
@@ -186,7 +160,6 @@ fun AppListScreen(
                 isLoading = false
                 isRefreshing = false
                 appList = list
-                isShowSystemAppEnabled = true
             }
         })
         refreshTask?.start()
@@ -217,11 +190,6 @@ fun AppListScreen(
         }
     }
 
-    // 初始化
-    LaunchedEffect(Unit) {
-        refreshAvailableStorage(context) { availableStorage = it }
-    }
-
     // 权限授予后刷新
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
@@ -229,26 +197,9 @@ fun AppListScreen(
         }
     }
 
-    // 监听系统应用开关 - 与原实现一致，先禁用checkbox再刷新
-    LaunchedEffect(showSystemApp) {
-        if (hasPermission) {
-            isShowSystemAppEnabled = false
-            SPUtil.getGlobalSharedPreferences(context)
-                .edit()
-                .putBoolean(Constants.PREFERENCE_SHOW_SYSTEM_APP, showSystemApp)
-                .apply()
-            refreshAppList()
-        }
-    }
-
     // 多选模式状态变化
     LaunchedEffect(isMultiSelectMode) {
-        if (isMultiSelectMode) {
-            isBottomCardVisible = false
-            isMultiSelectCardVisible = true
-        } else {
-            isMultiSelectCardVisible = false
-            isBottomCardVisible = !isSearchMode
+        if (!isMultiSelectMode) {
             selectedItems.clear()
             selectedSize = 0
         }
@@ -257,13 +208,10 @@ fun AppListScreen(
     // 搜索模式状态变化
     LaunchedEffect(isSearchMode) {
         if (isSearchMode) {
-            isBottomCardVisible = false
-            isMultiSelectCardVisible = false
             if (isMultiSelectMode) {
                 onMultiSelectModeChange(false)
             }
         } else {
-            isBottomCardVisible = !isMultiSelectMode
             highlightKeyword = null
             appList = Global.app_list.toList()
         }
@@ -284,245 +232,181 @@ fun AppListScreen(
         )
     }
 
-    // 滚动监听 - 与原实现完全一致
     val listState = rememberLazyListState()
 
-    // 处理滚动方向变化
-    var previousFirstVisibleItemIndex by remember { mutableStateOf(0) }
-    var previousFirstVisibleItemScrollOffset by remember { mutableStateOf(0) }
-
-    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
-        val currentIndex = listState.firstVisibleItemIndex
-        val currentOffset = listState.firstVisibleItemScrollOffset
-
-        // 判断滚动方向
-        if (currentIndex > previousFirstVisibleItemIndex ||
-            (currentIndex == previousFirstVisibleItemIndex && currentOffset > previousFirstVisibleItemScrollOffset)) {
-            // 向下滚动
-            if (isScrollable) {
-                if (isMultiSelectMode) {
-                    if (isMultiSelectCardVisible) {
-                        isMultiSelectCardVisible = false
-                    }
-                } else if (!isSearchMode) {
-                    if (isBottomCardVisible) {
-                        isBottomCardVisible = false
-                    }
-                }
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(snackbarData = data)
             }
-            isScrollable = true
-        } else if (currentIndex < previousFirstVisibleItemIndex ||
-            (currentIndex == previousFirstVisibleItemIndex && currentOffset < previousFirstVisibleItemScrollOffset)) {
-            // 向上滚动
-            if (isScrollable) {
-                if (isMultiSelectMode) {
-                    if (!isMultiSelectCardVisible) {
-                        isMultiSelectCardVisible = true
-                    }
-                } else if (!isSearchMode) {
-                    if (!isBottomCardVisible) {
-                        isBottomCardVisible = true
-                    }
-                }
-            }
-        }
-
-        previousFirstVisibleItemIndex = currentIndex
-        previousFirstVisibleItemScrollOffset = currentOffset
-    }
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // 主内容区域
-        if (!hasPermission) {
-            // 无权限时显示空白背景，底部卡片显示权限请求
-        } else if (isLoading && appList.isEmpty()) {
-            // 加载中 - 水平进度条（与原实现一致）
-            LoadingContent(
-                current = loadingProgress.first,
-                total = loadingProgress.second
-            )
-        } else if (appList.isEmpty() && !isSearchMode) {
-            // 空内容（与原实现一致）
-            EmptyContent()
-        } else if (appList.isEmpty() && isSearchMode && searchText.isNotEmpty()) {
-            // 搜索中
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            // 应用列表
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = {
-                    if (!isSearchMode && !isMultiSelectMode) {
+        },
+        bottomBar = {
+            when {
+                !hasPermission -> PermissionBottomBar(
+                    onPermissionGranted = {
+                        hasPermission = true
+                        SPUtil.getGlobalSharedPreferences(context)
+                            .edit()
+                            .putBoolean("show_app", true)
+                            .apply()
                         refreshAppList()
                     }
-                },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (viewMode == 0) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = listState
-                    ) {
-                        items(appList, key = { it.getPackageName() }) { app ->
-                            LinearAppItem(
-                                app = app,
-                                isSelected = selectedItems.contains(app.getPackageName()),
-                                isMultiSelectMode = isMultiSelectMode,
-                                highlightKeyword = highlightKeyword,
-                                onClick = {
-                                    if (isMultiSelectMode) {
-                                        val pkgName = app.getPackageName()
-                                        if (selectedItems.contains(pkgName)) {
-                                            selectedItems.remove(pkgName)
-                                            selectedSize -= app.getSize()
-                                        } else {
-                                            selectedItems.add(pkgName)
-                                            selectedSize += app.getSize()
-                                        }
-                                        if (selectedItems.isEmpty()) {
-                                            onMultiSelectModeChange(false)
-                                        }
-                                    } else {
-                                        onNavigateToDetail(app.getPackageName())
-                                    }
-                                },
-                                onLongClick = {
-                                    if (!isSearchMode) {
-                                        onMultiSelectModeChange(true)
-                                        val pkgName = app.getPackageName()
-                                        if (!selectedItems.contains(pkgName)) {
-                                            selectedItems.add(pkgName)
-                                            selectedSize += app.getSize()
-                                        }
-                                    }
-                                }
-                            )
+                )
+                isMultiSelectMode -> MultiSelectCard(
+                    selectedCount = selectedItems.size,
+                    selectedSize = selectedSize,
+                    onSelectAll = {
+                        if (selectedItems.size == appList.size) {
+                            selectedItems.clear()
+                            selectedSize = 0
+                        } else {
+                            selectedItems.clear()
+                            selectedSize = 0
+                            appList.forEach { app ->
+                                selectedItems.add(app.getPackageName())
+                                selectedSize += app.getSize()
+                            }
+                        }
+                    },
+                    onCopyPackageNames = {
+                        if (selectedItems.isEmpty()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.snack_bar_no_app_selected))
+                            }
+                            return@MultiSelectCard
+                        }
+                        val separator = SPUtil.getGlobalSharedPreferences(context)
+                            .getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR, ",") ?: ","
+                        val resultString = selectedItems.joinToString(separator)
+
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("message", resultString))
+
+                        scope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.snack_bar_clipboard))
                         }
                     }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(4),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(appList, key = { it.getPackageName() }) { app ->
-                            GridAppItem(
-                                app = app,
-                                isSelected = selectedItems.contains(app.getPackageName()),
-                                onClick = {
-                                    if (isMultiSelectMode) {
-                                        val pkgName = app.getPackageName()
-                                        if (selectedItems.contains(pkgName)) {
-                                            selectedItems.remove(pkgName)
-                                            selectedSize -= app.getSize()
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (!hasPermission) {
+                EmptyContent()
+            } else if (isLoading && appList.isEmpty()) {
+                LoadingContent(
+                    current = loadingProgress.first,
+                    total = loadingProgress.second
+                )
+            } else if (appList.isEmpty() && !isSearchMode) {
+                EmptyContent()
+            } else if (appList.isEmpty() && isSearchMode && searchText.isNotEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        if (!isSearchMode && !isMultiSelectMode) {
+                            refreshAppList()
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (viewMode == 0) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = listState,
+                            contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
+                        ) {
+                            items(appList, key = { it.getPackageName() }) { app ->
+                                LinearAppItem(
+                                    app = app,
+                                    isSelected = selectedItems.contains(app.getPackageName()),
+                                    isMultiSelectMode = isMultiSelectMode,
+                                    highlightKeyword = highlightKeyword,
+                                    onClick = {
+                                        if (isMultiSelectMode) {
+                                            val pkgName = app.getPackageName()
+                                            if (selectedItems.contains(pkgName)) {
+                                                selectedItems.remove(pkgName)
+                                                selectedSize -= app.getSize()
+                                            } else {
+                                                selectedItems.add(pkgName)
+                                                selectedSize += app.getSize()
+                                            }
+                                            if (selectedItems.isEmpty()) {
+                                                onMultiSelectModeChange(false)
+                                            }
                                         } else {
-                                            selectedItems.add(pkgName)
-                                            selectedSize += app.getSize()
+                                            onNavigateToDetail(app.getPackageName())
                                         }
-                                        if (selectedItems.isEmpty()) {
-                                            onMultiSelectModeChange(false)
-                                        }
-                                    } else {
-                                        onNavigateToDetail(app.getPackageName())
-                                    }
-                                },
-                                onLongClick = {
-                                    if (!isSearchMode) {
-                                        onMultiSelectModeChange(true)
-                                        val pkgName = app.getPackageName()
-                                        if (!selectedItems.contains(pkgName)) {
-                                            selectedItems.add(pkgName)
-                                            selectedSize += app.getSize()
+                                    },
+                                    onLongClick = {
+                                        if (!isSearchMode) {
+                                            onMultiSelectModeChange(true)
+                                            val pkgName = app.getPackageName()
+                                            if (!selectedItems.contains(pkgName)) {
+                                                selectedItems.add(pkgName)
+                                                selectedSize += app.getSize()
+                                            }
                                         }
                                     }
-                                }
-                            )
+                                )
+                            }
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(4),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
+                        ) {
+                            items(appList, key = { it.getPackageName() }) { app ->
+                                GridAppItem(
+                                    app = app,
+                                    isSelected = selectedItems.contains(app.getPackageName()),
+                                    onClick = {
+                                        if (isMultiSelectMode) {
+                                            val pkgName = app.getPackageName()
+                                            if (selectedItems.contains(pkgName)) {
+                                                selectedItems.remove(pkgName)
+                                                selectedSize -= app.getSize()
+                                            } else {
+                                                selectedItems.add(pkgName)
+                                                selectedSize += app.getSize()
+                                            }
+                                            if (selectedItems.isEmpty()) {
+                                                onMultiSelectModeChange(false)
+                                            }
+                                        } else {
+                                            onNavigateToDetail(app.getPackageName())
+                                        }
+                                    },
+                                    onLongClick = {
+                                        if (!isSearchMode) {
+                                            onMultiSelectModeChange(true)
+                                            val pkgName = app.getPackageName()
+                                            if (!selectedItems.contains(pkgName)) {
+                                                selectedItems.add(pkgName)
+                                                selectedSize += app.getSize()
+                                            }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-
-        // 底部卡片 - 常规模式
-        AnimatedVisibility(
-            visible = isBottomCardVisible,
-            enter = slideInVertically(animationSpec = tween(300)) { it },
-            exit = slideOutVertically(animationSpec = tween(300)) { it },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            ExportCard(
-                hasPermission = hasPermission,
-                availableStorage = availableStorage,
-                showSystemApp = showSystemApp,
-                onShowSystemAppChange = { showSystemApp = it },
-                isShowSystemAppEnabled = isShowSystemAppEnabled && !isLoading,
-                onPermissionGranted = {
-                    hasPermission = true
-                    SPUtil.getGlobalSharedPreferences(context)
-                        .edit()
-                        .putBoolean("show_app", true)
-                        .apply()
-                    refreshAppList()
-                }
-            )
-        }
-
-        // 底部卡片 - 多选模式
-        AnimatedVisibility(
-            visible = isMultiSelectCardVisible,
-            enter = slideInVertically(animationSpec = tween(300)) { it },
-            exit = slideOutVertically(animationSpec = tween(300)) { it },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            MultiSelectCard(
-                selectedCount = selectedItems.size,
-                selectedSize = selectedSize,
-                onSelectAll = {
-                    if (selectedItems.size == appList.size) {
-                        selectedItems.clear()
-                        selectedSize = 0
-                    } else {
-                        selectedItems.clear()
-                        selectedSize = 0
-                        appList.forEach { app ->
-                            selectedItems.add(app.getPackageName())
-                            selectedSize += app.getSize()
-                        }
-                    }
-                },
-                onCopyPackageNames = {
-                    if (selectedItems.isEmpty()) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.snack_bar_no_app_selected))
-                        }
-                        return@MultiSelectCard
-                    }
-                    val separator = SPUtil.getGlobalSharedPreferences(context)
-                        .getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR, ",") ?: ","
-                    val resultString = selectedItems.joinToString(separator)
-
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("message", resultString))
-
-                    scope.launch {
-                        snackbarHostState.showSnackbar(context.getString(R.string.snack_bar_clipboard))
-                    }
-                }
-            )
-        }
-
-        // Snackbar
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) { data ->
-            Snackbar(snackbarData = data)
         }
     }
 }
@@ -545,7 +429,7 @@ private fun LoadingContent(
             modifier = Modifier.size(120.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
-            shadowElevation = 0.dp
+            shadowElevation = AppDimens.Elevation.none
         ) {
             Box(
                 contentAlignment = Alignment.Center
@@ -586,7 +470,7 @@ private fun LoadingContent(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.sm))
 
         Text(
             text = "正在扫描应用...",
@@ -624,7 +508,7 @@ private fun EmptyContent() {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.lg))
 
         Text(
             text = stringResource(R.string.word_content_blank),
@@ -632,7 +516,7 @@ private fun EmptyContent() {
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.sm))
 
         Text(
             text = "下拉刷新以加载应用列表",
@@ -642,156 +526,54 @@ private fun EmptyContent() {
     }
 }
 
-/**
- * 底部导出卡片 - MD3 风格
- */
 @Composable
-private fun ExportCard(
-    hasPermission: Boolean,
-    availableStorage: String,
-    showSystemApp: Boolean,
-    onShowSystemAppChange: (Boolean) -> Unit,
-    isShowSystemAppEnabled: Boolean,
+private fun PermissionBottomBar(
     onPermissionGranted: () -> Unit
 ) {
     val context = LocalContext.current
-
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shadowElevation = 6.dp,
-        tonalElevation = 2.dp
+        shadowElevation = AppDimens.Elevation.none,
+        tonalElevation = AppDimens.Elevation.none
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .padding(horizontal = AppDimens.Space.lg, vertical = AppDimens.Space.md),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (!hasPermission) {
-                // 权限请求区域
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // 权限图标
-                    Surface(
-                        modifier = Modifier.size(40.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.errorContainer
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Android,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = "需要授予读取应用列表权限",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = RoundedCornerShape(AppDimens.Radius.md),
+                color = MaterialTheme.colorScheme.errorContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Android,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.size(24.dp)
                     )
+                }
+            }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(AppDimens.Space.md))
+            Text(
+                text = "需要授予读取应用列表权限",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
 
-                    FilledTonalButton(
-                        onClick = {
-                            PermissionExts.requestreadInstallApps(context as android.app.Activity) {
-                                onPermissionGranted()
-                            }
-                        }
-                    ) {
-                        Text("授予")
+            FilledTonalButton(
+                onClick = {
+                    PermissionExts.requestreadInstallApps(context as android.app.Activity) {
+                        onPermissionGranted()
                     }
                 }
-            } else {
-                // 应用列表信息区域
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // 存储图标
-                    Surface(
-                        modifier = Modifier.size(40.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Folder,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.main_card_remaining_storage),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = availableStorage,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    // 显示系统应用开关
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.main_card_show_system_app),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Switch(
-                            checked = showSystemApp,
-                            onCheckedChange = {
-                                if (isShowSystemAppEnabled) {
-                                    onShowSystemAppChange(it)
-                                }
-                            },
-                            enabled = isShowSystemAppEnabled,
-                            modifier = Modifier.height(24.dp),
-                            thumbContent = {
-                                if (showSystemApp) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // 分析 APK 按钮已隐藏
+            ) {
+                Text("授予")
             }
         }
     }
@@ -808,28 +590,26 @@ private fun MultiSelectCard(
     onCopyPackageNames: () -> Unit
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(topStart = AppDimens.Radius.xl, topEnd = AppDimens.Radius.xl),
         color = MaterialTheme.colorScheme.secondaryContainer,
-        shadowElevation = 6.dp,
-        tonalElevation = 2.dp
+        shadowElevation = AppDimens.Elevation.none,
+        tonalElevation = AppDimens.Elevation.none
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(horizontal = AppDimens.Space.xl, vertical = AppDimens.Space.lg),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 选中数量和大小
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Space.sm)
             ) {
                 // 数量标签
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(AppDimens.Radius.sm),
                     color = MaterialTheme.colorScheme.primary
                 ) {
                     Text(
@@ -837,7 +617,7 @@ private fun MultiSelectCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = AppDimens.Space.md, vertical = AppDimens.Space.xs)
                     )
                 }
 
@@ -863,11 +643,11 @@ private fun MultiSelectCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(AppDimens.Space.md))
 
             // 操作按钮组
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Space.sm)
             ) {
                 FilledTonalButton(
                     onClick = onSelectAll
@@ -904,25 +684,26 @@ private fun LinearAppItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .padding(horizontal = AppDimens.Space.md, vertical = AppDimens.Space.xs)
+            .clip(RoundedCornerShape(AppDimens.Radius.lg))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface,
-        shadowElevation = if (isSelected) 4.dp else 1.dp,
-        tonalElevation = if (isSelected) 0.dp else 1.dp
+        shape = RoundedCornerShape(AppDimens.Radius.lg),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(AppDimens.Space.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 应用图标容器
@@ -935,7 +716,7 @@ private fun LinearAppItem(
                     contentDescription = null,
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(RoundedCornerShape(14.dp)),
+                        .clip(RoundedCornerShape(AppDimens.Radius.md)),
                     contentScale = ContentScale.Crop
                 )
 
@@ -948,7 +729,7 @@ private fun LinearAppItem(
                     Surface(
                         modifier = Modifier
                             .size(52.dp)
-                            .clip(RoundedCornerShape(14.dp)),
+                            .clip(RoundedCornerShape(AppDimens.Radius.md)),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                     ) {
                         Box(
@@ -995,7 +776,7 @@ private fun LinearAppItem(
             // 选择框或大小
             if (isMultiSelectMode) {
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(AppDimens.Radius.sm),
                     color = if (isSelected) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.surfaceVariant
                 ) {
@@ -1011,7 +792,7 @@ private fun LinearAppItem(
                 }
             } else {
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(AppDimens.Radius.sm),
                     color = MaterialTheme.colorScheme.surfaceContainerHighest
                 ) {
                     Text(
@@ -1037,19 +818,20 @@ private fun GridAppItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    Surface(
+    Card(
         modifier = Modifier
-            .padding(6.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .padding(AppDimens.Space.sm)
+            .clip(RoundedCornerShape(AppDimens.Radius.xl))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface,
-        shadowElevation = if (isSelected) 4.dp else 1.dp,
-        tonalElevation = if (isSelected) 0.dp else 1.dp
+        shape = RoundedCornerShape(AppDimens.Radius.xl),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
     ) {
         Box(
             modifier = Modifier.fillMaxWidth()
@@ -1070,7 +852,7 @@ private fun GridAppItem(
                         contentDescription = null,
                         modifier = Modifier
                             .size(56.dp)
-                            .clip(RoundedCornerShape(14.dp)),
+                            .clip(RoundedCornerShape(AppDimens.Radius.md)),
                         contentScale = ContentScale.Crop
                     )
 
@@ -1083,7 +865,7 @@ private fun GridAppItem(
                         Surface(
                             modifier = Modifier
                                 .size(56.dp)
-                                .clip(RoundedCornerShape(14.dp)),
+                                .clip(RoundedCornerShape(AppDimens.Radius.md)),
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         ) {
                             Box(
@@ -1141,31 +923,5 @@ private fun highlightText(text: String, keyword: String?): androidx.compose.ui.t
             index = text.lowercase(Locale.getDefault()).indexOf(keyword.lowercase(Locale.getDefault()), startIndex)
         }
         append(text.substring(startIndex))
-    }
-}
-
-/**
- * 刷新可用存储空间 - 与原实现完全一致
- */
-private fun refreshAvailableStorage(context: Context, onResult: (String) -> Unit) {
-    try {
-        val isExternal = SPUtil.getIsSaved2ExternalStorage(context)
-        var available: Long = 0
-
-        if (isExternal) {
-            val files = context.getExternalFilesDirs(null)
-            for (file in files) {
-                if (file.absolutePath.lowercase(Locale.getDefault())
-                        .startsWith(StorageUtil.getMainExternalStoragePath())) continue
-                available = StorageUtil.getAvaliableSizeOfPath(file.absolutePath)
-            }
-        } else {
-            available = StorageUtil.getAvaliableSizeOfPath(StorageUtil.getMainExternalStoragePath())
-        }
-
-        onResult(Formatter.formatFileSize(context, available))
-    } catch (e: Exception) {
-        e.printStackTrace()
-        onResult("")
     }
 }

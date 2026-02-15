@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import info.muge.appshare.ui.theme.AppDimens
 import info.muge.appshare.ui.theme.ChartColors
 
 /**
@@ -129,7 +130,7 @@ fun SimpleBarChart(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = AppDimens.Space.xs),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -143,7 +144,7 @@ fun SimpleBarChart(
                     modifier = Modifier
                         .weight(1f)
                         .height(24.dp)
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = AppDimens.Space.xs)
                 ) {
                     Box(
                         modifier = Modifier
@@ -151,7 +152,7 @@ fun SimpleBarChart(
                             .height(24.dp)
                             .background(
                                 color = color.copy(alpha = 0.3f),
-                                shape = RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(AppDimens.Radius.xs)
                             )
                     )
                     Box(
@@ -160,7 +161,7 @@ fun SimpleBarChart(
                             .height(24.dp)
                             .background(
                                 color = color,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(AppDimens.Radius.xs)
                             )
                     )
                 }
@@ -169,7 +170,7 @@ fun SimpleBarChart(
                     text = item.value.toInt().toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = AppDimens.Space.sm)
                 )
             }
         }

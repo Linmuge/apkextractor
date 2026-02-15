@@ -78,8 +78,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import info.muge.appshare.Global
 import info.muge.appshare.R
 import info.muge.appshare.items.AppItem
@@ -87,6 +88,7 @@ import info.muge.appshare.tasks.HashTask
 import info.muge.appshare.ui.dialogs.AppBottomSheet
 import info.muge.appshare.ui.dialogs.AppBottomSheetDualActions
 import info.muge.appshare.ui.ToastManager
+import info.muge.appshare.ui.theme.AppDimens
 import info.muge.appshare.utils.AXMLPrinter
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
@@ -441,7 +443,7 @@ private fun AppDetailHeader(
             contentDescription = null,
             modifier = Modifier
                 .size(96.dp)
-                .clip(RoundedCornerShape(28.dp))
+                .clip(RoundedCornerShape(AppDimens.Radius.xl))
                 .clickable(onClick = onIconClick),
             contentScale = ContentScale.Crop
         )
@@ -502,11 +504,11 @@ private fun AppInfoContent(appItem: AppItem) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(AppDimens.Space.lg)
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(AppDimens.Radius.xl),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
             )
@@ -887,7 +889,7 @@ private fun ComponentItemCard(
                 onClick = onClick,
                 onLongClick = if (canLongClick) onLongClick else null
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(AppDimens.Radius.md),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
@@ -895,7 +897,7 @@ private fun ComponentItemCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(AppDimens.Space.lg)
         ) {
             // 组件名称
             Text(
@@ -1037,7 +1039,7 @@ private fun SignatureContent(appItem: AppItem) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(AppDimens.Space.lg)
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -1048,7 +1050,7 @@ private fun SignatureContent(appItem: AppItem) {
         } else if (signatureInfo != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(AppDimens.Radius.xl),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 )
@@ -1188,11 +1190,11 @@ private fun HashContent(appItem: AppItem) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(AppDimens.Space.lg)
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(AppDimens.Radius.xl),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
             )
@@ -1313,18 +1315,18 @@ private fun ManifestContent(appItem: AppItem) {
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(16.dp)
+                    .padding(AppDimens.Space.lg)
             )
         } else if (manifestContent != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
+                    .padding(AppDimens.Space.lg)
             ) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(AppDimens.Radius.xl),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
@@ -1336,7 +1338,7 @@ private fun ManifestContent(appItem: AppItem) {
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(AppDimens.Space.lg)
                     )
                 }
             }
@@ -1424,7 +1426,7 @@ private fun SoLibContent(appItem: AppItem) {
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp, vertical = 4.dp)
                             .clickable { copyToClipboard(context, item.name) },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(AppDimens.Radius.md),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer
                         )
@@ -1432,7 +1434,7 @@ private fun SoLibContent(appItem: AppItem) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(AppDimens.Space.lg)
                         ) {
                             Text(
                                 text = item.name,

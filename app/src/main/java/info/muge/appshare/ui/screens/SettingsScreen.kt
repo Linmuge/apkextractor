@@ -25,7 +25,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,12 +44,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import info.muge.appshare.Constants
-import info.muge.appshare.Global
 import info.muge.appshare.R
 import info.muge.appshare.ThemeState
 import info.muge.appshare.ui.dialogs.AppBottomSheet
 import info.muge.appshare.ui.dialogs.AppBottomSheetDualActions
 import info.muge.appshare.ui.dialogs.ExportRuleDialog
+import info.muge.appshare.ui.theme.AppDimens
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.toast
@@ -75,46 +76,50 @@ fun SettingsScreen() {
     // 设置值
     var nightModeValue by remember { mutableIntStateOf(settings.getInt(Constants.PREFERENCE_NIGHT_MODE, Constants.PREFERENCE_NIGHT_MODE_DEFAULT)) }
     var languageValue by remember { mutableIntStateOf(settings.getInt(Constants.PREFERENCE_LANGUAGE, Constants.PREFERENCE_LANGUAGE_DEFAULT)) }
-    var isExternalStorage by remember {
+    var showSystemApp by remember {
         mutableStateOf(
             settings.getBoolean(
-                Constants.PREFERENCE_STORAGE_PATH_EXTERNAL,
-                Constants.PREFERENCE_STORAGE_PATH_EXTERNAL_DEFAULT
+                Constants.PREFERENCE_SHOW_SYSTEM_APP,
+                Constants.PREFERENCE_SHOW_SYSTEM_APP_DEFAULT
             )
         )
     }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
-            .padding(top = 8.dp, bottom = 100.dp)
+            .padding(horizontal = AppDimens.Space.lg)
+            .padding(top = AppDimens.Space.sm, bottom = 100.dp)
     ) {
         // 分组标题：通用设置
         SectionTitle(title = "通用设置")
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.md))
 
         // 导出路径设置
-        SettingItemWithSwitch(
+        SettingItem(
             iconRes = R.drawable.ic_folder,
             title = stringResource(R.string.activity_settings_path),
-            value = SPUtil.getDisplayingExportPath(),
-            isChecked = isExternalStorage,
-            onCheckedChange = { isExternal ->
-                isExternalStorage = isExternal
+            value = SPUtil.getDisplayingExportPath(context),
+            onClick = {}
+        )
+
+        Spacer(modifier = Modifier.height(AppDimens.Space.sm))
+
+        SettingToggleItem(
+            iconRes = R.drawable.ic_settings,
+            title = stringResource(R.string.main_card_show_system_app),
+            value = "开启后显示系统应用",
+            checked = showSystemApp,
+            onCheckedChange = {
+                showSystemApp = it
                 settings.edit()
-                    .putBoolean(Constants.PREFERENCE_STORAGE_PATH_EXTERNAL, isExternal)
+                    .putBoolean(Constants.PREFERENCE_SHOW_SYSTEM_APP, it)
                     .apply()
-                // 刷新存储空间显示
-                Global.handler.post {
-                    context.sendBroadcast(android.content.Intent(Constants.ACTION_REFRESH_AVAILIBLE_STORAGE))
-                }
             }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppDimens.Space.sm))
 
         // 规则设置
         SettingItem(
@@ -322,7 +327,7 @@ private fun SectionTitle(title: String) {
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(start = 4.dp)
+        modifier = Modifier.padding(start = AppDimens.Space.xs)
     )
 }
 
@@ -337,17 +342,21 @@ private fun SettingItem(
     isValueHighlighted: Boolean = false,
     onClick: () -> Unit
 ) {
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(AppDimens.Radius.lg))
             .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        shape = RoundedCornerShape(AppDimens.Radius.lg),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppDimens.Space.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 图标
@@ -358,7 +367,7 @@ private fun SettingItem(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(AppDimens.Space.md))
 
             // 文本区域
             Column(
@@ -396,63 +405,53 @@ private fun SettingItem(
     }
 }
 
-/**
- * 带开关的设置项
- */
 @Composable
-private fun SettingItemWithSwitch(
+private fun SettingToggleItem(
     iconRes: Int,
     title: String,
     value: String,
-    isChecked: Boolean,
+    checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp)),
-        color = MaterialTheme.colorScheme.surfaceContainer
+            .clip(RoundedCornerShape(AppDimens.Radius.lg)),
+        shape = RoundedCornerShape(AppDimens.Radius.lg),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppDimens.Space.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 图标
             Icon(
                 painter = painterResource(id = iconRes),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // 文本区域
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Spacer(modifier = Modifier.width(AppDimens.Space.md))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
-
-                if (value.isNotEmpty()) {
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
-
-            // 开关
             Switch(
-                checked = isChecked,
+                checked = checked,
                 onCheckedChange = onCheckedChange
             )
         }
