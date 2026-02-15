@@ -1,60 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 主题颜色 -->
     <color name="colorAccent">#4285F4</color>
-
-    <color name="color1">#4285F4</color>
-    <color name="color2">#F4433C</color>
-    <color name="color3">#FFBC32</color>
-    <color name="color4">#0AA858</color>
     <color name="colorTitle">#4285F4</color>
     <color name="colorTitleDark">#4285F4</color>
 
-    <color name="colorCardArea">#ffffff</color>
-    <color name="colorMainBottomCard">#e7ffffff</color>
-    <color name="colorHighLightText">#000000</color>
-    <color name="color_text_normal">#303030</color>
-
-    <color name="colorHighLightTextDarkBackground">#ffffff</color>
-
-    <color name="colorDividingLine">#dddddd</color>
-    <color name="colorWarnText">#ee2c2c</color>
-    <color name="colorFirstAttention">#0068ea</color>
-    <color name="colorTabIndicator">#ffffff</color>
-
-    <color name="standardBgColor">#F6F6F6</color>
-    <color name="colorSelectedBackground">#4285F4</color>
-    <color name="colorSystemAppTitleColor">#FF4500</color>
-    <color name="color_popup_window">#bb000000</color>
+    <!-- 对话框样式颜色 -->
     <color name="standardHintColor">#666666</color>
-    <color name="titleViewBgColor">#ffffff</color>
     <color name="standardTextColor">#111111</color>
-    <color name="titleViewBgColorp50">#80FFFFFF</color>
-    <color name="coloraa">#AAAAAA</color>
-    <!--ThemeActivity-->
-    <color name="ThemeActivity_themeTextColor">#FFFFFF</color>
-
-
-    <!--MainActivity-->
-    <!--Tab-->
-    <color name="MainActivity_TabUnSelectedColor1">#666666</color>
-    <color name="MainActivity_TabUnSelectedColor2">#333333</color>
-    <color name="MainActivity_TabUnSelectedTextColor">#666666</color>
-
-    <!--ItemAppV2-->
-    <color name="ItemAppV2_IconBorder">#e5e5e5</color>
-    <!--
-        深色模式
-        #111111 → #eeeeee
-        #666666 → #cccccc
-        #aaaaaa → #aaaaaa
-        #f6f6f6 →#333333
-        #e5e5e5 →333333
-    -->
-
-    <!-- MD3 Colors -->
-    <color name="md3_card_stroke_color">#E0E0E0</color>
-    <color name="md3_card_background">#FFFFFF</color>
-    <color name="md_theme_primary">?attr/colorPrimary</color>
-    <color name="md_theme_onSurfaceVariant">?attr/colorOnSurfaceVariant</color>
-    <color name="md_theme_surface">?attr/colorSurface</color>
+    <color name="titleViewBgColor">#ffffff</color>
 </resources>

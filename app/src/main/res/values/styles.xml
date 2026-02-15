@@ -30,33 +30,14 @@
         <item name="actionOverflowMenuStyle">@style/Widget.Material3.PopupMenu.Overflow</item>
     </style>
 
-    <!--更新样式-->
+    <!-- 对话框样式 -->
     <style name="materialDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="android:backgroundTint">@color/titleViewBgColor</item>
+        <item name="android:backgroundTint">?attr/colorSurface</item>
         <item name="android:background">@drawable/bg_10dp</item>
         <item name="android:windowMinWidthMinor">320dp</item>
         <item name="windowFixedWidthMinor">320dp</item>
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowIsFloating">true</item>
-    </style>
-    <!--更新样式-->
-    <style name="updateDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/bg_update_dialog_md3</item>
-        <item name="android:windowMinWidthMinor">340dp</item>
-        <item name="android:windowMinWidthMajor">340dp</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:windowFullscreen">false</item>
-        <item name="windowFixedWidthMinor">340dp</item>
-    </style>
-    <style name="CommonTheme" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">@color/colorTitle</item>
-        <item name="colorPrimaryDark">@color/colorTitleDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:titleTextStyle">@style/TitleTextStyle</item>
-    </style>
-
-    <style name="TitleTextStyle">
-        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.ActionBar" />
@@ -70,35 +51,11 @@
         <item name="android:colorBackground">?attr/colorSurfaceContainer</item>
     </style>
 
-    <style name="MyTabTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="textAllCaps">false</item>
-    </style>
-    <style name="BaseDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/bg_10dp</item>
-        <item name="android:background">@drawable/bg_10dp</item>
-        <item name="android:backgroundTint">@color/titleViewBgColor</item>
-        <item name="android:windowMinWidthMinor">350dp</item>
-        <item name="windowFixedWidthMinor">350dp</item>
-        <item name="android:shadowColor">@color/standardHintColor</item>
-        <item name="android:outlineAmbientShadowColor" tools:targetApi="p">@color/standardHintColor</item>
-        <item name="android:outlineSpotShadowColor" tools:targetApi="p">@color/standardHintColor</item>
-    </style>
-
     <!-- ShapeableImageView 圆角样式 -->
     <style name="shapeImageCircle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
         <item name="android:scaleType">centerCrop</item>
-    </style>
-
-    <style name="shapeImage4dp">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">4dp</item>
-    </style>
-
-    <style name="shapeImage8dp">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">8dp</item>
     </style>
 
     <style name="shapeImage10dp">
@@ -114,31 +71,5 @@
     <style name="shapeImage16dp">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">16dp</item>
-    </style>
-
-    <style name="shapeImage18dp">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">18dp</item>
-    </style>
-
-    <style name="shapeImage28dp">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">28dp</item>
-    </style>
-
-    <!-- 文本样式 -->
-    <style name="bold600" parent="Widget.AppCompat.TextView">
-        <item name="android:textStyle">bold</item>
-        <item name="android:fontWeight" tools:targetApi="o">600</item>
-    </style>
-
-    <style name="tabSelectText" parent="Widget.AppCompat.TextView">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="tabUnSelectText" parent="Widget.AppCompat.TextView">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">normal</item>
     </style>
 </resources>

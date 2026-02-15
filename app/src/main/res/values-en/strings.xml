@@ -117,6 +117,10 @@
     <string name="dialog_data_obb_title">Additional options</string>
     <string name="dialog_data_obb_message">The app(s) selected contain(s) data or obb in the external storage, check the following options
         will package them to a zip file</string>
+    <string name="dialog_data_obb_export_data">Export Data files</string>
+    <string name="dialog_data_obb_export_obb">Export Obb files</string>
+    <string name="dialog_exporting">Exporting…</string>
+    <string name="dialog_importing">Importing…</string>
 
     <string name="dialog_button_confirm">Confirm</string>
     <string name="dialog_button_cancel">Cancel</string>

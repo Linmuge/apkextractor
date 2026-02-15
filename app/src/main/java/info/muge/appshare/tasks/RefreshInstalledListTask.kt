@@ -85,9 +85,7 @@ class RefreshInstalledListTask(
             Global.app_list.clear()
             Global.app_list.addAll(list_sum) // 向全局list保存一个引用
         }
-        
-        GetSignatureInfoTask.clearCache()
-        
+
         Global.handler.post {
             listener?.onRefreshCompleted(list_sum)
         }

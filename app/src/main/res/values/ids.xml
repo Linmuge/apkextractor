@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- BRV适配器使用的Tag ID -->
-    <item name="tag_highlight_keyword" type="id"/>
-    <item name="tag_multi_select_mode" type="id"/>
-    <item name="tag_selected_positions" type="id"/>
-</resources>
-

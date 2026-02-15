@@ -34,6 +34,7 @@ import java.io.InputStream
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
 import java.util.Calendar
+import java.util.Locale
 import java.util.jar.JarFile
 
 /**
@@ -689,6 +690,43 @@ object EnvironmentUtil {
         } catch (e: Exception) {
             e.printStackTrace()
             ToastManager.showToast(context, "Error: ${e.message}", Toast.LENGTH_SHORT)
+        }
+    }
+
+    /**
+     * 设置应用语言
+     * @param context 上下文
+     * @param languageValue 语言值，参考 Constants.LANGUAGE_*
+     */
+    @JvmStatic
+    fun setLanguage(context: Context, languageValue: Int) {
+        val locale = when (languageValue) {
+            Constants.LANGUAGE_CHINESE -> Locale.CHINESE
+            Constants.LANGUAGE_ENGLISH -> Locale.ENGLISH
+            else -> Locale.getDefault() // 跟随系统
+        }
+
+        Locale.setDefault(locale)
+        val config = android.content.res.Configuration(context.resources.configuration)
+        config.setLocale(locale)
+        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+
+        // 同时更新 Application context
+        val appContext = context.applicationContext
+        appContext.resources.updateConfiguration(config, appContext.resources.displayMetrics)
+    }
+
+    /**
+     * 获取当前设置的语言 Locale
+     */
+    @JvmStatic
+    fun getAppLocale(context: Context): Locale {
+        val languageValue = SPUtil.getGlobalSharedPreferences(context)
+            .getInt(Constants.PREFERENCE_LANGUAGE, Constants.PREFERENCE_LANGUAGE_DEFAULT)
+        return when (languageValue) {
+            Constants.LANGUAGE_CHINESE -> Locale.CHINESE
+            Constants.LANGUAGE_ENGLISH -> Locale.ENGLISH
+            else -> Locale.getDefault()
         }
     }
 }

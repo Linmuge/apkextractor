@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.android.legacy-kapt")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
     val versionBase = "5.0.2"
@@ -67,10 +68,13 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
-        dataBinding = true
+        compose = true
         buildConfig = true
         resValues = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     compileOptions {
@@ -129,25 +133,27 @@ androidComponents {
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("com.google.android.material:material:1.13.0")
-    implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("androidx.emoji2:emoji2:1.6.0") // 使用合适的版本号
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
-    implementation("androidx.coordinatorlayout:coordinatorlayout:1.3.0")
+    implementation("androidx.emoji2:emoji2:1.6.0")
     implementation("com.belerweb:pinyin4j:2.5.1")
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("com.github.getActivity:XXPermissions:28.0")
     implementation("androidx.documentfile:documentfile:1.1.0")
 
-    // ViewPager2 - 现代化的页面滑动组件
-    implementation("androidx.viewpager2:viewpager2:1.1.0")
-
-    // BRV - 强大的RecyclerView框架
-    implementation("com.github.liangjingkanji:BRV:1.6.1")
-
-    // MPAndroidChart - 图表库
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    // Jetpack Compose
+    implementation(platform("androidx.compose:compose-bom:2026.02.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.activity:activity-compose:1.12.4")
+    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
 // 注册自动导出逻辑

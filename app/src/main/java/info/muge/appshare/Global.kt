@@ -2,25 +2,20 @@ package info.muge.appshare
 
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.items.ImportItem
 import info.muge.appshare.tasks.ExportTask
 import info.muge.appshare.tasks.GetImportLengthAndDuplicateInfoTask
 import info.muge.appshare.tasks.ImportTask
-import info.muge.appshare.ui.DataObbDialog
-import info.muge.appshare.ui.ExportingDialog
-import info.muge.appshare.ui.ImportingDialog
 import info.muge.appshare.ui.ToastManager
+import info.muge.appshare.ui.dialogs.GlobalDialogManager
 import info.muge.appshare.utils.DocumentFileUtil
 import info.muge.appshare.utils.EnvironmentUtil
 import info.muge.appshare.utils.OutputUtil
@@ -88,37 +83,37 @@ object Global {
         listener: ExportTaskFinishedListener?
     ) {
         if (list.isEmpty()) return
-        
+
         if (check_data_obb) {
-            val dialog = DataObbDialog(activity, list, object : DataObbDialog.DialogDataObbConfirmedCallback {
-                override fun onDialogDataObbConfirmed(export_list: List<AppItem>) {
-                    val dulplicated_info = getDuplicatedFileInfo(activity, export_list)
-                    if (dulplicated_info.trim().isNotEmpty()) {
-                        AlertDialog.Builder(activity)
-                            .setTitle(activity.resources.getString(R.string.dialog_duplicate_title))
-                            .setMessage("${activity.resources.getString(R.string.dialog_duplicate_msg)}$dulplicated_info")
-                            .setPositiveButton(activity.resources.getString(R.string.dialog_button_confirm)) { _, _ ->
-                                exportCertainAppItemsToSetPathAndShare(activity, export_list, listener)
-                            }
-                            .setNegativeButton(activity.resources.getString(R.string.dialog_button_cancel), null)
-                            .show()
-                        return
+            GlobalDialogManager.showDataObbSelection(
+                title = activity.getString(R.string.dialog_data_obb_title),
+                dataLabel = activity.getString(R.string.dialog_data_obb_export_data),
+                obbLabel = activity.getString(R.string.dialog_data_obb_export_obb),
+                onConfirm = { exportData, exportObb ->
+                    list.forEach {
+                        it.exportData = exportData
+                        it.exportObb = exportObb
                     }
-                    exportCertainAppItemsToSetPathAndShare(activity, export_list, listener)
-                }
-            })
-            dialog.show()
-        } else {
-            val dulplicated_info = getDuplicatedFileInfo(activity, list)
-            if (dulplicated_info.trim().isNotEmpty()) {
-                AlertDialog.Builder(activity)
-                    .setTitle(activity.resources.getString(R.string.dialog_duplicate_title))
-                    .setMessage("${activity.resources.getString(R.string.dialog_duplicate_msg)}$dulplicated_info")
-                    .setPositiveButton(activity.resources.getString(R.string.dialog_button_confirm)) { _, _ ->
+                    val duplicatedInfo = getDuplicatedFileInfo(activity, list)
+                    if (duplicatedInfo.trim().isNotEmpty()) {
+                        GlobalDialogManager.showConfirm(
+                            title = activity.resources.getString(R.string.dialog_duplicate_title),
+                            message = "${activity.resources.getString(R.string.dialog_duplicate_msg)}$duplicatedInfo",
+                            onConfirm = { exportCertainAppItemsToSetPathAndShare(activity, list, listener) }
+                        )
+                    } else {
                         exportCertainAppItemsToSetPathAndShare(activity, list, listener)
                     }
-                    .setNegativeButton(activity.resources.getString(R.string.dialog_button_cancel), null)
-                    .show()
+                }
+            )
+        } else {
+            val duplicatedInfo = getDuplicatedFileInfo(activity, list)
+            if (duplicatedInfo.trim().isNotEmpty()) {
+                GlobalDialogManager.showConfirm(
+                    title = activity.resources.getString(R.string.dialog_duplicate_title),
+                    message = "${activity.resources.getString(R.string.dialog_duplicate_msg)}$duplicatedInfo",
+                    onConfirm = { exportCertainAppItemsToSetPathAndShare(activity, list, listener) }
+                )
                 return
             }
             exportCertainAppItemsToSetPathAndShare(activity, list, listener)
@@ -133,39 +128,50 @@ object Global {
         export_list: List<AppItem>,
         listener: ExportTaskFinishedListener?
     ) {
-        val dialog = ExportingDialog(activity)
         val task = ExportTask(activity, export_list, null)
-        
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, activity.resources.getString(R.string.dialog_export_stop)) { dialog1, _ ->
-            task.setInterrupted()
-            dialog1.cancel()
-        }
-        dialog.setCancelable(false)
-        dialog.setCanceledOnTouchOutside(false)
-        dialog.show()
-        
+
+        GlobalDialogManager.showProgress(
+            title = activity.getString(R.string.dialog_exporting),
+            indeterminate = false,
+            cancelText = activity.getString(R.string.dialog_export_stop),
+            onCancel = {
+                task.setInterrupted()
+                GlobalDialogManager.dismiss()
+            }
+        )
+        GlobalDialogManager.updateProgress(0, export_list.size)
+
         task.setExportProgressListener(object : ExportTask.ExportProgressListener {
             override fun onExportAppItemStarted(order: Int, item: AppItem, total: Int, write_path: String) {
-                dialog.setProgressOfApp(order, total, item, write_path)
+                handler.post {
+                    GlobalDialogManager.updateProgress(
+                        progress = order,
+                        total = total,
+                        message = "${item.getAppName()}\n$write_path"
+                    )
+                }
             }
 
             override fun onExportProgressUpdated(current: Long, total: Long, write_path: String) {
-                dialog.setProgressOfWriteBytes(current, total)
+                // 进度更新在主对话框中体现
             }
 
             override fun onExportZipProgressUpdated(write_path: String) {
-                dialog.setProgressOfCurrentZipFile(write_path)
+                // ZIP进度更新
             }
 
             override fun onExportSpeedUpdated(speed: Long) {
-                dialog.setSpeed(speed)
+                // 速度更新
             }
 
             override fun onExportTaskFinished(fileItems: List<info.muge.appshare.items.FileItem>, error_message: String) {
-                dialog.cancel()
-                listener?.onFinished(error_message)
+                handler.post {
+                    GlobalDialogManager.dismiss()
+                    listener?.onFinished(error_message)
+                }
             }
         })
+
         task.start()
     }
 
@@ -281,47 +287,52 @@ object Global {
         zipFileInfos: List<ZipFileUtil.ZipFileInfo>,
         callback: ImportTaskFinishedCallback?
     ) {
-        val dialog_duplication_wait = AlertDialog.Builder(activity)
-            .setTitle(activity.resources.getString(R.string.dialog_wait))
-            .setView(LayoutInflater.from(activity).inflate(R.layout.dialog_duplication_file, null))
-            .setNegativeButton(activity.resources.getString(R.string.dialog_button_cancel), null)
-            .setCancelable(false)
-            .show()
-
         val infoTask = GetImportLengthAndDuplicateInfoTask(importItems, zipFileInfos,
             object : GetImportLengthAndDuplicateInfoTask.GetImportLengthAndDuplicateInfoCallback {
                 override fun onCheckingFinished(duplication_infos: List<String>, total: Long) {
-                    dialog_duplication_wait.cancel()
+                    GlobalDialogManager.dismiss()
 
-                    val importingDialog = ImportingDialog(activity, total)
+                    var importTask: ImportTask? = null
+                    GlobalDialogManager.showProgress(
+                        title = activity.getString(R.string.dialog_importing),
+                        indeterminate = false,
+                        cancelText = activity.getString(R.string.word_stop),
+                        onCancel = {
+                            importTask?.setInterrupted()
+                            GlobalDialogManager.dismiss()
+                        }
+                    )
+                    GlobalDialogManager.updateProgress(0, total.toInt())
+
                     val importTaskCallback = object : ImportTask.ImportTaskCallback {
                         override fun onImportTaskStarted() {}
 
                         override fun onRefreshSpeed(speed: Long) {
-                            importingDialog.setSpeed(speed)
+                            // 速度更新
                         }
 
                         override fun onImportTaskProgress(writePath: String, progress: Long) {
-                            importingDialog.setProgress(progress)
-                            importingDialog.setCurrentWritingName(writePath)
+                            handler.post {
+                                GlobalDialogManager.updateProgress(
+                                    progress = progress.toInt(),
+                                    total = total.toInt(),
+                                    message = writePath
+                                )
+                            }
                         }
 
                         override fun onImportTaskFinished(errorMessage: String) {
-                            importingDialog.cancel()
-                            callback?.onImportFinished(errorMessage)
+                            handler.post {
+                                GlobalDialogManager.dismiss()
+                                callback?.onImportFinished(errorMessage)
+                            }
                         }
                     }
 
-                    val importTask = ImportTask(activity, importItems, importTaskCallback)
-                    importingDialog.setButton(AlertDialog.BUTTON_NEGATIVE,
-                        activity.resources.getString(R.string.word_stop)) { dialog, _ ->
-                        importTask.setInterrupted()
-                        importingDialog.cancel()
-                    }
+                    importTask = ImportTask(activity, importItems, importTaskCallback)
 
                     if (duplication_infos.isEmpty()) {
-                        importingDialog.show()
-                        importTask.start()
+                        importTask?.start()
                     } else {
                         val stringBuilder = StringBuilder()
                         var checkingIndex = duplication_infos.size
@@ -343,24 +354,38 @@ object Global {
                             stringBuilder.append(activity.resources.getString(R.string.dialog_import_duplicate_more))
                         }
 
-                        AlertDialog.Builder(activity)
-                            .setTitle(activity.resources.getString(R.string.dialog_import_duplicate_title))
-                            .setMessage("${activity.resources.getString(R.string.dialog_import_duplicate_message)}$stringBuilder")
-                            .setPositiveButton(activity.resources.getString(R.string.dialog_button_confirm)) { _, _ ->
-                                importingDialog.show()
-                                importTask.start()
+                        GlobalDialogManager.dismiss()
+                        GlobalDialogManager.showConfirm(
+                            title = activity.resources.getString(R.string.dialog_import_duplicate_title),
+                            message = "${activity.resources.getString(R.string.dialog_import_duplicate_message)}$stringBuilder",
+                            onConfirm = {
+                                GlobalDialogManager.showProgress(
+                                    title = activity.getString(R.string.dialog_importing),
+                                    indeterminate = false,
+                                    cancelText = activity.getString(R.string.word_stop),
+                                    onCancel = {
+                                        importTask?.setInterrupted()
+                                        GlobalDialogManager.dismiss()
+                                    }
+                                )
+                                GlobalDialogManager.updateProgress(0, total.toInt())
+                                importTask?.start()
                             }
-                            .setNegativeButton(activity.resources.getString(R.string.dialog_button_cancel), null)
-                            .show()
+                        )
                     }
                 }
             })
 
         infoTask.start()
-        dialog_duplication_wait.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-            dialog_duplication_wait.cancel()
-            infoTask.setInterrupted()
-        }
+        GlobalDialogManager.showProgress(
+            title = activity.getString(R.string.dialog_wait),
+            indeterminate = true,
+            cancelText = activity.getString(R.string.dialog_button_cancel),
+            onCancel = {
+                GlobalDialogManager.dismiss()
+                infoTask.setInterrupted()
+            }
+        )
     }
 
     /**
@@ -436,4 +461,3 @@ object Global {
         }
     }
 }
-

@@ -125,6 +125,10 @@
     <string name="dialog_wait">请等待&#8230;</string>
     <string name="dialog_data_obb_title">附加选项</string>
     <string name="dialog_data_obb_message">发现部分应用包含外置存储Data和Obb数据，勾选下面的选项将打包成zip导出。</string>
+    <string name="dialog_data_obb_export_data">导出Data数据</string>
+    <string name="dialog_data_obb_export_obb">导出Obb数据</string>
+    <string name="dialog_exporting">正在导出…</string>
+    <string name="dialog_importing">正在导入…</string>
 
     <string name="dialog_button_confirm">确定</string>
     <string name="dialog_button_cancel">取消</string>
