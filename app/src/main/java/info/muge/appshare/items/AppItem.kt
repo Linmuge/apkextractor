@@ -21,7 +21,6 @@ class AppItem : Comparable<AppItem>, DisplayItem {
 
     companion object {
         @Transient
-        @JvmField
         var sort_config = 0
     }
 

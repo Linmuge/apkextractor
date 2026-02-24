@@ -1,76 +1,62 @@
 package info.muge.appshare.tasks
 
-import info.muge.appshare.Global
 import info.muge.appshare.items.ImportItem
 import info.muge.appshare.utils.PinyinUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 
 /**
- * 搜索包任务
+ * 搜索包任务（协程版）
  */
 class SearchPackageTask(
     importItemList: List<ImportItem>,
-    info: String,
-    private val callback: SearchTaskCompletedCallback
-) : Thread() {
+    info: String
+) {
+    private val searchInfo: String = info.trim().lowercase()
+    private val importItemList = ArrayList<ImportItem>(importItemList)
 
-    @Volatile
-    private var isInterrupted = false
-    private val search_info: String = info.trim().lowercase()
-    private val importItemList = ArrayList<ImportItem>()
-    private val result_importItems = ArrayList<ImportItem>()
+    /**
+     * 执行搜索（挂起函数，在 IO 线程执行）
+     */
+    suspend fun execute(): List<ImportItem> = withContext(Dispatchers.IO) {
+        val resultItems = ArrayList<ImportItem>()
 
-    init {
-        this.importItemList.addAll(importItemList)
-    }
-
-    override fun run() {
-        super.run()
-        
         for (importItem in importItemList) {
-            if (isInterrupted) {
-                result_importItems.clear()
-                return
-            }
-            
+            ensureActive()
+
             try {
-                val b = (getFormatString(importItem.getItemName()).contains(search_info) ||
-                        getFormatString(importItem.getDescription()).contains(search_info) ||
-                        getFormatString(PinyinUtil.getFirstSpell(importItem.getItemName())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getFullSpell(importItem.getItemName())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getPinYin(importItem.getItemName())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getFirstSpell(importItem.getDescription())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getFullSpell(importItem.getDescription())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getPinYin(importItem.getDescription())).contains(search_info)) &&
-                        search_info.trim().isNotEmpty()
-                
-                if (b) {
-                    result_importItems.add(importItem)
+                val matched = (getFormatString(importItem.getItemName()).contains(searchInfo) ||
+                        getFormatString(importItem.getDescription()).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getFirstSpell(importItem.getItemName())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getFullSpell(importItem.getItemName())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getPinYin(importItem.getItemName())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getFirstSpell(importItem.getDescription())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getFullSpell(importItem.getDescription())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getPinYin(importItem.getDescription())).contains(searchInfo)) &&
+                        searchInfo.trim().isNotEmpty()
+
+                if (matched) {
+                    resultItems.add(importItem)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        
-        Global.handler.post {
-            if (!isInterrupted) {
-                callback.onSearchTaskCompleted(result_importItems, search_info)
-            }
-        }
-    }
 
-    fun setInterrupted() {
-        isInterrupted = true
+        resultItems
     }
 
     private fun getFormatString(s: String): String {
         return s.trim().lowercase()
     }
 
+    val keyword: String get() = searchInfo
+
     /**
-     * 搜索任务完成回调
+     * 搜索任务完成回调（保留向后兼容）
      */
     interface SearchTaskCompletedCallback {
         fun onSearchTaskCompleted(importItems: List<ImportItem>, keyword: String)
     }
 }
-

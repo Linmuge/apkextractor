@@ -12,18 +12,20 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -95,7 +97,9 @@ data class BottomNavItem(
 @Composable
 fun MainScreen(
     onNavigateToAppDetail: (String) -> Unit = {},
-    onNavigateToAppDetailWithUri: (Uri) -> Unit = {}
+    onNavigateToAppDetailWithUri: (Uri) -> Unit = {},
+    onNavigateToAppChange: () -> Unit = {},
+    onNavigateToThemeSettings: () -> Unit = {}
 ) {
     var currentTab by rememberSaveable { mutableIntStateOf(0) }
     var isSearchMode by rememberSaveable { mutableStateOf(false) }
@@ -165,7 +169,7 @@ fun MainScreen(
                 MainTopBar(
                     title = when (currentTab) {
                         0 -> stringResource(R.string.app_name)
-                        1 -> "统计"
+                        1 -> stringResource(R.string.nav_statistics)
                         2 -> stringResource(R.string.action_settings)
                         else -> stringResource(R.string.app_name)
                     },
@@ -192,22 +196,53 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .imePadding()
         ) {
-            when (currentTab) {
-                0 -> AppListScreen(
-                    viewMode = viewMode,
-                    isSearchMode = isSearchMode,
-                    searchText = searchText,
-                    isMultiSelectMode = isMultiSelectMode,
-                    onMultiSelectModeChange = { isMultiSelectMode = it },
-                    onNavigateToDetail = onNavigateToAppDetail,
-                    onNavigateToDetailWithUri = onNavigateToAppDetailWithUri,
-                    showSortDialog = showSortDialog,
-                    onSortDialogDismiss = { showSortDialog = false }
+            // 使用 Box 堆叠所有 Tab 页，通过透明度和交互控制切换
+            // 这样切换 Tab 时可以保持各页面的滚动位置和状态
+            // 活跃 Tab 通过 zIndex 浮到最上层，确保接收触摸事件
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .zIndex(if (currentTab == 0) 1f else 0f)
+                .graphicsLayer {
+                    alpha = if (currentTab == 0) 1f else 0f
+                }
+            ) {
+                if (currentTab == 0 || !isSearchMode) {
+                    AppListScreen(
+                        viewMode = viewMode,
+                        isSearchMode = isSearchMode,
+                        searchText = searchText,
+                        isMultiSelectMode = isMultiSelectMode,
+                        onMultiSelectModeChange = { isMultiSelectMode = it },
+                        onNavigateToDetail = onNavigateToAppDetail,
+                        onNavigateToDetailWithUri = onNavigateToAppDetailWithUri,
+                        showSortDialog = showSortDialog,
+                        onSortDialogDismiss = { showSortDialog = false }
+                    )
+                }
+            }
+
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .zIndex(if (currentTab == 1) 1f else 0f)
+                .graphicsLayer {
+                    alpha = if (currentTab == 1) 1f else 0f
+                }
+            ) {
+                StatisticsScreen(onNavigateToAppDetail = onNavigateToAppDetail)
+            }
+
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .zIndex(if (currentTab == 2) 1f else 0f)
+                .graphicsLayer {
+                    alpha = if (currentTab == 2) 1f else 0f
+                }
+            ) {
+                SettingsScreen(
+                    onNavigateToAppChange = onNavigateToAppChange,
+                    onNavigateToThemeSettings = onNavigateToThemeSettings
                 )
-                1 -> StatisticsScreen(onNavigateToAppDetail = onNavigateToAppDetail)
-                2 -> SettingsScreen()
             }
         }
     }
@@ -239,7 +274,7 @@ private fun MainTopBar(
                 FilledTonalIconButton(onClick = onSearchClick) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "搜索"
+                        contentDescription = stringResource(R.string.search_label)
                     )
                 }
             }
@@ -287,7 +322,7 @@ private fun SearchTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.statusBars),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surface,
         tonalElevation = AppDimens.Elevation.none
     ) {
         Row(
@@ -299,7 +334,7 @@ private fun SearchTopBar(
             IconButton(onClick = onClose) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "返回",
+                    contentDescription = stringResource(R.string.back_label),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -326,7 +361,7 @@ private fun SearchTopBar(
                         interactionSource = interactionSource,
                         placeholder = {
                             Text(
-                                text = "搜索应用...",
+                                text = stringResource(R.string.search_hint),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
@@ -351,7 +386,7 @@ private fun SearchTopBar(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
-                                        contentDescription = "清除",
+                                        contentDescription = stringResource(R.string.clear_label),
                                         modifier = Modifier.padding(AppDimens.Space.xs),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -394,7 +429,13 @@ private fun MainNavigationBar(
                                 contentDescription = item.title
                             )
                         },
-                        alwaysShowLabel = false,
+                        label = {
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        alwaysShowLabel = true,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
                             indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -403,16 +444,11 @@ private fun MainNavigationBar(
                     )
                 }
             }
-            Spacer(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
             )
         }
     }
-}
-
-@Composable
-private fun Spacer(modifier: Modifier = Modifier) {
-    Box(modifier = modifier)
 }

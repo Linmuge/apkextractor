@@ -246,6 +246,7 @@
     <string name="word_none">无</string>
     <string name="word_stop">停止</string>
     <string name="word_content_blank">没有内容</string>
+    <string name="search_no_result">未找到匹配的应用</string>
     <string name="word_keep_screen_on">保持常亮</string>
     <string name="word_custom">自定义</string>
     <string name="att_loading">正在载入&#8230;</string>
@@ -275,4 +276,23 @@
     <string name="activity_detail_flags">Flags</string>
     <string name="menu_open_system_settings">查看系统详情</string>
     <string name="action_save_icon">保存应用图标</string>
+
+    <!-- 新增国际化字符串 -->
+    <string name="nav_statistics">统计</string>
+    <string name="loading_scanning_apps">正在扫描应用…</string>
+    <string name="empty_pull_to_refresh">下拉刷新以加载应用列表</string>
+    <string name="permission_read_app_list">需要授予读取应用列表权限</string>
+    <string name="permission_grant_short">授予</string>
+    <string name="copy_package_names">复制包名</string>
+    <string name="app_no_launcher">应用没有界面，无法运行</string>
+    <string name="choose_action">选择操作</string>
+    <string name="copied">已复制</string>
+    <string name="search_hint">搜索应用…</string>
+    <string name="search_label">搜索</string>
+    <string name="back_label">返回</string>
+    <string name="clear_label">清除</string>
+    <string name="setting_dynamic_color">动态取色</string>
+    <string name="setting_dynamic_color_desc">使用壁纸颜色生成主题 (Material You)</string>
+    <string name="invert_selection">反选</string>
+    <string name="deselect_all">取消全选</string>
 </resources>

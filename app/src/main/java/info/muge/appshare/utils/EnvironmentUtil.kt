@@ -42,7 +42,6 @@ import java.util.jar.JarFile
  */
 object EnvironmentUtil {
 
-    @JvmStatic
     fun showInputMethod(view: View) {
         try {
             val inputMethodManager = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -53,7 +52,6 @@ object EnvironmentUtil {
         }
     }
 
-    @JvmStatic
     fun hideInputMethod(activity: Activity) {
         try {
             (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
@@ -63,7 +61,6 @@ object EnvironmentUtil {
         }
     }
 
-    @JvmStatic
     fun drawableToBitmap(drawable: Drawable): Bitmap {
         val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,
@@ -76,7 +73,6 @@ object EnvironmentUtil {
         return bitmap
     }
 
-    @JvmStatic
     fun getAppNameByPackageName(context: Context, package_name: String): String {
         try {
             val packageManager = context.packageManager
@@ -94,7 +90,6 @@ object EnvironmentUtil {
      * @param field 参考[Calendar.YEAR] [Calendar.MONTH] [Calendar.MINUTE]
      * [Calendar.HOUR_OF_DAY] [Calendar.MINUTE] [Calendar.SECOND]
      */
-    @JvmStatic
     fun getCurrentTimeValue(field: Int): String {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
@@ -111,7 +106,6 @@ object EnvironmentUtil {
         }
     }
 
-    @JvmStatic
     fun getEmptyVariableString(value: String): String {
         var result = value
         result = result.replace(Constants.FONT_APP_NAME, "")
@@ -133,7 +127,6 @@ object EnvironmentUtil {
      * @return string[0]证书发行者,string[1]证书所有者,string[2]序列号
      * string[3]证书起始时间 string[4]证书结束时间
      */
-    @JvmStatic
     fun getAPKSignInfo(filePath: String): Array<String> {
         var subjectDN = ""
         var issuerDN = ""
@@ -171,32 +164,26 @@ object EnvironmentUtil {
         return arrayOf(subjectDN, issuerDN, serial, notBefore, notAfter)
     }
 
-    @JvmStatic
     fun hashMD5Value(inputStream: InputStream): String {
         return getHashValue(inputStream, "MD5")
     }
 
-    @JvmStatic
     fun hashSHA256Value(inputStream: InputStream): String {
         return getHashValue(inputStream, "SHA256")
     }
 
-    @JvmStatic
     fun hashSHA1Value(inputStream: InputStream): String {
         return getHashValue(inputStream, "SHA1")
     }
 
-    @JvmStatic
     fun getSignatureMD5StringOfPackageInfo(info: PackageInfo): String {
         return getSignatureStringOfPackageInfo(info, "MD5")
     }
 
-    @JvmStatic
     fun getSignatureSHA1OfPackageInfo(info: PackageInfo): String {
         return getSignatureStringOfPackageInfo(info, "SHA1")
     }
 
-    @JvmStatic
     fun getSignatureSHA256OfPackageInfo(info: PackageInfo): String {
         return getSignatureStringOfPackageInfo(info, "SHA256")
     }
@@ -250,7 +237,6 @@ object EnvironmentUtil {
     /**
      * 当SharedPreference中设置了加载启动项的值，则会查询启动Receiver，否则会直接返回一个空Bundle（查询为耗时操作，此方法会阻塞）
      */
-    @JvmStatic
     fun getStaticRegisteredReceiversOfBundleTypeForPackageName(context: Context, package_name: String): Bundle {
         val bundle = Bundle()
         if (!SPUtil.getGlobalSharedPreferences(context)
@@ -286,7 +272,6 @@ object EnvironmentUtil {
      * @param name 文件名称（仅文件名，不包含路径）
      * @return true-合法文件名  false-包含非法字符
      */
-    @JvmStatic
     fun isALegalFileName(name: String): Boolean {
         try {
             if (name.contains("?") || name.contains("\\") || name.contains("/") ||
@@ -321,7 +306,6 @@ object EnvironmentUtil {
     /**
      * 截取文件扩展名，例如Test.apk 则返回 apk
      */
-    @JvmStatic
     fun getFileExtensionName(fileName: String): String {
         try {
             return fileName.substring(fileName.lastIndexOf(".") + 1)
@@ -334,7 +318,6 @@ object EnvironmentUtil {
     /**
      * 返回文件主体的文件名，例如 Test.File.java 则返回Test.File
      */
-    @JvmStatic
     fun getFileMainName(fileName: String): String {
         try {
             val lastIndex = fileName.lastIndexOf(".")
@@ -350,7 +333,6 @@ object EnvironmentUtil {
      * 判断当前是否连接了WiFi网络
      * @return true-连接了WiFi网络
      */
-    @JvmStatic
     fun isWifiConnected(context: Context): Boolean {
         try {
             val wifiInfo = (context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).connectionInfo
@@ -364,7 +346,6 @@ object EnvironmentUtil {
     /**
      * 获取系统热点是否开启
      */
-    @JvmStatic
     fun isAPEnabled(context: Context): Boolean {
         try {
             val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -381,7 +362,6 @@ object EnvironmentUtil {
     /**
      * 跳转到系统热点配置页
      */
-    @JvmStatic
     fun goToApPageActivity(context: Context) {
         try {
             val intent = Intent()
@@ -395,7 +375,6 @@ object EnvironmentUtil {
         }
     }
 
-    @JvmStatic
     fun getRouterIpAddress(context: Context): String {
         try {
             val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -410,7 +389,6 @@ object EnvironmentUtil {
     /**
      * 获取本机连接WiFi网络的IP地址
      */
-    @JvmStatic
     fun getSelfIp(context: Context): String {
         try {
             val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -424,7 +402,6 @@ object EnvironmentUtil {
     /**
      * 获取本应用名称
      */
-    @JvmStatic
     fun getAppName(context: Context): String {
         return getAppNameByPackageName(context, context.packageName)
     }
@@ -432,7 +409,6 @@ object EnvironmentUtil {
     /**
      * 获取本应用版本名
      */
-    @JvmStatic
     fun getAppVersionName(context: Context): String {
         try {
             val packageManager = context.packageManager
@@ -446,7 +422,6 @@ object EnvironmentUtil {
     /**
      * 通过contentUri获取文件名
      */
-    @JvmStatic
     fun getFileNameFromContentUri(context: Context, contentUri: Uri): String? {
         return queryResultByContentResolver(context, contentUri, MediaStore.Files.FileColumns.DISPLAY_NAME)
     }
@@ -454,7 +429,6 @@ object EnvironmentUtil {
     /**
      * 通过contentUri获取文件路径
      */
-    @JvmStatic
     fun getFilePathFromContentUri(context: Context, contentUri: Uri): String? {
         return queryResultByContentResolver(context, contentUri, MediaStore.Files.FileColumns.DATA)
     }
@@ -462,7 +436,6 @@ object EnvironmentUtil {
     /**
      * 通过contentUri获取文件大小，返回字符串型长度，单位字节
      */
-    @JvmStatic
     fun getFileLengthFromContentUri(context: Context, contentUri: Uri): String? {
         return queryResultByContentResolver(context, contentUri, MediaStore.Files.FileColumns.SIZE)
     }
@@ -492,7 +465,6 @@ object EnvironmentUtil {
     /**
      * 传入的file须为主存储下的文件，且对file有完整的读写权限
      */
-    @JvmStatic
     fun getUriForFileByFileProvider(context: Context, file: File): Uri {
         return FileProvider.getUriForFile(context, "info.muge.appshare.FileProvider", file)
     }
@@ -500,7 +472,6 @@ object EnvironmentUtil {
     /**
      * 请求更新媒体数据库
      */
-    @JvmStatic
     fun requestUpdatingMediaDatabase(context: Context) {
         try {
             val bundle = Bundle()
@@ -524,7 +495,6 @@ object EnvironmentUtil {
      * @param contentView   window的内容布局
      * @return window显示的左上角的xOff,yOff坐标
      */
-    @JvmStatic
     fun calculatePopWindowPos(anchorView: View, contentView: View): IntArray {
         val windowPos = IntArray(2)
         val anchorLoc = IntArray(2)
@@ -557,7 +527,6 @@ object EnvironmentUtil {
      * @param color 高亮颜色
      * @return 生成的Spannable
      */
-    @JvmStatic
     fun getSpannableString(content: String, keyword: String?, @ColorInt color: Int): SpannableStringBuilder {
         val builder = SpannableStringBuilder(content)
         if (keyword == null || keyword.isEmpty()) return builder
@@ -652,7 +621,6 @@ object EnvironmentUtil {
         return builder
     }
 
-    @JvmStatic
     fun dp2px(context: Context, dp: Int): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
@@ -664,7 +632,6 @@ object EnvironmentUtil {
     /**
      * 保存 Drawable 到相册
      */
-    @JvmStatic
     fun saveDrawableToGallery(context: Context, drawable: Drawable, appName: String) {
         try {
             val bitmap = drawableToBitmap(drawable)
@@ -698,7 +665,6 @@ object EnvironmentUtil {
      * @param context 上下文
      * @param languageValue 语言值，参考 Constants.LANGUAGE_*
      */
-    @JvmStatic
     fun setLanguage(context: Context, languageValue: Int) {
         val locale = when (languageValue) {
             Constants.LANGUAGE_CHINESE -> Locale.CHINESE
@@ -719,7 +685,6 @@ object EnvironmentUtil {
     /**
      * 获取当前设置的语言 Locale
      */
-    @JvmStatic
     fun getAppLocale(context: Context): Locale {
         val languageValue = SPUtil.getGlobalSharedPreferences(context)
             .getInt(Constants.PREFERENCE_LANGUAGE, Constants.PREFERENCE_LANGUAGE_DEFAULT)

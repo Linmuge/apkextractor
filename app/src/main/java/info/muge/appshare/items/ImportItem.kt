@@ -28,7 +28,6 @@ class ImportItem : DisplayItem, Comparable<ImportItem> {
     }
 
     companion object {
-        @JvmField
         var sort_config = 0
     }
 

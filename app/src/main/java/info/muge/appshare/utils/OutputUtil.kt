@@ -17,12 +17,10 @@ object OutputUtil {
      * 为AppItem获取一个内置存储绝对写入路径
      * @param extension "apk"或者"zip"
      */
-    @JvmStatic
     fun getAbsoluteWritePath(context: Context, item: AppItem, extension: String, sequence_number: Int): String {
         return "${SPUtil.getInternalSavePath()}/${getWriteFileNameForAppItem(context, item, extension, sequence_number)}"
     }
 
-    @JvmStatic
     @Throws(Exception::class)
     fun getWritingDocumentFileForAppItem(
         context: Context,
@@ -49,7 +47,6 @@ object OutputUtil {
      * @param documentFile 要写入的documentFile
      * @return 已按照命名规则的写入的documentFile输出流
      */
-    @JvmStatic
     @Throws(Exception::class)
     fun getOutputStreamForDocumentFile(context: Context, documentFile: DocumentFile): OutputStream? {
         return context.contentResolver.openOutputStream(documentFile.uri)
@@ -58,7 +55,6 @@ object OutputUtil {
     /**
      * 获取导出根目录的documentFile
      */
-    @JvmStatic
     @Throws(Exception::class)
     fun getExportPathDocumentFile(context: Context): DocumentFile {
         val segments = SPUtil.getInternalSavePath()
@@ -71,7 +67,6 @@ object OutputUtil {
     /**
      * 为一个AppItem获取一个写入的文件名，例如example.apk
      */
-    @JvmStatic
     fun getWriteFileNameForAppItem(context: Context, item: AppItem, extension: String, sqNum: Int): String {
         val settings = SPUtil.getGlobalSharedPreferences(context)
         
@@ -81,25 +76,27 @@ object OutputUtil {
             Constants.PREFERENCE_FILENAME_FONT_ZIP
         }
         
-        var result = settings.getString(fontKey, Constants.PREFERENCE_FILENAME_FONT_DEFAULT) ?: Constants.PREFERENCE_FILENAME_FONT_DEFAULT
+        val template = settings.getString(fontKey, Constants.PREFERENCE_FILENAME_FONT_DEFAULT) ?: Constants.PREFERENCE_FILENAME_FONT_DEFAULT
         
-        result = result.replace(Constants.FONT_APP_NAME, EnvironmentUtil.removeIllegalFileNameCharacters(item.getAppName()))
-        result = result.replace(Constants.FONT_APP_PACKAGE_NAME, item.getPackageName())
-        result = result.replace(Constants.FONT_APP_VERSIONCODE, item.getVersionCode().toString())
-        result = result.replace(Constants.FONT_APP_VERSIONNAME, item.getVersionName())
-        result = result.replace(Constants.FONT_YEAR, EnvironmentUtil.getCurrentTimeValue(Calendar.YEAR))
-        result = result.replace(Constants.FONT_MONTH, EnvironmentUtil.getCurrentTimeValue(Calendar.MONTH))
-        result = result.replace(Constants.FONT_DAY_OF_MONTH, EnvironmentUtil.getCurrentTimeValue(Calendar.DAY_OF_MONTH))
-        result = result.replace(Constants.FONT_HOUR_OF_DAY, EnvironmentUtil.getCurrentTimeValue(Calendar.HOUR_OF_DAY))
-        result = result.replace(Constants.FONT_MINUTE, EnvironmentUtil.getCurrentTimeValue(Calendar.MINUTE))
-        result = result.replace(Constants.FONT_SECOND, EnvironmentUtil.getCurrentTimeValue(Calendar.SECOND))
+        val replacements = mapOf(
+            Constants.FONT_APP_NAME to EnvironmentUtil.removeIllegalFileNameCharacters(item.getAppName()),
+            Constants.FONT_APP_PACKAGE_NAME to item.getPackageName(),
+            Constants.FONT_APP_VERSIONCODE to item.getVersionCode().toString(),
+            Constants.FONT_APP_VERSIONNAME to item.getVersionName(),
+            Constants.FONT_YEAR to EnvironmentUtil.getCurrentTimeValue(Calendar.YEAR),
+            Constants.FONT_MONTH to EnvironmentUtil.getCurrentTimeValue(Calendar.MONTH),
+            Constants.FONT_DAY_OF_MONTH to EnvironmentUtil.getCurrentTimeValue(Calendar.DAY_OF_MONTH),
+            Constants.FONT_HOUR_OF_DAY to EnvironmentUtil.getCurrentTimeValue(Calendar.HOUR_OF_DAY),
+            Constants.FONT_MINUTE to EnvironmentUtil.getCurrentTimeValue(Calendar.MINUTE),
+            Constants.FONT_SECOND to EnvironmentUtil.getCurrentTimeValue(Calendar.SECOND),
+            Constants.FONT_AUTO_SEQUENCE_NUMBER to sqNum.toString()
+        )
         
-        if (result.contains(Constants.FONT_AUTO_SEQUENCE_NUMBER)) {
-            result = result.replace(Constants.FONT_AUTO_SEQUENCE_NUMBER, sqNum.toString())
+        val result = replacements.entries.fold(template) { acc, (key, value) ->
+            acc.replace(key, value)
         }
         
-        result = "$result.$extension"
-        return result
+        return "$result.$extension"
     }
 }
 

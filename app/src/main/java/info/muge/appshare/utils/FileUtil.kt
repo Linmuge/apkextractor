@@ -14,7 +14,6 @@ object FileUtil {
      * 获取文件，文件夹的大小，单位字节
      * @return 文件或文件夹大小，单位字节
      */
-    @JvmStatic
     fun getFileOrFolderSize(file: File?): Long {
         return try {
             if (file == null) return 0
@@ -39,13 +38,11 @@ object FileUtil {
     /**
      * 获取一个文件的CRC32值
      */
-    @JvmStatic
     @Throws(Exception::class)
     fun getCRC32FromFile(file: File): CRC32 {
         return getCRC32FromInputStream(FileInputStream(file.absolutePath))
     }
 
-    @JvmStatic
     @Throws(Exception::class)
     fun getCRC32FromInputStream(inputStream: InputStream): CRC32 {
         val crc = CRC32()

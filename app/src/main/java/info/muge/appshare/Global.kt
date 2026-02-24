@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.items.ImportItem
@@ -22,6 +23,8 @@ import info.muge.appshare.utils.OutputUtil
 import info.muge.appshare.utils.SPUtil
 import info.muge.appshare.utils.toast
 import info.muge.appshare.utils.ZipFileUtil
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Collections
 
@@ -33,22 +36,22 @@ object Global {
     /**
      * 全局Handler，用于向主UI线程发送消息
      */
-    @JvmField
     val handler = Handler(Looper.getMainLooper())
 
     /**
      * 用于持有对读取出的list的引用
+     * 注意：此列表通过 synchronizedList 保证线程安全，
+     * 但遍历时仍需手动 synchronized(app_list) 加锁
      */
-    @JvmField
     val app_list: MutableList<AppItem> = Collections.synchronizedList(ArrayList())
 
     /**
      * 导出目录下的文件list引用
+     * 注意：此列表通过 synchronizedList 保证线程安全，
+     * 但遍历时仍需手动 synchronized(item_list) 加锁
      */
-    @JvmField
     val item_list: MutableList<ImportItem> = Collections.synchronizedList(ArrayList())
 
-    @JvmStatic
     fun showRequestingWritePermissionSnackBar(activity: Activity) {
         val snackbar = Snackbar.make(
             activity.findViewById(android.R.id.content),
@@ -75,7 +78,6 @@ object Global {
      * @param list AppItem的副本，当check_data_obb值为true时无需初始，false时须提前设置好data,obb值
      * @param check_data_obb 传入true 则会执行一次data,obb检查（list中没有设置data,obb值）
      */
-    @JvmStatic
     fun checkAndExportCertainAppItemsToSetPathWithoutShare(
         activity: Activity,
         list: List<AppItem>,
@@ -129,13 +131,14 @@ object Global {
         listener: ExportTaskFinishedListener?
     ) {
         val task = ExportTask(activity, export_list, null)
+        var exportJob: Job? = null
 
         GlobalDialogManager.showProgress(
             title = activity.getString(R.string.dialog_exporting),
             indeterminate = false,
             cancelText = activity.getString(R.string.dialog_export_stop),
             onCancel = {
-                task.setInterrupted()
+                exportJob?.cancel()
                 GlobalDialogManager.dismiss()
             }
         )
@@ -143,117 +146,67 @@ object Global {
 
         task.setExportProgressListener(object : ExportTask.ExportProgressListener {
             override fun onExportAppItemStarted(order: Int, item: AppItem, total: Int, write_path: String) {
-                handler.post {
-                    GlobalDialogManager.updateProgress(
-                        progress = order,
-                        total = total,
-                        message = "${item.getAppName()}\n$write_path"
-                    )
-                }
+                GlobalDialogManager.updateProgress(
+                    progress = order,
+                    total = total,
+                    message = "${item.getAppName()}\n$write_path"
+                )
             }
 
-            override fun onExportProgressUpdated(current: Long, total: Long, write_path: String) {
-                // 进度更新在主对话框中体现
-            }
-
-            override fun onExportZipProgressUpdated(write_path: String) {
-                // ZIP进度更新
-            }
-
-            override fun onExportSpeedUpdated(speed: Long) {
-                // 速度更新
-            }
+            override fun onExportProgressUpdated(current: Long, total: Long, write_path: String) {}
+            override fun onExportZipProgressUpdated(write_path: String) {}
+            override fun onExportSpeedUpdated(speed: Long) {}
 
             override fun onExportTaskFinished(fileItems: List<info.muge.appshare.items.FileItem>, error_message: String) {
-                handler.post {
-                    GlobalDialogManager.dismiss()
-                    listener?.onFinished(error_message)
-                }
+                GlobalDialogManager.dismiss()
+                listener?.onFinished(error_message)
             }
         })
 
-        task.start()
+        exportJob = (activity as androidx.lifecycle.LifecycleOwner).lifecycleScope.launch {
+            task.execute()
+        }
     }
 
     /**
-     * 通过包名获取指定list中的item
-     * @param list 要遍历的list
-     * @param package_name 要定位的包名
-     * @return 查询到的AppItem
+     * 通过包名获取指定list中的item（忽略大小写）
      */
-    @JvmStatic
     fun getAppItemByPackageNameFromList(list: List<AppItem>, package_name: String): AppItem? {
-        for (item in list) {
-            try {
-                if (item.getPackageName().trim().lowercase() == package_name.trim().lowercase()) {
-                    return item
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        val target = package_name.trim().lowercase()
+        return synchronized(list) {
+            list.firstOrNull {
+                it.getPackageName().trim().lowercase() == target
             }
         }
-        return null
     }
 
     /**
-     * 通过FileItem的path从指定list中取出ImportItem
-     * @param list 要遍历的list
-     * @param path FileItem的path，参考[info.muge.appshare.items.FileItem.getPath]
-     * @return 指定的ImportItem
+     * 通过FileItem的path从指定list中取出ImportItem（忽略大小写）
      */
-    @JvmStatic
     fun getImportItemByFileItemPath(list: List<ImportItem>, path: String): ImportItem? {
-        for (importItem in list) {
-            try {
-                if (importItem.getFileItem().getPath().equals(path, ignoreCase = true)) {
-                    return importItem
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        return synchronized(list) {
+            list.firstOrNull {
+                it.getFileItem().getPath().equals(path, ignoreCase = true)
             }
         }
-        return null
     }
 
     private fun getDuplicatedFileInfo(context: Context, items: List<AppItem>): String {
         if (items.isEmpty()) return ""
         
         val builder = StringBuilder()
-        val external = SPUtil.getIsSaved2ExternalStorage(context)
         
-        if (external) {
-            for (i in items.indices) {
-                val item = items[i]
-                try {
-                    val extension = if (item.exportData || item.exportObb) {
-                        SPUtil.getCompressingExtensionName(context)
-                    } else {
-                        "apk"
-                    }
-                    val searchFile = OutputUtil.getExportPathDocumentFile(context)
-                        .findFile(OutputUtil.getWriteFileNameForAppItem(context, item, extension, i))
-                    
-                    if (searchFile != null) {
-                        builder.append(DocumentFileUtil.getDisplayPathForDocumentFile(context, searchFile))
-                        builder.append("\n\n")
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+        for (i in items.indices) {
+            val item = items[i]
+            val extension = if (item.exportData || item.exportObb) {
+                SPUtil.getCompressingExtensionName(context)
+            } else {
+                "apk"
             }
-        } else {
-            for (i in items.indices) {
-                val item = items[i]
-                val extension = if (item.exportData || item.exportObb) {
-                    SPUtil.getCompressingExtensionName(context)
-                } else {
-                    "apk"
-                }
-                val file = File(OutputUtil.getAbsoluteWritePath(context, item, extension, i + 1))
-                if (file.exists()) {
-                    builder.append(file.absolutePath)
-                    builder.append("\n\n")
-                }
+            val file = File(OutputUtil.getAbsoluteWritePath(context, item, extension, i + 1))
+            if (file.exists()) {
+                builder.append(file.absolutePath)
+                builder.append("\n\n")
             }
         }
         
@@ -264,7 +217,6 @@ object Global {
      * 分享指定item应用
      * @param items 传入AppItem的副本，data obb为false
      */
-    @JvmStatic
     fun shareCertainAppsByItems(activity: Activity, items: List<AppItem>) {
         if (items.isEmpty()) return
         val uris = ArrayList<Uri>()
@@ -280,110 +232,107 @@ object Global {
     /**
      * 展示查重对话框，启动导入流程
      */
-    @JvmStatic
     fun showCheckingDuplicationDialogAndStartImporting(
         activity: Activity,
         importItems: List<ImportItem>,
         zipFileInfos: List<ZipFileUtil.ZipFileInfo>,
         callback: ImportTaskFinishedCallback?
     ) {
-        val infoTask = GetImportLengthAndDuplicateInfoTask(importItems, zipFileInfos,
-            object : GetImportLengthAndDuplicateInfoTask.GetImportLengthAndDuplicateInfoCallback {
-                override fun onCheckingFinished(duplication_infos: List<String>, total: Long) {
+        var infoJob: Job? = null
+
+        infoJob = (activity as androidx.lifecycle.LifecycleOwner).lifecycleScope.launch {
+            val infoTask = GetImportLengthAndDuplicateInfoTask(importItems, zipFileInfos)
+            val (duplicationInfos, total) = infoTask.execute()
+
+            GlobalDialogManager.dismiss()
+
+            var importJob: Job? = null
+            GlobalDialogManager.showProgress(
+                title = activity.getString(R.string.dialog_importing),
+                indeterminate = false,
+                cancelText = activity.getString(R.string.word_stop),
+                onCancel = {
+                    importJob?.cancel()
                     GlobalDialogManager.dismiss()
+                }
+            )
+            GlobalDialogManager.updateProgress(0, total.toInt())
 
-                    var importTask: ImportTask? = null
-                    GlobalDialogManager.showProgress(
-                        title = activity.getString(R.string.dialog_importing),
-                        indeterminate = false,
-                        cancelText = activity.getString(R.string.word_stop),
-                        onCancel = {
-                            importTask?.setInterrupted()
-                            GlobalDialogManager.dismiss()
-                        }
+            val importTaskCallback = object : ImportTask.ImportTaskCallback {
+                override fun onImportTaskStarted() {}
+                override fun onRefreshSpeed(speed: Long) {}
+
+                override fun onImportTaskProgress(writePath: String, progress: Long) {
+                    GlobalDialogManager.updateProgress(
+                        progress = progress.toInt(),
+                        total = total.toInt(),
+                        message = writePath
                     )
-                    GlobalDialogManager.updateProgress(0, total.toInt())
+                }
 
-                    val importTaskCallback = object : ImportTask.ImportTaskCallback {
-                        override fun onImportTaskStarted() {}
+                override fun onImportTaskFinished(errorMessage: String) {
+                    GlobalDialogManager.dismiss()
+                    callback?.onImportFinished(errorMessage)
+                }
+            }
 
-                        override fun onRefreshSpeed(speed: Long) {
-                            // 速度更新
-                        }
+            val importTask = ImportTask(activity, importItems, importTaskCallback)
 
-                        override fun onImportTaskProgress(writePath: String, progress: Long) {
-                            handler.post {
-                                GlobalDialogManager.updateProgress(
-                                    progress = progress.toInt(),
-                                    total = total.toInt(),
-                                    message = writePath
-                                )
-                            }
-                        }
+            if (duplicationInfos.isEmpty()) {
+                importJob = (activity as androidx.lifecycle.LifecycleOwner).lifecycleScope.launch {
+                    importTask.execute()
+                }
+            } else {
+                val stringBuilder = StringBuilder()
+                var checkingIndex = duplicationInfos.size
+                var unListed = 0
 
-                        override fun onImportTaskFinished(errorMessage: String) {
-                            handler.post {
+                if (checkingIndex > 100) {
+                    unListed = checkingIndex - 100
+                    checkingIndex = 100
+                }
+
+                for (i in 0 until checkingIndex) {
+                    stringBuilder.append(duplicationInfos[i])
+                    stringBuilder.append("\n\n")
+                }
+
+                if (unListed > 0) {
+                    stringBuilder.append("+")
+                    stringBuilder.append(unListed)
+                    stringBuilder.append(activity.resources.getString(R.string.dialog_import_duplicate_more))
+                }
+
+                GlobalDialogManager.dismiss()
+                GlobalDialogManager.showConfirm(
+                    title = activity.resources.getString(R.string.dialog_import_duplicate_title),
+                    message = "${activity.resources.getString(R.string.dialog_import_duplicate_message)}$stringBuilder",
+                    onConfirm = {
+                        GlobalDialogManager.showProgress(
+                            title = activity.getString(R.string.dialog_importing),
+                            indeterminate = false,
+                            cancelText = activity.getString(R.string.word_stop),
+                            onCancel = {
+                                importJob?.cancel()
                                 GlobalDialogManager.dismiss()
-                                callback?.onImportFinished(errorMessage)
-                            }
-                        }
-                    }
-
-                    importTask = ImportTask(activity, importItems, importTaskCallback)
-
-                    if (duplication_infos.isEmpty()) {
-                        importTask?.start()
-                    } else {
-                        val stringBuilder = StringBuilder()
-                        var checkingIndex = duplication_infos.size
-                        var unListed = 0
-
-                        if (checkingIndex > 100) {
-                            unListed = checkingIndex - 100
-                            checkingIndex = 100
-                        }
-
-                        for (i in 0 until checkingIndex) {
-                            stringBuilder.append(duplication_infos[i])
-                            stringBuilder.append("\n\n")
-                        }
-
-                        if (unListed > 0) {
-                            stringBuilder.append("+")
-                            stringBuilder.append(unListed)
-                            stringBuilder.append(activity.resources.getString(R.string.dialog_import_duplicate_more))
-                        }
-
-                        GlobalDialogManager.dismiss()
-                        GlobalDialogManager.showConfirm(
-                            title = activity.resources.getString(R.string.dialog_import_duplicate_title),
-                            message = "${activity.resources.getString(R.string.dialog_import_duplicate_message)}$stringBuilder",
-                            onConfirm = {
-                                GlobalDialogManager.showProgress(
-                                    title = activity.getString(R.string.dialog_importing),
-                                    indeterminate = false,
-                                    cancelText = activity.getString(R.string.word_stop),
-                                    onCancel = {
-                                        importTask?.setInterrupted()
-                                        GlobalDialogManager.dismiss()
-                                    }
-                                )
-                                GlobalDialogManager.updateProgress(0, total.toInt())
-                                importTask?.start()
                             }
                         )
+                        GlobalDialogManager.updateProgress(0, total.toInt())
+                        importJob = (activity as androidx.lifecycle.LifecycleOwner).lifecycleScope.launch {
+                            importTask.execute()
+                        }
                     }
-                }
-            })
+                )
+            }
+        }
 
-        infoTask.start()
         GlobalDialogManager.showProgress(
             title = activity.getString(R.string.dialog_wait),
             indeterminate = true,
             cancelText = activity.getString(R.string.dialog_button_cancel),
             onCancel = {
                 GlobalDialogManager.dismiss()
-                infoTask.setInterrupted()
+                infoJob?.cancel()
             }
         )
     }
@@ -395,7 +344,6 @@ object Global {
         fun onImportFinished(error_message: String)
     }
 
-    @JvmStatic
     fun shareImportItems(activity: Activity, importItems: List<ImportItem>) {
         if (importItems.isEmpty()) return
         val uris = ArrayList<Uri>()
@@ -411,7 +359,6 @@ object Global {
     /**
      * 执行分享应用操作
      */
-    @JvmStatic
     fun shareCertainFiles(context: Context, uris: List<Uri>, title: String) {
         if (uris.isEmpty()) return
 
@@ -442,7 +389,6 @@ object Global {
     /**
      * 通过系统分享接口分享本应用
      */
-    @JvmStatic
     fun shareThisApp(context: Context) {
         try {
             val applicationInfo = context.packageManager.getApplicationInfo(context.packageName, 0)

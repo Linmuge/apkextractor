@@ -33,7 +33,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEvent
+import info.muge.appshare.ui.screens.AppChangeScreen
 import info.muge.appshare.ui.screens.AppDetailScreen
+import info.muge.appshare.ui.screens.ThemeSettingsScreen
 import info.muge.appshare.ui.screens.LaunchScreen
 import info.muge.appshare.ui.screens.MainScreen
 import info.muge.appshare.ui.dialogs.GlobalDialogHost
@@ -64,6 +66,12 @@ data class ExternalDetailRoute(
     val packageName: String? = null,
     val uri: String? = null
 ) : AppRoute
+
+@Serializable
+data object AppChangeRoute : AppRoute
+
+@Serializable
+data object ThemeSettingsRoute : AppRoute
 
 private class AppNavigator(
     private val context: ComponentActivity?,
@@ -259,8 +267,29 @@ object ThemeState {
     private val _darkModeFlow = MutableStateFlow(false)
     val darkModeFlow: StateFlow<Boolean> = _darkModeFlow.asStateFlow()
 
+    private val _dynamicColorFlow = MutableStateFlow(true)
+    val dynamicColorFlow: StateFlow<Boolean> = _dynamicColorFlow.asStateFlow()
+
+    private val _seedColorFlow = MutableStateFlow(androidx.compose.ui.graphics.Color(0xFF4285F4))
+    val seedColorFlow: StateFlow<androidx.compose.ui.graphics.Color> = _seedColorFlow.asStateFlow()
+
+    private val _isAmoledFlow = MutableStateFlow(false)
+    val isAmoledFlow: StateFlow<Boolean> = _isAmoledFlow.asStateFlow()
+
     fun updateDarkMode(isDark: Boolean) {
         _darkModeFlow.value = isDark
+    }
+
+    fun updateDynamicColor(isDynamic: Boolean) {
+        _dynamicColorFlow.value = isDynamic
+    }
+
+    fun updateSeedColor(color: androidx.compose.ui.graphics.Color) {
+        _seedColorFlow.value = color
+    }
+
+    fun updateAmoled(isAmoled: Boolean) {
+        _isAmoledFlow.value = isAmoled
     }
 
     fun getDarkModeValue(context: android.content.Context): Boolean {
@@ -279,6 +308,22 @@ object ThemeState {
 
     fun initDarkMode(context: android.content.Context) {
         _darkModeFlow.value = getDarkModeValue(context)
+    }
+
+    fun initDynamicColor(context: android.content.Context) {
+        val settings = SPUtil.getGlobalSharedPreferences(context)
+        _dynamicColorFlow.value = settings.getBoolean(Constants.PREFERENCE_DYNAMIC_COLOR, true)
+    }
+
+    fun initSeedColor(context: android.content.Context) {
+        val settings = SPUtil.getGlobalSharedPreferences(context)
+        val colorInt = settings.getInt(Constants.PREFERENCE_THEME_COLOR, Constants.PREFERENCE_THEME_COLOR_DEFAULT)
+        _seedColorFlow.value = androidx.compose.ui.graphics.Color(colorInt)
+    }
+
+    fun initAmoled(context: android.content.Context) {
+        val settings = SPUtil.getGlobalSharedPreferences(context)
+        _isAmoledFlow.value = settings.getBoolean(Constants.PREFERENCE_AMOLED, false)
     }
 }
 
@@ -304,11 +349,22 @@ class ComposeMainActivity : ComponentActivity() {
 
         // 初始化主题状态
         ThemeState.initDarkMode(this)
+        ThemeState.initDynamicColor(this)
+        ThemeState.initSeedColor(this)
+        ThemeState.initAmoled(this)
 
         setContent {
             val darkMode by ThemeState.darkModeFlow.collectAsStateWithLifecycle()
+            val dynamicColor by ThemeState.dynamicColorFlow.collectAsStateWithLifecycle()
+            val seedColor by ThemeState.seedColorFlow.collectAsStateWithLifecycle()
+            val isAmoled by ThemeState.isAmoledFlow.collectAsStateWithLifecycle()
 
-            AppShareTheme(darkTheme = darkMode) {
+            AppShareTheme(
+                darkTheme = darkMode,
+                dynamicColor = dynamicColor,
+                seedColor = seedColor,
+                isAmoled = isAmoled
+            ) {
                 AppNavigation()
             }
         }
@@ -362,6 +418,12 @@ fun AppNavigation() {
                         },
                         onNavigateToAppDetailWithUri = { uri ->
                             navigator.navigateToUri(uri)
+                        },
+                        onNavigateToAppChange = {
+                            navigator.navigate(AppChangeRoute)
+                        },
+                        onNavigateToThemeSettings = {
+                            navigator.navigate(ThemeSettingsRoute)
                         }
                     )
                 }
@@ -389,6 +451,18 @@ fun AppNavigation() {
                     AppDetailScreen(
                         packageName = route.packageName,
                         apkUri = route.uri?.let { Uri.parse(it) },
+                        onBack = { navigator.popOrFinish() }
+                    )
+                }
+
+                entry<AppChangeRoute>(clazzContentKey = { "app-change" }) {
+                    AppChangeScreen(
+                        onBack = { navigator.popOrFinish() }
+                    )
+                }
+
+                entry<ThemeSettingsRoute>(clazzContentKey = { "theme-settings" }) {
+                    ThemeSettingsScreen(
                         onBack = { navigator.popOrFinish() }
                     )
                 }

@@ -12,7 +12,6 @@ object DocumentFileUtil {
     /**
      * 通过segment片段定位到parent的指定文件夹，如果没有则尝试创建
      */
-    @JvmStatic
     @Throws(Exception::class)
     fun getDocumentFileBySegments(parent: DocumentFile, segment: String?): DocumentFile {
         if (segment == null) return parent
@@ -36,7 +35,6 @@ object DocumentFileUtil {
     /**
      * 将segments数组转换为string
      */
-    @JvmStatic
     fun toSegmentString(segments: Array<Any>): String {
         val builder = StringBuilder()
         for (i in segments.indices) {
@@ -49,7 +47,6 @@ object DocumentFileUtil {
     /**
      * 获取一个documentFile用于展示的路径
      */
-    @JvmStatic
     fun getDisplayPathForDocumentFile(context: Context, documentFile: DocumentFile): String {
         val uriPath = documentFile.uri.path
         if (uriPath == null) return ""

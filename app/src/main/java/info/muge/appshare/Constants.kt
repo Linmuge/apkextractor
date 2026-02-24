@@ -17,7 +17,6 @@ object Constants {
      * this preference stands for a string value;
      */
     const val PREFERENCE_SAVE_PATH = "savepath"
-    @JvmField
     val PREFERENCE_SAVE_PATH_DEFAULT = "${StorageUtil.getMainExternalStoragePath()}/Download/AppKit"
 
     /**
@@ -115,6 +114,10 @@ object Constants {
      * stands for a int value
      */
     const val PREFERENCE_NIGHT_MODE = "night_mode"
+    const val PREFERENCE_DYNAMIC_COLOR = "dynamic_color"
+    const val PREFERENCE_THEME_COLOR = "theme_seed_color"
+    const val PREFERENCE_THEME_COLOR_DEFAULT = 0xFF4285F4.toInt() // Google Blue
+    const val PREFERENCE_AMOLED = "amoled_mode"
 
     /**
      * int value

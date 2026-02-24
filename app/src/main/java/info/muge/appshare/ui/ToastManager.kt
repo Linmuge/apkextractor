@@ -11,7 +11,6 @@ object ToastManager {
 
     private var toast: Toast? = null
 
-    @JvmStatic
     fun showToast(context: Context, content: String, length: Int) {
         Global.handler.post {
             toast?.cancel()

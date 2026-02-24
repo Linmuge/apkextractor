@@ -17,7 +17,6 @@ object PinyinUtil {
      * @param inputString 输入字符串
      * @return 拼音字符串
      */
-    @JvmStatic
     fun getPinYin(inputString: String): String {
         val format = HanyuPinyinOutputFormat()
         format.caseType = HanyuPinyinCaseType.LOWERCASE
@@ -51,7 +50,6 @@ object PinyinUtil {
      * @param chinese 汉字串
      * @return 汉语拼音首字母
      */
-    @JvmStatic
     fun getFirstSpell(chinese: String): String {
         val pybf = StringBuilder()
         val arr = chinese.toCharArray()
@@ -86,7 +84,6 @@ object PinyinUtil {
      * @param chinese 汉字串
      * @return 汉语拼音
      */
-    @JvmStatic
     fun getFullSpell(chinese: String): String {
         val pybf = StringBuilder()
         val arr = chinese.toCharArray()
@@ -117,7 +114,6 @@ object PinyinUtil {
      * @param content 要过滤的字符串
      * @return 所有汉字字符串
      */
-    @JvmStatic
     fun getAllChineseCharacters(content: String): String {
         return try {
             content.replace(Regex("[^\u4e00-\u9fa5]"), "")
@@ -131,7 +127,6 @@ object PinyinUtil {
      * 判断一个char是否为汉字（不包含中文符号）
      * @return true 为汉字
      */
-    @JvmStatic
     fun isChineseChar(c: Char): Boolean {
         return c in '\u4e00'..'\u9fbb'
     }

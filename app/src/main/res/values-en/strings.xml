@@ -220,6 +220,7 @@
     <string name="word_none">none</string>
     <string name="word_stop">stop</string>
     <string name="word_content_blank">No contents</string>
+    <string name="search_no_result">No matching apps found</string>
     <string name="word_custom">custom</string>
     <string name="att_loading">Loading&#8230;</string>
     <string name="att_checking_duplication">Checking duplication files&#8230;</string>
@@ -244,4 +245,23 @@
     <string name="dialog_compress_extension_empty">type in a valid extension name</string>
     <string name="activity_settings_extension">Compressed ExtName</string>
     <string name="dialog_compress_extension_att">*this option only changes the extension of the compressed exporting files, but will not change the content of zip itself</string>
+
+    <!-- New internationalized strings -->
+    <string name="nav_statistics">Statistics</string>
+    <string name="loading_scanning_apps">Scanning apps…</string>
+    <string name="empty_pull_to_refresh">Pull to refresh to load app list</string>
+    <string name="permission_read_app_list">Permission required to read app list</string>
+    <string name="permission_grant_short">Grant</string>
+    <string name="copy_package_names">Copy Package Names</string>
+    <string name="app_no_launcher">App has no launcher interface</string>
+    <string name="choose_action">Choose Action</string>
+    <string name="copied">Copied</string>
+    <string name="search_hint">Search apps…</string>
+    <string name="search_label">Search</string>
+    <string name="back_label">Back</string>
+    <string name="clear_label">Clear</string>
+    <string name="setting_dynamic_color">Dynamic Color</string>
+    <string name="setting_dynamic_color_desc">Generate theme from wallpaper colors (Material You)</string>
+    <string name="invert_selection">Invert</string>
+    <string name="deselect_all">Deselect All</string>
 </resources>

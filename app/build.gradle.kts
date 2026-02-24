@@ -157,6 +157,9 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-compose:3.0.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // MaterialKolor - 动态主题色
+    implementation("com.materialkolor:material-kolor:4.1.1")
 }
 
 // 注册自动导出逻辑

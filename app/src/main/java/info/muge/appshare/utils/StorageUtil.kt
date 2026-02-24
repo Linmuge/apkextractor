@@ -17,7 +17,6 @@ object StorageUtil {
     /**
      * 获取指定path的可写入存储容量，单位字节
      */
-    @JvmStatic
     fun getAvaliableSizeOfPath(path: String): Long {
         return try {
             val stat = StatFs(path)
@@ -34,7 +33,6 @@ object StorageUtil {
     /**
      * 获取外部存储主路径
      */
-    @JvmStatic
     fun getMainExternalStoragePath(): String {
         return try {
             Environment.getExternalStorageDirectory().absolutePath
@@ -47,7 +45,6 @@ object StorageUtil {
     /**
      * 获取设备挂载的所有外部存储分区path
      */
-    @JvmStatic
     fun getAvailableStoragePaths(context: Context): List<String> {
         val paths = ArrayList<String>()
         

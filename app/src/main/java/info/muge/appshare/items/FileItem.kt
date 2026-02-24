@@ -20,14 +20,8 @@ import java.io.OutputStream
 class FileItem : Comparable<FileItem> {
 
     companion object {
-        @JvmField
         var sort_config = 0
-
-        @JvmStatic
-        @Synchronized
-        fun setSort_config(value: Int) {
-            sort_config = value
-        }
+            @Synchronized set
     }
 
     private val context: Context?

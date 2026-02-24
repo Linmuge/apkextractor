@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import info.muge.appshare.Constants
 import info.muge.appshare.R
 import info.muge.appshare.ThemeState
+import info.muge.appshare.ui.dialogs.ThemeColorDialog
+import info.muge.appshare.ui.theme.isDynamicColorAvailable
 import info.muge.appshare.ui.dialogs.AppBottomSheet
 import info.muge.appshare.ui.dialogs.AppBottomSheetDualActions
 import info.muge.appshare.ui.dialogs.ExportRuleDialog
@@ -58,11 +61,13 @@ import info.muge.appshare.utils.toast
  * 设置页面 - 完全匹配原 SettingsFragment 布局
  */
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onNavigateToAppChange: () -> Unit = {},
+    onNavigateToThemeSettings: () -> Unit = {}
+) {
     val context = LocalContext.current
     val settings = SPUtil.getGlobalSharedPreferences(context)
 
-    var showNightModeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showLoadingOptionsDialog by remember { mutableStateOf(false) }
     var showPackageSeparatorDialog by remember { mutableStateOf(false) }
@@ -74,7 +79,6 @@ fun SettingsScreen() {
     var showDeviceNameDialog by remember { mutableStateOf(false) }
 
     // 设置值
-    var nightModeValue by remember { mutableIntStateOf(settings.getInt(Constants.PREFERENCE_NIGHT_MODE, Constants.PREFERENCE_NIGHT_MODE_DEFAULT)) }
     var languageValue by remember { mutableIntStateOf(settings.getInt(Constants.PREFERENCE_LANGUAGE, Constants.PREFERENCE_LANGUAGE_DEFAULT)) }
     var showSystemApp by remember {
         mutableStateOf(
@@ -142,13 +146,13 @@ fun SettingsScreen() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 夜间模式设置
+        // 主题设置
         SettingItem(
             iconRes = R.drawable.ic_dark_mode,
-            title = stringResource(R.string.activity_settings_night_mode),
-            value = getNightModeDisplayText(nightModeValue, context),
+            title = "主题设置",
+            value = "夜间模式、主题色、AMOLED 纯黑",
             isValueHighlighted = true,
-            onClick = { showNightModeDialog = true }
+            onClick = onNavigateToThemeSettings
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -197,6 +201,20 @@ fun SettingsScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        SectionTitle(title = "数据")
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 应用变更记录
+        SettingItem(
+            iconRes = R.drawable.ic_info,
+            title = "应用变更记录",
+            value = "查看安装、更新、卸载记录",
+            onClick = onNavigateToAppChange
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // 分组标题：关于
         SectionTitle(title = "关于")
 
@@ -218,22 +236,6 @@ fun SettingsScreen() {
             title = stringResource(R.string.activity_settings_about),
             value = "应用信息与版本",
             onClick = { showAboutDialog = true }
-        )
-    }
-
-    // 夜间模式对话框
-    if (showNightModeDialog) {
-        NightModeDialog(
-            currentValue = nightModeValue,
-            onDismiss = { showNightModeDialog = false },
-            onConfirm = { value ->
-                nightModeValue = value
-                settings.edit().putInt(Constants.PREFERENCE_NIGHT_MODE, value).apply()
-                AppCompatDelegate.setDefaultNightMode(value)
-                // 更新 Compose 主题状态
-                ThemeState.updateDarkMode(ThemeState.getDarkModeValue(context))
-                showNightModeDialog = false
-            }
         )
     }
 
@@ -335,7 +337,7 @@ private fun SectionTitle(title: String) {
  * 设置项
  */
 @Composable
-private fun SettingItem(
+fun SettingItem(
     iconRes: Int,
     title: String,
     value: String,
@@ -406,7 +408,7 @@ private fun SettingItem(
 }
 
 @Composable
-private fun SettingToggleItem(
+fun SettingToggleItem(
     iconRes: Int,
     title: String,
     value: String,

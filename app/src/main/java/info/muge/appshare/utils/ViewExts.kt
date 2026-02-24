@@ -31,6 +31,17 @@ import info.muge.appshare.MyApplication
 import java.io.IOException
 import java.util.*
 
+/**
+ * 安全地从 Context 链中查找 Activity
+ */
+fun Context.findActivity(): Activity {
+    var context = this
+    while (context is android.content.ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    throw IllegalStateException("Context is not an Activity")
+}
 
 fun Any.toast(){
     Toast.makeText(MyApplication.instance, this.toString(), Toast.LENGTH_SHORT).show()

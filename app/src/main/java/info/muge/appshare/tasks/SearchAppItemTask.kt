@@ -1,62 +1,49 @@
 package info.muge.appshare.tasks
 
-import info.muge.appshare.Global
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.utils.PinyinUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 
 /**
- * 搜索应用项任务
+ * 搜索应用项任务（协程版）
  */
 class SearchAppItemTask(
     appItems: List<AppItem>,
-    info: String,
-    private val callback: SearchTaskCompletedCallback
-) : Thread() {
+    info: String
+) {
+    private val searchInfo: String = info.trim().lowercase()
+    private val appItemList = ArrayList<AppItem>(appItems)
 
-    @Volatile
-    private var isInterrupted = false
-    private val search_info: String = info.trim().lowercase()
-    private val appItemList = ArrayList<AppItem>()
-    private val result_appItems = ArrayList<AppItem>()
+    /**
+     * 执行搜索（挂起函数，在 IO 线程执行）
+     * 通过 Job.cancel() 取消
+     */
+    suspend fun execute(): List<AppItem> = withContext(Dispatchers.IO) {
+        val resultItems = ArrayList<AppItem>()
 
-    init {
-        this.appItemList.addAll(appItems)
-    }
-
-    override fun run() {
-        super.run()
-        
         for (item in appItemList) {
-            if (isInterrupted) {
-                break
-            }
-            
+            ensureActive() // 替代 isInterrupted 检查
+
             try {
-                val b = (getFormatString(item.getAppName()).contains(search_info) ||
-                        getFormatString(item.getPackageName()).contains(search_info) ||
-                        getFormatString(item.getVersionName()).contains(search_info) ||
-                        getFormatString(PinyinUtil.getFirstSpell(item.getAppName())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getFullSpell(item.getAppName())).contains(search_info) ||
-                        getFormatString(PinyinUtil.getPinYin(item.getAppName())).contains(search_info)) &&
-                        search_info.trim().isNotEmpty()
-                
-                if (b) {
-                    result_appItems.add(item)
+                val matched = (getFormatString(item.getAppName()).contains(searchInfo) ||
+                        getFormatString(item.getPackageName()).contains(searchInfo) ||
+                        getFormatString(item.getVersionName()).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getFirstSpell(item.getAppName())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getFullSpell(item.getAppName())).contains(searchInfo) ||
+                        getFormatString(PinyinUtil.getPinYin(item.getAppName())).contains(searchInfo)) &&
+                        searchInfo.trim().isNotEmpty()
+
+                if (matched) {
+                    resultItems.add(item)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-        
-        Global.handler.post {
-            if (!isInterrupted) {
-                callback.onSearchTaskCompleted(result_appItems, search_info)
-            }
-        }
-    }
 
-    fun setInterrupted() {
-        isInterrupted = true
+        resultItems
     }
 
     private fun getFormatString(s: String): String {
@@ -64,10 +51,14 @@ class SearchAppItemTask(
     }
 
     /**
-     * 搜索任务完成回调
+     * 搜索关键词
+     */
+    val keyword: String get() = searchInfo
+
+    /**
+     * 搜索任务完成回调（保留向后兼容）
      */
     interface SearchTaskCompletedCallback {
         fun onSearchTaskCompleted(appItems: List<AppItem>, keyword: String)
     }
 }
-

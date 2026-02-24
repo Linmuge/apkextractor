@@ -13,7 +13,6 @@ import java.util.zip.ZipInputStream
  */
 object ZipFileUtil {
 
-    @JvmStatic
     fun getZipFileInfoOfImportItem(importItem: ImportItem): ZipFileInfo? {
         val fileItem = importItem.getFileItem()
         try {
