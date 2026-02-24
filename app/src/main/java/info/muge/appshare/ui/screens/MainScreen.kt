@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -20,9 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
@@ -36,11 +40,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -50,9 +59,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -75,9 +86,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import info.muge.appshare.R
 import info.muge.appshare.ui.theme.AppDimens
 
@@ -99,7 +113,8 @@ fun MainScreen(
     onNavigateToAppDetail: (String) -> Unit = {},
     onNavigateToAppDetailWithUri: (Uri) -> Unit = {},
     onNavigateToAppChange: () -> Unit = {},
-    onNavigateToThemeSettings: () -> Unit = {}
+    onNavigateToThemeSettings: () -> Unit = {},
+    appListViewModel: AppListViewModel = viewModel()
 ) {
     var currentTab by rememberSaveable { mutableIntStateOf(0) }
     var isSearchMode by rememberSaveable { mutableStateOf(false) }
@@ -113,6 +128,14 @@ fun MainScreen(
 
     // 排序选项对话框
     var showSortDialog by rememberSaveable { mutableStateOf(false) }
+
+    // 筛选弹窗状态
+    var showFilterSheet by remember { mutableStateOf(false) }
+
+    // 分组弹窗状态
+    var showGroupDialog by remember { mutableStateOf(false) }
+
+    val appListState by appListViewModel.uiState.collectAsStateWithLifecycle()
 
     val navItems = listOf(
         BottomNavItem(
@@ -143,6 +166,31 @@ fun MainScreen(
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
+    // 筛选底部弹窗
+    if (showFilterSheet) {
+        FilterBottomSheet(
+            currentConfig = appListState.filterConfig,
+            availableInstallers = appListState.availableInstallers,
+            onApply = { config ->
+                appListViewModel.updateFilter(config)
+                showFilterSheet = false
+            },
+            onDismiss = { showFilterSheet = false }
+        )
+    }
+
+    // 分组选择对话框
+    if (showGroupDialog) {
+        GroupModeDialog(
+            currentMode = appListState.groupMode,
+            onSelect = { mode ->
+                appListViewModel.setGroupMode(mode)
+                showGroupDialog = false
+            },
+            onDismiss = { showGroupDialog = false }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -176,7 +224,11 @@ fun MainScreen(
                     showSearch = currentTab == 0,
                     showMenu = currentTab == 0,
                     viewMode = viewMode,
+                    activeFilterCount = appListState.filterConfig.activeCount,
+                    groupMode = appListState.groupMode,
                     onSearchClick = { isSearchMode = true },
+                    onFilterClick = { showFilterSheet = true },
+                    onGroupClick = { showGroupDialog = true },
                     onSortClick = { showSortDialog = true },
                     onViewModeClick = { viewMode = if (viewMode == 0) 1 else 0 },
                     scrollBehavior = scrollBehavior
@@ -217,7 +269,8 @@ fun MainScreen(
                         onNavigateToDetail = onNavigateToAppDetail,
                         onNavigateToDetailWithUri = onNavigateToAppDetailWithUri,
                         showSortDialog = showSortDialog,
-                        onSortDialogDismiss = { showSortDialog = false }
+                        onSortDialogDismiss = { showSortDialog = false },
+                        viewModel = appListViewModel
                     )
                 }
             }
@@ -255,7 +308,11 @@ private fun MainTopBar(
     showSearch: Boolean,
     showMenu: Boolean,
     viewMode: Int,
+    activeFilterCount: Int = 0,
+    groupMode: GroupMode = GroupMode.NONE,
     onSearchClick: () -> Unit,
+    onFilterClick: () -> Unit = {},
+    onGroupClick: () -> Unit = {},
     onSortClick: () -> Unit,
     onViewModeClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
@@ -279,6 +336,42 @@ private fun MainTopBar(
                 }
             }
             if (showMenu) {
+                // 筛选按钮（带 Badge）
+                FilledTonalIconButton(onClick = onFilterClick) {
+                    if (activeFilterCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge {
+                                    Text(activeFilterCount.toString())
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = "筛选"
+                            )
+                        }
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "筛选"
+                        )
+                    }
+                }
+
+                // 分组按钮
+                FilledTonalIconButton(onClick = onGroupClick) {
+                    Icon(
+                        imageVector = Icons.Default.Layers,
+                        contentDescription = "分组",
+                        tint = if (groupMode != GroupMode.NONE) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            LocalTextStyle.current.color
+                        }
+                    )
+                }
+
                 FilledTonalIconButton(onClick = onSortClick) {
                     Icon(
                         imageVector = Icons.Default.Sort,
@@ -300,6 +393,49 @@ private fun MainTopBar(
             actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         scrollBehavior = scrollBehavior
+    )
+}
+
+/**
+ * 分组模式选择对话框
+ */
+@Composable
+private fun GroupModeDialog(
+    currentMode: GroupMode,
+    onSelect: (GroupMode) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("选择分组方式") },
+        text = {
+            Column {
+                GroupMode.entries.forEach { mode ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(AppDimens.Radius.sm))
+                            .padding(vertical = AppDimens.Space.xs),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = currentMode == mode,
+                            onClick = { onSelect(mode) }
+                        )
+                        Text(
+                            text = mode.label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = AppDimens.Space.sm)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("取消")
+            }
+        }
     )
 }
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.documentfile.provider.DocumentFile
 import info.muge.appshare.Constants
 import info.muge.appshare.Global
+import info.muge.appshare.data.ExportStatsManager
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.items.FileItem
 import info.muge.appshare.utils.EnvironmentUtil
@@ -138,6 +139,8 @@ class ExportTask(
                     inputStream.close()
                     out.close()
                     writePaths.add(currentWritingFile!!)
+                    // 记录导出统计
+                    ExportStatsManager.recordExport(context, item.getPackageName(), item.getAppName(), item.getSize())
                     if (coroutineContext.isActive) currentWritingFile = null
                 } else {
                     // Export ZIP
@@ -192,6 +195,8 @@ class ExportTask(
                     zos.flush()
                     zos.close()
                     writePaths.add(currentWritingFile!!)
+                    // 记录导出统计
+                    ExportStatsManager.recordExport(context, item.getPackageName(), item.getAppName(), item.getSize())
                     if (coroutineContext.isActive) currentWritingFile = null
                 }
             } catch (e: Exception) {

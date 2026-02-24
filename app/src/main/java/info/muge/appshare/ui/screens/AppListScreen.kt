@@ -2,10 +2,14 @@ package info.muge.appshare.ui.screens
 
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,12 +17,15 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -28,14 +35,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import info.muge.appshare.Constants
 import info.muge.appshare.R
+import info.muge.appshare.items.AppItem
+import info.muge.appshare.ui.components.AlphabetIndexBar
 import info.muge.appshare.ui.dialogs.SortConfigDialog
 import info.muge.appshare.ui.theme.AppDimens
+import info.muge.appshare.utils.PinyinUtil
 import info.muge.appshare.utils.SPUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -123,6 +135,9 @@ fun AppListScreen(
 
     val listState = rememberLazyListState()
 
+    // 字母索引条：列表视图 + 非搜索 + 无分组时显示
+    val showAlphabetIndex = viewMode == 0 && !isSearchMode && state.groupMode == GroupMode.NONE
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
@@ -204,18 +219,17 @@ fun AppListScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     if (viewMode == 0) {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            state = listState,
-                            contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
-                        ) {
-                            items(state.appList, key = { it.getPackageName() }) { app ->
-                                LinearAppItem(
-                                    app = app,
-                                    isSelected = state.selectedItems.contains(app.getPackageName()),
+                        // 列表视图
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            if (state.groupMode != GroupMode.NONE && state.groupedAppList.isNotEmpty()) {
+                                // 分组模式
+                                GroupedAppList(
+                                    groupedApps = state.groupedAppList,
+                                    selectedItems = state.selectedItems,
                                     isMultiSelectMode = isMultiSelectMode,
                                     highlightKeyword = state.highlightKeyword,
-                                    onClick = {
+                                    isSearchMode = isSearchMode,
+                                    onAppClick = { app ->
                                         if (isMultiSelectMode) {
                                             viewModel.toggleSelection(app)
                                             if (!viewModel.hasSelection()) {
@@ -225,12 +239,70 @@ fun AppListScreen(
                                             onNavigateToDetail(app.getPackageName())
                                         }
                                     },
-                                    onLongClick = {
+                                    onAppLongClick = { app ->
                                         if (!isSearchMode) {
                                             onMultiSelectModeChange(true)
                                             viewModel.toggleSelection(app)
                                         }
                                     }
+                                )
+                            } else {
+                                // 普通列表
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    state = listState,
+                                    contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
+                                ) {
+                                    items(state.appList) { app ->
+                                        LinearAppItem(
+                                            app = app,
+                                            isSelected = state.selectedItems.contains(app.getPackageName()),
+                                            isMultiSelectMode = isMultiSelectMode,
+                                            highlightKeyword = state.highlightKeyword,
+                                            onClick = {
+                                                if (isMultiSelectMode) {
+                                                    viewModel.toggleSelection(app)
+                                                    if (!viewModel.hasSelection()) {
+                                                        onMultiSelectModeChange(false)
+                                                    }
+                                                } else {
+                                                    onNavigateToDetail(app.getPackageName())
+                                                }
+                                            },
+                                            onLongClick = {
+                                                if (!isSearchMode) {
+                                                    onMultiSelectModeChange(true)
+                                                    viewModel.toggleSelection(app)
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 字母索引条
+                            if (showAlphabetIndex) {
+                                AlphabetIndexBar(
+                                    onLetterSelected = { letter ->
+                                        scope.launch {
+                                            val index = state.appList.indexOfFirst { app ->
+                                                try {
+                                                    val pinyin = PinyinUtil.getFirstSpell(app.getAppName())
+                                                    val first = pinyin.firstOrNull()?.uppercaseChar() ?: '#'
+                                                    val appLetter = if (first in 'A'..'Z') first else '#'
+                                                    appLetter == letter
+                                                } catch (_: Exception) {
+                                                    letter == '#'
+                                                }
+                                            }
+                                            if (index >= 0) {
+                                                listState.animateScrollToItem(index)
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .padding(end = AppDimens.Space.xs)
                                 )
                             }
                         }
@@ -240,7 +312,7 @@ fun AppListScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
                         ) {
-                            items(state.appList, key = { it.getPackageName() }) { app ->
+                            items(state.appList) { app ->
                                 GridAppItem(
                                     app = app,
                                     isSelected = state.selectedItems.contains(app.getPackageName()),
@@ -265,6 +337,69 @@ fun AppListScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * 分组列表
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun GroupedAppList(
+    groupedApps: Map<String, List<AppItem>>,
+    selectedItems: Set<String>,
+    isMultiSelectMode: Boolean,
+    highlightKeyword: String?,
+    isSearchMode: Boolean,
+    onAppClick: (AppItem) -> Unit,
+    onAppLongClick: (AppItem) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
+    ) {
+        groupedApps.forEach { (group, apps) ->
+            stickyHeader(key = "header_$group") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(
+                            horizontal = AppDimens.Space.lg,
+                            vertical = AppDimens.Space.sm
+                        ),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = group,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "${apps.size}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(AppDimens.Radius.full))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(horizontal = AppDimens.Space.sm, vertical = AppDimens.Space.xs)
+                    )
+                }
+            }
+
+            items(apps) { app ->
+                LinearAppItem(
+                    app = app,
+                    isSelected = selectedItems.contains(app.getPackageName()),
+                    isMultiSelectMode = isMultiSelectMode,
+                    highlightKeyword = highlightKeyword,
+                    onClick = { onAppClick(app) },
+                    onLongClick = { onAppLongClick(app) }
+                )
             }
         }
     }

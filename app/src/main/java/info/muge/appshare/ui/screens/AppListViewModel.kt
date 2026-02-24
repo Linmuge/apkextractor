@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,7 @@ import info.muge.appshare.Global
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.tasks.RefreshInstalledListTask
 import info.muge.appshare.tasks.SearchAppItemTask
+import info.muge.appshare.utils.PinyinUtil
 import info.muge.appshare.utils.SPUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +21,74 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Collections
+import java.util.Date
+import java.util.Locale
+
+/**
+ * 应用类型筛选
+ */
+enum class AppTypeFilter(val label: String) {
+    ALL("全部"),
+    USER("用户应用"),
+    SYSTEM("系统应用")
+}
+
+/**
+ * 大小范围筛选
+ */
+enum class SizeRange(val label: String, val minBytes: Long, val maxBytes: Long) {
+    ALL("全部", 0L, Long.MAX_VALUE),
+    LESS_1MB("< 1 MB", 0L, 1L * 1024 * 1024),
+    MB_1_10("1 - 10 MB", 1L * 1024 * 1024, 10L * 1024 * 1024),
+    MB_10_50("10 - 50 MB", 10L * 1024 * 1024, 50L * 1024 * 1024),
+    MB_50_100("50 - 100 MB", 50L * 1024 * 1024, 100L * 1024 * 1024),
+    MB_100_500("100 - 500 MB", 100L * 1024 * 1024, 500L * 1024 * 1024),
+    MORE_500MB("> 500 MB", 500L * 1024 * 1024, Long.MAX_VALUE)
+}
+
+/**
+ * 筛选配置
+ */
+data class FilterConfig(
+    val appType: AppTypeFilter = AppTypeFilter.ALL,
+    val sizeRange: SizeRange = SizeRange.ALL,
+    val installerSources: Set<String> = emptySet()
+) {
+    val isActive: Boolean
+        get() = appType != AppTypeFilter.ALL ||
+                sizeRange != SizeRange.ALL ||
+                installerSources.isNotEmpty()
+
+    val activeCount: Int
+        get() {
+            var count = 0
+            if (appType != AppTypeFilter.ALL) count++
+            if (sizeRange != SizeRange.ALL) count++
+            if (installerSources.isNotEmpty()) count++
+            return count
+        }
+}
+
+/**
+ * 分组模式
+ */
+enum class GroupMode(val label: String) {
+    NONE("不分组"),
+    BY_TYPE("按类型"),
+    BY_INSTALLER("按安装来源"),
+    BY_UPDATE_TIME("按更新时间"),
+    BY_SIZE("按大小范围"),
+    BY_FIRST_LETTER("按首字母")
+}
 
 /**
  * AppListScreen 的 UI 状态
  */
 data class AppListUiState(
     val appList: List<AppItem> = emptyList(),
+    val groupedAppList: Map<String, List<AppItem>> = emptyMap(),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val loadingCurrent: Int = 0,
@@ -33,7 +96,10 @@ data class AppListUiState(
     val hasPermission: Boolean = false,
     val selectedItems: Set<String> = emptySet(),
     val selectedSize: Long = 0L,
-    val highlightKeyword: String? = null
+    val highlightKeyword: String? = null,
+    val filterConfig: FilterConfig = FilterConfig(),
+    val groupMode: GroupMode = GroupMode.NONE,
+    val availableInstallers: List<String> = emptyList()
 )
 
 /**
@@ -67,7 +133,8 @@ class AppListViewModel : ViewModel() {
                 isLoading = true,
                 loadingCurrent = 0,
                 loadingTotal = 0,
-                appList = emptyList()
+                appList = emptyList(),
+                groupedAppList = emptyMap()
             )
         }
 
@@ -81,11 +148,24 @@ class AppListViewModel : ViewModel() {
                     _uiState.update { it.copy(loadingCurrent = current, loadingTotal = total) }
                 }
             )
+
+            // 收集所有安装来源
+            val installers = appList.map { it.getInstallSource() }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted()
+
+            val currentState = _uiState.value
+            val filtered = applyFilter(appList, currentState.filterConfig)
+            val grouped = applyGroup(filtered, currentState.groupMode)
+
             _uiState.update {
                 it.copy(
                     isLoading = false,
                     isRefreshing = false,
-                    appList = appList
+                    appList = filtered,
+                    groupedAppList = grouped,
+                    availableInstallers = installers
                 )
             }
         }
@@ -100,17 +180,22 @@ class AppListViewModel : ViewModel() {
             it.copy(
                 isRefreshing = true,
                 highlightKeyword = keyword,
-                appList = emptyList()
+                appList = emptyList(),
+                groupedAppList = emptyMap()
             )
         }
 
         searchJob = viewModelScope.launch {
             val task = SearchAppItemTask(Global.app_list.toList(), keyword)
             val results = task.execute()
+            val currentState = _uiState.value
+            val filtered = applyFilter(results, currentState.filterConfig)
+            val grouped = applyGroup(filtered, currentState.groupMode)
             _uiState.update {
                 it.copy(
                     isRefreshing = false,
-                    appList = results
+                    appList = filtered,
+                    groupedAppList = grouped
                 )
             }
         }
@@ -120,12 +205,121 @@ class AppListViewModel : ViewModel() {
      * 退出搜索模式
      */
     fun exitSearchMode() {
+        val currentState = _uiState.value
+        val source = Global.app_list.toList()
+        val filtered = applyFilter(source, currentState.filterConfig)
+        val grouped = applyGroup(filtered, currentState.groupMode)
         _uiState.update {
             it.copy(
                 highlightKeyword = null,
-                appList = Global.app_list.toList()
+                appList = filtered,
+                groupedAppList = grouped
             )
         }
+    }
+
+    /**
+     * 更新筛选配置
+     */
+    fun updateFilter(filterConfig: FilterConfig) {
+        val source = Global.app_list.toList()
+        val filtered = applyFilter(source, filterConfig)
+        val grouped = applyGroup(filtered, _uiState.value.groupMode)
+        _uiState.update {
+            it.copy(
+                filterConfig = filterConfig,
+                appList = filtered,
+                groupedAppList = grouped
+            )
+        }
+    }
+
+    /**
+     * 重置筛选
+     */
+    fun resetFilter() {
+        updateFilter(FilterConfig())
+    }
+
+    /**
+     * 设置分组模式
+     */
+    fun setGroupMode(mode: GroupMode) {
+        val grouped = applyGroup(_uiState.value.appList, mode)
+        _uiState.update {
+            it.copy(
+                groupMode = mode,
+                groupedAppList = grouped
+            )
+        }
+    }
+
+    /**
+     * 应用筛选逻辑
+     */
+    private fun applyFilter(list: List<AppItem>, config: FilterConfig): List<AppItem> {
+        if (!config.isActive) return list
+
+        return list.filter { app ->
+            // 应用类型筛选
+            val typeMatch = when (config.appType) {
+                AppTypeFilter.ALL -> true
+                AppTypeFilter.USER -> !app.isRedMarked()
+                AppTypeFilter.SYSTEM -> app.isRedMarked()
+            }
+
+            // 大小范围筛选
+            val sizeMatch = app.getSize() in config.sizeRange.minBytes until config.sizeRange.maxBytes
+
+            // 安装来源筛选
+            val installerMatch = config.installerSources.isEmpty() ||
+                    config.installerSources.contains(app.getInstallSource())
+
+            typeMatch && sizeMatch && installerMatch
+        }
+    }
+
+    /**
+     * 应用分组逻辑
+     */
+    private fun applyGroup(list: List<AppItem>, mode: GroupMode): Map<String, List<AppItem>> {
+        if (mode == GroupMode.NONE) return emptyMap()
+
+        return list.groupBy { app ->
+            when (mode) {
+                GroupMode.NONE -> ""
+                GroupMode.BY_TYPE -> if (app.isRedMarked()) "系统应用" else "用户应用"
+                GroupMode.BY_INSTALLER -> app.getInstallSource().ifBlank { "未知来源" }
+                GroupMode.BY_UPDATE_TIME -> {
+                    val sdf = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+                    try {
+                        sdf.format(Date(app.getPackageInfo().lastUpdateTime))
+                    } catch (_: Exception) {
+                        "未知"
+                    }
+                }
+                GroupMode.BY_SIZE -> {
+                    val mb = app.getSize() / (1024.0 * 1024.0)
+                    when {
+                        mb < 1 -> "< 1 MB"
+                        mb < 10 -> "1 - 10 MB"
+                        mb < 50 -> "10 - 50 MB"
+                        mb < 100 -> "50 - 100 MB"
+                        mb < 500 -> "100 - 500 MB"
+                        else -> "> 500 MB"
+                    }
+                }
+                GroupMode.BY_FIRST_LETTER -> {
+                    try {
+                        val pinyin = PinyinUtil.getFirstSpell(app.getAppName())
+                        val first = pinyin.firstOrNull()?.uppercaseChar() ?: '#'
+                        if (first in 'A'..'Z') first.toString() else "#"
+                    } catch (_: Exception) {
+                        "#"
+                    }
+                }
+            }
+        }.toSortedMap()
     }
 
     /**
@@ -202,7 +396,11 @@ class AppListViewModel : ViewModel() {
         synchronized(Global.app_list) {
             Collections.sort(Global.app_list)
         }
-        _uiState.update { it.copy(appList = Global.app_list.toList()) }
+        val currentState = _uiState.value
+        val source = Global.app_list.toList()
+        val filtered = applyFilter(source, currentState.filterConfig)
+        val grouped = applyGroup(filtered, currentState.groupMode)
+        _uiState.update { it.copy(appList = filtered, groupedAppList = grouped) }
     }
 
     /**
