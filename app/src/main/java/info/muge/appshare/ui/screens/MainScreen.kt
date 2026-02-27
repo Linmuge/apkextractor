@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sort
@@ -50,6 +52,8 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -267,7 +271,6 @@ fun MainScreen(
                         isMultiSelectMode = isMultiSelectMode,
                         onMultiSelectModeChange = { isMultiSelectMode = it },
                         onNavigateToDetail = onNavigateToAppDetail,
-                        onNavigateToDetailWithUri = onNavigateToAppDetailWithUri,
                         showSortDialog = showSortDialog,
                         onSortDialogDismiss = { showSortDialog = false },
                         viewModel = appListViewModel
@@ -317,6 +320,8 @@ private fun MainTopBar(
     onViewModeClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
+    var showMoreMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = {
             Text(
@@ -359,32 +364,81 @@ private fun MainTopBar(
                     }
                 }
 
-                // 分组按钮
-                FilledTonalIconButton(onClick = onGroupClick) {
-                    Icon(
-                        imageVector = Icons.Default.Layers,
-                        contentDescription = "分组",
-                        tint = if (groupMode != GroupMode.NONE) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            LocalTextStyle.current.color
-                        }
-                    )
-                }
+                // 更多菜单（收纳分组/排序/视图切换）
+                Box {
+                    FilledTonalIconButton(onClick = { showMoreMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "更多"
+                        )
+                    }
 
-                FilledTonalIconButton(onClick = onSortClick) {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = stringResource(R.string.action_sort)
-                    )
-                }
-                FilledTonalIconButton(onClick = onViewModeClick) {
-                    Icon(
-                        imageVector = if (viewMode == 0) Icons.Default.Apps else Icons.AutoMirrored.Filled.List,
-                        contentDescription = stringResource(R.string.action_view)
-                    )
+                    DropdownMenu(
+                        expanded = showMoreMenu,
+                        onDismissRequest = { showMoreMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(stringResource(R.string.action_sort))
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Sort,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showMoreMenu = false
+                                onSortClick()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (groupMode != GroupMode.NONE) {
+                                        "分组（${groupMode.label}）"
+                                    } else {
+                                        "分组"
+                                    }
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Layers,
+                                    contentDescription = null,
+                                    tint = if (groupMode != GroupMode.NONE) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    }
+                                )
+                            },
+                            onClick = {
+                                showMoreMenu = false
+                                onGroupClick()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = if (viewMode == 0) "切换为网格" else "切换为列表"
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = if (viewMode == 0) Icons.Default.Apps else Icons.AutoMirrored.Filled.List,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showMoreMenu = false
+                                onViewModeClick()
+                            }
+                        )
+                    }
                 }
             }
+            Spacer(modifier = Modifier.width(8.dp))
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,

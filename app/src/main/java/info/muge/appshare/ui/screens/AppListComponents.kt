@@ -1,6 +1,8 @@
 package info.muge.appshare.ui.screens
 
+import android.app.Activity
 import android.text.format.Formatter
+
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
@@ -42,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -246,7 +249,8 @@ internal fun PermissionBottomBar(
 
             FilledTonalButton(
                 onClick = {
-                    PermissionExts.requestreadInstallApps(context as android.app.Activity) {
+                    val activity = context as? Activity ?: return@FilledTonalButton
+                    PermissionExts.requestreadInstallApps(activity) {
                         onPermissionGranted()
                     }
                 }
@@ -375,7 +379,6 @@ internal fun LinearAppItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppDimens.Space.md, vertical = AppDimens.Space.xs)
-            .clip(RoundedCornerShape(AppDimens.Radius.lg))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -432,7 +435,7 @@ internal fun LinearAppItem(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 14.dp)
+                    .padding(horizontal = AppDimens.Space.md)
             ) {
                 Text(
                     text = highlightText(app.getAppName(), highlightKeyword),
@@ -443,7 +446,7 @@ internal fun LinearAppItem(
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(AppDimens.Space.xs))
 
                 Text(
                     text = highlightText(app.getPackageName(), highlightKeyword),
@@ -464,7 +467,7 @@ internal fun LinearAppItem(
                         contentDescription = null,
                         modifier = Modifier
                             .size(28.dp)
-                            .padding(4.dp),
+                            .padding(AppDimens.Space.xs),
                         tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0f)
                     )
@@ -478,7 +481,7 @@ internal fun LinearAppItem(
                         text = Formatter.formatFileSize(LocalContext.current, app.getSize()),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = AppDimens.Space.md, vertical = AppDimens.Space.sm)
                     )
                 }
             }
@@ -499,8 +502,7 @@ internal fun GridAppItem(
 ) {
     Card(
         modifier = Modifier
-            .padding(AppDimens.Space.sm)
-            .clip(RoundedCornerShape(AppDimens.Radius.xl))
+            .padding(AppDimens.Space.xs)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -516,7 +518,7 @@ internal fun GridAppItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 16.dp),
+                    .padding(horizontal = AppDimens.Space.sm, vertical = AppDimens.Space.md),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box {
@@ -555,7 +557,7 @@ internal fun GridAppItem(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(AppDimens.Space.sm))
 
                 Text(
                     text = app.getAppName(),
@@ -577,14 +579,17 @@ internal fun GridAppItem(
  * 高亮文本
  */
 @Composable
-internal fun highlightText(text: String, keyword: String?): androidx.compose.ui.text.AnnotatedString {
+internal fun highlightText(text: String, keyword: String?): AnnotatedString {
     if (keyword.isNullOrEmpty()) {
-        return androidx.compose.ui.text.AnnotatedString(text)
+        return AnnotatedString(text)
     }
+
+    val lowerText = text.lowercase(Locale.getDefault())
+    val lowerKeyword = keyword.lowercase(Locale.getDefault())
 
     return buildAnnotatedString {
         var startIndex = 0
-        var index = text.lowercase(Locale.getDefault()).indexOf(keyword.lowercase(Locale.getDefault()))
+        var index = lowerText.indexOf(lowerKeyword)
 
         while (index != -1) {
             append(text.substring(startIndex, index))
@@ -592,7 +597,7 @@ internal fun highlightText(text: String, keyword: String?): androidx.compose.ui.
                 append(text.substring(index, index + keyword.length))
             }
             startIndex = index + keyword.length
-            index = text.lowercase(Locale.getDefault()).indexOf(keyword.lowercase(Locale.getDefault()), startIndex)
+            index = lowerText.indexOf(lowerKeyword, startIndex)
         }
         append(text.substring(startIndex))
     }

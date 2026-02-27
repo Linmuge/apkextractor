@@ -1,5 +1,7 @@
 package info.muge.appshare.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -14,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,7 +47,6 @@ import info.muge.appshare.items.AppItem
 import info.muge.appshare.ui.components.AlphabetIndexBar
 import info.muge.appshare.ui.dialogs.SortConfigDialog
 import info.muge.appshare.ui.theme.AppDimens
-import info.muge.appshare.utils.PinyinUtil
 import info.muge.appshare.utils.SPUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -64,7 +63,6 @@ fun AppListScreen(
     isMultiSelectMode: Boolean = false,
     onMultiSelectModeChange: (Boolean) -> Unit = {},
     onNavigateToDetail: (String) -> Unit = {},
-    onNavigateToDetailWithUri: (android.net.Uri) -> Unit = {},
     showSortDialog: Boolean = false,
     onSortDialogDismiss: () -> Unit = {},
     viewModel: AppListViewModel = viewModel()
@@ -138,6 +136,29 @@ fun AppListScreen(
     // 字母索引条：列表视图 + 非搜索 + 无分组时显示
     val showAlphabetIndex = viewMode == 0 && !isSearchMode && state.groupMode == GroupMode.NONE
 
+    // 提取通用的点击/长按逻辑，避免重复代码
+    val onAppClick: (AppItem) -> Unit = remember(isMultiSelectMode) {
+        { app ->
+            if (isMultiSelectMode) {
+                viewModel.toggleSelection(app)
+                if (!viewModel.hasSelection()) {
+                    onMultiSelectModeChange(false)
+                }
+            } else {
+                onNavigateToDetail(app.getPackageName())
+            }
+        }
+    }
+
+    val onAppLongClick: (AppItem) -> Unit = remember(isSearchMode) {
+        { app ->
+            if (!isSearchMode) {
+                onMultiSelectModeChange(true)
+                viewModel.toggleSelection(app)
+            }
+        }
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
@@ -172,8 +193,8 @@ fun AppListScreen(
                             .getString(Constants.PREFERENCE_COPYING_PACKAGE_NAME_SEPARATOR, ",") ?: ","
                         val resultString = state.selectedItems.joinToString(separator)
 
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("message", resultString))
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("message", resultString))
 
                         scope.launch {
                             snackbarHostState.showSnackbar(context.getString(R.string.snack_bar_clipboard))
@@ -228,23 +249,8 @@ fun AppListScreen(
                                     selectedItems = state.selectedItems,
                                     isMultiSelectMode = isMultiSelectMode,
                                     highlightKeyword = state.highlightKeyword,
-                                    isSearchMode = isSearchMode,
-                                    onAppClick = { app ->
-                                        if (isMultiSelectMode) {
-                                            viewModel.toggleSelection(app)
-                                            if (!viewModel.hasSelection()) {
-                                                onMultiSelectModeChange(false)
-                                            }
-                                        } else {
-                                            onNavigateToDetail(app.getPackageName())
-                                        }
-                                    },
-                                    onAppLongClick = { app ->
-                                        if (!isSearchMode) {
-                                            onMultiSelectModeChange(true)
-                                            viewModel.toggleSelection(app)
-                                        }
-                                    }
+                                    onAppClick = onAppClick,
+                                    onAppLongClick = onAppLongClick
                                 )
                             } else {
                                 // 普通列表
@@ -253,28 +259,15 @@ fun AppListScreen(
                                     state = listState,
                                     contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
                                 ) {
-                                    items(state.appList) { app ->
+                                    items(state.appList.size) { index ->
+                                        val app = state.appList[index]
                                         LinearAppItem(
                                             app = app,
                                             isSelected = state.selectedItems.contains(app.getPackageName()),
                                             isMultiSelectMode = isMultiSelectMode,
                                             highlightKeyword = state.highlightKeyword,
-                                            onClick = {
-                                                if (isMultiSelectMode) {
-                                                    viewModel.toggleSelection(app)
-                                                    if (!viewModel.hasSelection()) {
-                                                        onMultiSelectModeChange(false)
-                                                    }
-                                                } else {
-                                                    onNavigateToDetail(app.getPackageName())
-                                                }
-                                            },
-                                            onLongClick = {
-                                                if (!isSearchMode) {
-                                                    onMultiSelectModeChange(true)
-                                                    viewModel.toggleSelection(app)
-                                                }
-                                            }
+                                            onClick = { onAppClick(app) },
+                                            onLongClick = { onAppLongClick(app) }
                                         )
                                     }
                                 }
@@ -285,18 +278,9 @@ fun AppListScreen(
                                 AlphabetIndexBar(
                                     onLetterSelected = { letter ->
                                         scope.launch {
-                                            val index = state.appList.indexOfFirst { app ->
-                                                try {
-                                                    val pinyin = PinyinUtil.getFirstSpell(app.getAppName())
-                                                    val first = pinyin.firstOrNull()?.uppercaseChar() ?: '#'
-                                                    val appLetter = if (first in 'A'..'Z') first else '#'
-                                                    appLetter == letter
-                                                } catch (_: Exception) {
-                                                    letter == '#'
-                                                }
-                                            }
-                                            if (index >= 0) {
-                                                listState.animateScrollToItem(index)
+                                            val targetIndex = viewModel.getAlphabetIndex(letter)
+                                            if (targetIndex >= 0) {
+                                                listState.animateScrollToItem(targetIndex)
                                             }
                                         }
                                     },
@@ -310,28 +294,15 @@ fun AppListScreen(
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(4),
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
+                            contentPadding = PaddingValues(start = AppDimens.Space.lg, end = AppDimens.Space.lg, bottom = AppDimens.Space.xs)
                         ) {
-                            items(state.appList) { app ->
+                            items(state.appList.size) { index ->
+                                val app = state.appList[index]
                                 GridAppItem(
                                     app = app,
                                     isSelected = state.selectedItems.contains(app.getPackageName()),
-                                    onClick = {
-                                        if (isMultiSelectMode) {
-                                            viewModel.toggleSelection(app)
-                                            if (!viewModel.hasSelection()) {
-                                                onMultiSelectModeChange(false)
-                                            }
-                                        } else {
-                                            onNavigateToDetail(app.getPackageName())
-                                        }
-                                    },
-                                    onLongClick = {
-                                        if (!isSearchMode) {
-                                            onMultiSelectModeChange(true)
-                                            viewModel.toggleSelection(app)
-                                        }
-                                    }
+                                    onClick = { onAppClick(app) },
+                                    onLongClick = { onAppLongClick(app) }
                                 )
                             }
                         }
@@ -352,7 +323,6 @@ private fun GroupedAppList(
     selectedItems: Set<String>,
     isMultiSelectMode: Boolean,
     highlightKeyword: String?,
-    isSearchMode: Boolean,
     onAppClick: (AppItem) -> Unit,
     onAppLongClick: (AppItem) -> Unit
 ) {
@@ -391,7 +361,8 @@ private fun GroupedAppList(
                 }
             }
 
-            items(apps) { app ->
+            items(apps.size) { index ->
+                val app = apps[index]
                 LinearAppItem(
                     app = app,
                     isSelected = selectedItems.contains(app.getPackageName()),

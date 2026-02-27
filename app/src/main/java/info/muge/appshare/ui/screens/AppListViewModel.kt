@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import info.muge.appshare.Constants
 import info.muge.appshare.Global
+import info.muge.appshare.data.AppChangeRecord
+import info.muge.appshare.data.AppChangeRepository
+import info.muge.appshare.data.ChangeType
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.tasks.RefreshInstalledListTask
 import info.muge.appshare.tasks.SearchAppItemTask
@@ -112,6 +115,12 @@ class AppListViewModel : ViewModel() {
     private var refreshJob: Job? = null
     private var searchJob: Job? = null
 
+    // 字母索引缓存：字母 -> 列表中第一次出现的 index
+    private var alphabetIndexMap: Map<Char, Int> = emptyMap()
+
+    // 缓存 SimpleDateFormat 避免反复创建
+    private val monthFormatter = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+
     /**
      * 初始化权限状态
      */
@@ -158,6 +167,9 @@ class AppListViewModel : ViewModel() {
             val currentState = _uiState.value
             val filtered = applyFilter(appList, currentState.filterConfig)
             val grouped = applyGroup(filtered, currentState.groupMode)
+
+            // 构建字母索引缓存
+            buildAlphabetIndex(filtered)
 
             _uiState.update {
                 it.copy(
@@ -209,6 +221,7 @@ class AppListViewModel : ViewModel() {
         val source = Global.app_list.toList()
         val filtered = applyFilter(source, currentState.filterConfig)
         val grouped = applyGroup(filtered, currentState.groupMode)
+        buildAlphabetIndex(filtered)
         _uiState.update {
             it.copy(
                 highlightKeyword = null,
@@ -225,6 +238,7 @@ class AppListViewModel : ViewModel() {
         val source = Global.app_list.toList()
         val filtered = applyFilter(source, filterConfig)
         val grouped = applyGroup(filtered, _uiState.value.groupMode)
+        buildAlphabetIndex(filtered)
         _uiState.update {
             it.copy(
                 filterConfig = filterConfig,
@@ -291,9 +305,8 @@ class AppListViewModel : ViewModel() {
                 GroupMode.BY_TYPE -> if (app.isRedMarked()) "系统应用" else "用户应用"
                 GroupMode.BY_INSTALLER -> app.getInstallSource().ifBlank { "未知来源" }
                 GroupMode.BY_UPDATE_TIME -> {
-                    val sdf = SimpleDateFormat("yyyy-MM", Locale.getDefault())
                     try {
-                        sdf.format(Date(app.getPackageInfo().lastUpdateTime))
+                        monthFormatter.format(Date(app.getPackageInfo().lastUpdateTime))
                     } catch (_: Exception) {
                         "未知"
                     }
@@ -320,6 +333,31 @@ class AppListViewModel : ViewModel() {
                 }
             }
         }.toSortedMap()
+    }
+
+    /**
+     * 构建字母索引缓存，记录每个字母在列表中第一次出现的位置
+     */
+    private fun buildAlphabetIndex(list: List<AppItem>) {
+        alphabetIndexMap = buildMap {
+            list.forEachIndexed { index, app ->
+                val letter = try {
+                    val pinyin = PinyinUtil.getFirstSpell(app.getAppName())
+                    val first = pinyin.firstOrNull()?.uppercaseChar() ?: '#'
+                    if (first in 'A'..'Z') first else '#'
+                } catch (_: Exception) {
+                    '#'
+                }
+                putIfAbsent(letter, index)
+            }
+        }
+    }
+
+    /**
+     * 获取字母对应的列表索引位置（O(1) 查询）
+     */
+    fun getAlphabetIndex(letter: Char): Int {
+        return alphabetIndexMap[letter] ?: -1
     }
 
     /**
@@ -400,6 +438,7 @@ class AppListViewModel : ViewModel() {
         val source = Global.app_list.toList()
         val filtered = applyFilter(source, currentState.filterConfig)
         val grouped = applyGroup(filtered, currentState.groupMode)
+        buildAlphabetIndex(filtered)
         _uiState.update { it.copy(appList = filtered, groupedAppList = grouped) }
     }
 
@@ -429,15 +468,15 @@ class AppListViewModel : ViewModel() {
                     val changeType = when (action) {
                         Intent.ACTION_PACKAGE_ADDED -> {
                             if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))
-                                info.muge.appshare.data.ChangeType.UPDATED
+                                ChangeType.UPDATED
                             else
-                                info.muge.appshare.data.ChangeType.INSTALLED
+                                ChangeType.INSTALLED
                         }
                         Intent.ACTION_PACKAGE_REMOVED -> {
                             if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))
                                 return // PACKAGE_REMOVED + REPLACING = 更新前的移除，忽略
                             else
-                                info.muge.appshare.data.ChangeType.UNINSTALLED
+                                ChangeType.UNINSTALLED
                         }
                         else -> return
                     }
@@ -458,9 +497,9 @@ class AppListViewModel : ViewModel() {
                         null
                     }
 
-                    info.muge.appshare.data.AppChangeRepository.addRecord(
+                    AppChangeRepository.addRecord(
                         context,
-                        info.muge.appshare.data.AppChangeRecord(
+                        AppChangeRecord(
                             packageName = changedPkg,
                             appName = appName,
                             changeType = changeType,
