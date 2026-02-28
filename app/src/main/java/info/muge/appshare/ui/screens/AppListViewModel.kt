@@ -16,7 +16,6 @@ import info.muge.appshare.data.ChangeType
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.tasks.RefreshInstalledListTask
 import info.muge.appshare.tasks.SearchAppItemTask
-import info.muge.appshare.utils.PinyinUtil
 import info.muge.appshare.utils.SPUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -324,7 +323,7 @@ class AppListViewModel : ViewModel() {
                 }
                 GroupMode.BY_FIRST_LETTER -> {
                     try {
-                        val pinyin = PinyinUtil.getFirstSpell(app.getAppName())
+                        val pinyin = app.getCachedPinyin()
                         val first = pinyin.firstOrNull()?.uppercaseChar() ?: '#'
                         if (first in 'A'..'Z') first.toString() else "#"
                     } catch (_: Exception) {
@@ -342,7 +341,7 @@ class AppListViewModel : ViewModel() {
         alphabetIndexMap = buildMap {
             list.forEachIndexed { index, app ->
                 val letter = try {
-                    val pinyin = PinyinUtil.getFirstSpell(app.getAppName())
+                    val pinyin = app.getCachedPinyin()
                     val first = pinyin.firstOrNull()?.uppercaseChar() ?: '#'
                     if (first in 'A'..'Z') first else '#'
                 } catch (_: Exception) {

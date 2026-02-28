@@ -53,6 +53,10 @@ class AppItem : Comparable<AppItem>, DisplayItem {
     @Transient
     var exportObb = false
 
+    // 缓存拼音计算结果，避免重复计算
+    @Transient
+    private var cachedPinyin: String? = null
+
     /**
      * 初始化一个全新的AppItem
      * @param context context实例，用来获取应用图标、名称等参数
@@ -122,27 +126,31 @@ class AppItem : Comparable<AppItem>, DisplayItem {
     constructor(context: Context, filePath: String) {
         val packageManager = context.packageManager
         val packageInfo = packageManager.getPackageArchiveInfo(filePath, 0)
-        
-        // 由于是未安装的APK，我们需要手动设置 applicationInfo
-        packageInfo!!.applicationInfo!!.sourceDir = filePath
-        packageInfo!!.applicationInfo!!.publicSourceDir = filePath
-        
-        this.info = packageInfo
+
+        // 由于是未安装的APK，我们需要手动设置 applicationInfo（安全地处理空值）
+        packageInfo?.applicationInfo?.let {
+            it.sourceDir = filePath
+            it.publicSourceDir = filePath
+        }
+
+        this.info = packageInfo ?: android.content.pm.PackageInfo().apply { packageName = "unknown" }
         this.fileItem = FileItem(File(filePath))
         
         // 尝试获取应用名称和图标
         // 注意：未安装的应用可能无法直接通过 getApplicationLabel 获取正确的名称
         // 需要创建一个 assetManager 来读取资源
-        var appName = packageInfo.packageName
+        var appName = packageInfo?.packageName
         var appIcon = packageManager.defaultActivityIcon
         
         try {
-            val appInfo = packageInfo.applicationInfo!!
-            appInfo.sourceDir = filePath
-            appInfo.publicSourceDir = filePath
-            
-            appName = packageManager.getApplicationLabel(appInfo).toString()
-            appIcon = packageManager.getApplicationIcon(appInfo)
+            val appInfo = packageInfo?.applicationInfo
+            if (appInfo != null) {
+                appInfo.sourceDir = filePath
+                appInfo.publicSourceDir = filePath
+                
+                appName = packageManager.getApplicationLabel(appInfo).toString()
+                appIcon = packageManager.getApplicationIcon(appInfo)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -215,6 +223,22 @@ class AppItem : Comparable<AppItem>, DisplayItem {
     fun getSplitSourceDirs(): Array<String>? = splitSourceDirs
 
     /**
+     * 获取缓存的拼音首字母，首次调用时计算并缓存
+     */
+    fun getCachedPinyin(): String {
+        return cachedPinyin ?: run {
+            val pinyin = try {
+                PinyinUtil.getFirstSpell(title)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                title
+            }
+            cachedPinyin = pinyin
+            pinyin
+        }
+    }
+
+    /**
      * 排序模式。
      * 0 - 默认
      * 1 - 名称升序
@@ -232,8 +256,8 @@ class AppItem : Comparable<AppItem>, DisplayItem {
         return when (sort_config) {
             1 -> {
                 try {
-                    PinyinUtil.getFirstSpell(title).lowercase()
-                        .compareTo(PinyinUtil.getFirstSpell(other.title).lowercase())
+                    getCachedPinyin().lowercase()
+                        .compareTo(other.getCachedPinyin().lowercase())
                 } catch (e: Exception) {
                     e.printStackTrace()
                     0
@@ -241,8 +265,8 @@ class AppItem : Comparable<AppItem>, DisplayItem {
             }
             2 -> {
                 try {
-                    PinyinUtil.getFirstSpell(other.title).lowercase()
-                        .compareTo(PinyinUtil.getFirstSpell(title).lowercase())
+                    other.getCachedPinyin().lowercase()
+                        .compareTo(getCachedPinyin().lowercase())
                 } catch (e: Exception) {
                     e.printStackTrace()
                     0

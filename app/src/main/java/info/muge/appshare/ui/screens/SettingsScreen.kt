@@ -100,12 +100,11 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(AppDimens.Space.md))
 
-        // 导出路径设置
-        SettingItem(
+        // 导出路径设置（只读展示，无交互）
+        SettingInfoItem(
             iconRes = R.drawable.ic_folder,
             title = stringResource(R.string.activity_settings_path),
-            value = SPUtil.getDisplayingExportPath(context),
-            onClick = {}
+            value = SPUtil.getDisplayingExportPath(context)
         )
 
         Spacer(modifier = Modifier.height(AppDimens.Space.sm))
@@ -407,6 +406,56 @@ fun SettingItem(
     }
 }
 
+/**
+ * 只读信息设置项（无箭头、无点击反馈）
+ */
+@Composable
+fun SettingInfoItem(
+    iconRes: Int,
+    title: String,
+    value: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AppDimens.Radius.lg),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppDimens.Elevation.none)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppDimens.Space.lg),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(AppDimens.Space.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
+                if (value.isNotEmpty()) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun SettingToggleItem(
     iconRes: Int,
@@ -418,7 +467,8 @@ fun SettingToggleItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(AppDimens.Radius.lg)),
+            .clip(RoundedCornerShape(AppDimens.Radius.lg))
+            .clickable { onCheckedChange(!checked) },
         shape = RoundedCornerShape(AppDimens.Radius.lg),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
@@ -454,7 +504,7 @@ fun SettingToggleItem(
             }
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange
+                onCheckedChange = null
             )
         }
     }
@@ -685,11 +735,9 @@ private fun AboutDialog(
             }
         },
         actions = {
-            AppBottomSheetDualActions(
+            info.muge.appshare.ui.dialogs.AppBottomSheetActions(
                 onConfirm = onDismiss,
-                onDismiss = onDismiss,
-                confirmText = stringResource(R.string.dialog_button_confirm),
-                dismissText = stringResource(R.string.dialog_button_cancel)
+                confirmText = stringResource(R.string.dialog_button_confirm)
             )
         }
     )

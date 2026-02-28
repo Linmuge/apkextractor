@@ -2,11 +2,13 @@ package info.muge.appshare.ui.screens.appdetail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,12 +29,15 @@ import androidx.compose.ui.unit.sp
 import info.muge.appshare.R
 import info.muge.appshare.items.AppItem
 import info.muge.appshare.ui.theme.AppDimens
+import info.muge.appshare.utils.ApkSignatureInfo
+import info.muge.appshare.utils.ApkSignatureUtil
 import info.muge.appshare.utils.EnvironmentUtil
+import info.muge.appshare.utils.SignatureScheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * 签名数据类
+ * 签名数据类（保留原有兼容性）
  */
 data class SignatureInfo(
     val subject: String = "",
@@ -42,11 +47,12 @@ data class SignatureInfo(
     val notAfter: String = "",
     val md5: String = "",
     val sha1: String = "",
-    val sha256: String = ""
+    val sha256: String = "",
+    val signatureSchemes: Set<SignatureScheme> = emptySet()
 )
 
 /**
- * 签名内容 - 与原 SignatureFragment 完全一致
+ * 签名内容 - 增强版，显示签名方案版本
  */
 @Composable
 fun SignatureContent(appItem: AppItem) {
@@ -59,24 +65,31 @@ fun SignatureContent(appItem: AppItem) {
             val result = withContext(Dispatchers.IO) {
                 val packageInfo = appItem.getPackageInfo()
                 val sourceDir = packageInfo.applicationInfo?.sourceDir ?: ""
+
+                // 使用增强的签名工具获取完整信息
+                val fullInfo = ApkSignatureUtil.getFullSignatureInfo(sourceDir, packageInfo)
+
+                // 兼容原有格式
                 val signInfos = EnvironmentUtil.getAPKSignInfo(sourceDir)
-                val md5 = EnvironmentUtil.getSignatureMD5StringOfPackageInfo(packageInfo)
-                val sha1 = EnvironmentUtil.getSignatureSHA1OfPackageInfo(packageInfo)
-                val sha256 = EnvironmentUtil.getSignatureSHA256OfPackageInfo(packageInfo)
+
                 SignatureInfo(
-                    subject = signInfos.getOrElse(0) { "" },
-                    issuer = signInfos.getOrElse(1) { "" },
-                    serial = signInfos.getOrElse(2) { "" },
-                    notBefore = signInfos.getOrElse(3) { "" },
-                    notAfter = signInfos.getOrElse(4) { "" },
-                    md5 = md5,
-                    sha1 = sha1,
-                    sha256 = sha256
+                    subject = fullInfo.subject.ifEmpty { signInfos.getOrElse(0) { "" } },
+                    issuer = fullInfo.issuer.ifEmpty { signInfos.getOrElse(1) { "" } },
+                    serial = fullInfo.serialNumber.ifEmpty { signInfos.getOrElse(2) { "" } },
+                    notBefore = fullInfo.notBefore?.toString() ?: signInfos.getOrElse(3) { "" },
+                    notAfter = fullInfo.notAfter?.toString() ?: signInfos.getOrElse(4) { "" },
+                    md5 = fullInfo.md5.ifEmpty { EnvironmentUtil.getSignatureMD5StringOfPackageInfo(packageInfo) },
+                    sha1 = fullInfo.sha1.ifEmpty { EnvironmentUtil.getSignatureSHA1OfPackageInfo(packageInfo) },
+                    sha256 = fullInfo.sha256.ifEmpty { EnvironmentUtil.getSignatureSHA256OfPackageInfo(packageInfo) },
+                    signatureSchemes = fullInfo.signatureSchemes
                 )
             }
             signatureInfo = result
-        } catch (_: Exception) { }
-        isLoading = false
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            isLoading = false
+        }
     }
 
     Column(
@@ -93,6 +106,22 @@ fun SignatureContent(appItem: AppItem) {
             )
         } else {
             val info = signatureInfo ?: return
+
+            // 签名方案版本卡片
+            if (info.signatureSchemes.isNotEmpty()) {
+                DetailCard {
+                    Text(
+                        text = stringResource(R.string.signature_scheme_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                    )
+                    SignatureSchemeRow(info.signatureSchemes)
+                }
+                Spacer(modifier = Modifier.height(AppDimens.Space.md))
+            }
+
+            // 证书信息卡片
             DetailCard {
                 SignatureItem(
                     label = stringResource(R.string.activity_detail_signature_issuer),
@@ -135,6 +164,34 @@ fun SignatureContent(appItem: AppItem) {
                     onClick = { copyToClipboard(context, info.sha256) }
                 )
             }
+        }
+    }
+}
+
+/**
+ * 签名方案显示行
+ */
+@Composable
+private fun SignatureSchemeRow(schemes: Set<SignatureScheme>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        schemes.sortedBy { it.version }.forEach { scheme ->
+            androidx.compose.material3.FilterChip(
+                selected = true,
+                onClick = { },
+                label = {
+                    Text(
+                        text = "v${if (scheme.version == 31) "3.1" else scheme.version}",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                },
+                modifier = Modifier.padding(end = 4.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
         }
     }
 }

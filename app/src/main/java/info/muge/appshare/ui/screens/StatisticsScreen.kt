@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import info.muge.appshare.Global
@@ -52,14 +54,16 @@ import info.muge.appshare.ui.screens.statistics.StatisticsTabRow
 import info.muge.appshare.ui.screens.statistics.StatsMessagePanel
 import info.muge.appshare.ui.screens.statistics.StorageOverviewCard
 import info.muge.appshare.ui.screens.statistics.SummaryCard
+import info.muge.appshare.R
 import info.muge.appshare.ui.theme.AppDimens
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
  * 统计类型
  */
-enum class StatisticsType(val label: String) {
+enum class StatisticsType(val label: String, val labelResId: Int? = null) {
     TARGET_SDK("Target SDK"),
     MIN_SDK("Min SDK"),
     COMPILE_SDK("Compile SDK"),
@@ -71,13 +75,13 @@ enum class StatisticsType(val label: String) {
     APP_TYPE("App Type"),
     SIZE_DISTRIBUTION("Size"),
     INSTALL_TIME("Install"),
-    EXPORT_STATS("导出"),
-    PERMISSION("权限")
+    EXPORT_STATS("导出", R.string.stats_tab_export),
+    PERMISSION("权限", R.string.stats_tab_permission)
 }
 
-enum class DetailSortMode(val label: String) {
-    COUNT_DESC("按数量"),
-    LABEL_ASC("按名称")
+enum class DetailSortMode(val label: String, val labelResId: Int? = null) {
+    COUNT_DESC("按数量", R.string.stats_sort_by_count),
+    LABEL_ASC("按名称", R.string.stats_sort_by_name)
 }
 
 /**
@@ -90,6 +94,7 @@ fun StatisticsScreen(
     onNavigateToAppDetail: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
     // 设置 Context 用于权限查询
     val context = LocalContext.current
@@ -119,6 +124,7 @@ fun StatisticsScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedLabel by remember { mutableStateOf("") }
     var selectedApps by remember { mutableStateOf<List<AppItem>>(emptyList()) }
+
 
     val colorScheme = MaterialTheme.colorScheme
     val chartColors = remember(colorScheme) {
@@ -251,8 +257,9 @@ fun StatisticsScreen(
             }
 
             item {
+                val context = LocalContext.current
                 Text(
-                    text = "详细数据 (${visibleEntries.size}/${sortedEntries.size})",
+                    text = "${context.getString(R.string.stats_detail_data)} (${visibleEntries.size}/${sortedEntries.size})",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -262,8 +269,10 @@ fun StatisticsScreen(
 
             if (visibleEntries.isEmpty()) {
                 item {
+                    val context = LocalContext.current
                     StatsMessagePanel(
-                        text = uiState.loadError?.let { "加载失败：$it" } ?: "当前筛选条件下没有数据",
+                        text = uiState.loadError?.let { "${context.getString(R.string.stats_load_failed)}：$it" }
+                            ?: context.getString(R.string.stats_no_data),
                         onRetry = uiState.loadError?.let { { viewModel.onEvent(StatisticsEvent.Refresh) } }
                     )
                 }
@@ -281,8 +290,9 @@ fun StatisticsScreen(
                             .padding(vertical = AppDimens.Space.sm)
                     ) {
                         if (uiState.loadError != null) {
+                            val context = LocalContext.current
                             Text(
-                                text = "部分数据可能未更新：${uiState.loadError}",
+                                text = "${context.getString(R.string.stats_partial_data_error)}：${uiState.loadError}",
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier

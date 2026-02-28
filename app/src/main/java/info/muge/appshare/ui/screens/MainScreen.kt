@@ -33,8 +33,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -49,7 +49,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
@@ -150,7 +149,7 @@ fun MainScreen(
         BottomNavItem(
             route = "statistics",
             icon = Icons.Default.BarChart,
-            title = "统计"
+            title = stringResource(R.string.nav_statistics)
         ),
         BottomNavItem(
             route = "settings",
@@ -353,13 +352,13 @@ private fun MainTopBar(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.FilterList,
-                                contentDescription = "筛选"
+                                contentDescription = stringResource(R.string.menu_filter)
                             )
                         }
                     } else {
                         Icon(
                             imageVector = Icons.Default.FilterList,
-                            contentDescription = "筛选"
+                            contentDescription = stringResource(R.string.menu_filter)
                         )
                     }
                 }
@@ -369,7 +368,7 @@ private fun MainTopBar(
                     FilledTonalIconButton(onClick = { showMoreMenu = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "更多"
+                            contentDescription = stringResource(R.string.menu_more)
                         )
                     }
 
@@ -396,9 +395,9 @@ private fun MainTopBar(
                             text = {
                                 Text(
                                     text = if (groupMode != GroupMode.NONE) {
-                                        "分组（${groupMode.label}）"
+                                        stringResource(R.string.menu_group_active, groupMode.label)
                                     } else {
-                                        "分组"
+                                        stringResource(R.string.menu_group)
                                     }
                                 )
                             },
@@ -421,7 +420,7 @@ private fun MainTopBar(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = if (viewMode == 0) "切换为网格" else "切换为列表"
+                                    text = if (viewMode == 0) stringResource(R.string.menu_switch_to_grid) else stringResource(R.string.menu_switch_to_list)
                                 )
                             },
                             leadingIcon = {
@@ -459,22 +458,26 @@ private fun GroupModeDialog(
     onSelect: (GroupMode) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("选择分组方式") },
-        text = {
+    info.muge.appshare.ui.dialogs.AppBottomSheet(
+        title = stringResource(R.string.dialog_select_group_mode),
+        onDismiss = onDismiss,
+        content = {
             Column {
                 GroupMode.entries.forEach { mode ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(AppDimens.Radius.sm))
+                            .selectable(
+                                selected = currentMode == mode,
+                                onClick = { onSelect(mode) }
+                            )
                             .padding(vertical = AppDimens.Space.xs),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
                             selected = currentMode == mode,
-                            onClick = { onSelect(mode) }
+                            onClick = null
                         )
                         Text(
                             text = mode.label,
@@ -485,10 +488,11 @@ private fun GroupModeDialog(
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("取消")
-            }
+        actions = {
+            info.muge.appshare.ui.dialogs.AppBottomSheetActions(
+                onConfirm = onDismiss,
+                confirmText = stringResource(R.string.action_cancel)
+            )
         }
     )
 }
@@ -503,9 +507,11 @@ private fun SearchTopBar(
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+        keyboardController?.show()
     }
 
     Surface(

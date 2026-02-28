@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -87,10 +88,14 @@ fun AppListScreen(
 
     // 搜索功能（带防抖）
     LaunchedEffect(isSearchMode, searchText) {
-        if (isSearchMode && searchText.isNotEmpty()) {
-            delay(300L)
-            viewModel.searchApps(searchText)
-        } else if (!isSearchMode) {
+        if (isSearchMode) {
+            if (searchText.isNotEmpty()) {
+                delay(300L)
+                viewModel.searchApps(searchText)
+            } else {
+                viewModel.exitSearchMode()
+            }
+        } else {
             viewModel.exitSearchMode()
         }
     }
@@ -259,7 +264,10 @@ fun AppListScreen(
                                     state = listState,
                                     contentPadding = PaddingValues(bottom = AppDimens.Space.xs)
                                 ) {
-                                    items(state.appList.size) { index ->
+                                    items(
+                                        count = state.appList.size,
+                                        key = { index -> state.appList[index].getPackageName() }
+                                    ) { index ->
                                         val app = state.appList[index]
                                         LinearAppItem(
                                             app = app,
@@ -291,19 +299,32 @@ fun AppListScreen(
                             }
                         }
                     } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(4),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = AppDimens.Space.lg, end = AppDimens.Space.lg, bottom = AppDimens.Space.xs)
-                        ) {
-                            items(state.appList.size) { index ->
-                                val app = state.appList[index]
-                                GridAppItem(
-                                    app = app,
-                                    isSelected = state.selectedItems.contains(app.getPackageName()),
-                                    onClick = { onAppClick(app) },
-                                    onLongClick = { onAppLongClick(app) }
-                                )
+                        if (state.groupMode != GroupMode.NONE && state.groupedAppList.isNotEmpty()) {
+                            GroupedAppGrid(
+                                groupedApps = state.groupedAppList,
+                                selectedItems = state.selectedItems,
+                                isMultiSelectMode = isMultiSelectMode,
+                                onAppClick = onAppClick,
+                                onAppLongClick = onAppLongClick
+                            )
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(4),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(start = AppDimens.Space.lg, end = AppDimens.Space.lg, bottom = AppDimens.Space.xs)
+                            ) {
+                                items(
+                                    count = state.appList.size,
+                                    key = { index -> state.appList[index].getPackageName() }
+                                ) { index ->
+                                    val app = state.appList[index]
+                                    GridAppItem(
+                                        app = app,
+                                        isSelected = state.selectedItems.contains(app.getPackageName()),
+                                        onClick = { onAppClick(app) },
+                                        onLongClick = { onAppLongClick(app) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -361,13 +382,75 @@ private fun GroupedAppList(
                 }
             }
 
-            items(apps.size) { index ->
+            items(
+                count = apps.size,
+                key = { index -> apps[index].getPackageName() }
+            ) { index ->
                 val app = apps[index]
                 LinearAppItem(
                     app = app,
                     isSelected = selectedItems.contains(app.getPackageName()),
                     isMultiSelectMode = isMultiSelectMode,
                     highlightKeyword = highlightKeyword,
+                    onClick = { onAppClick(app) },
+                    onLongClick = { onAppLongClick(app) }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 分组网格列表
+ */
+@Composable
+private fun GroupedAppGrid(
+    groupedApps: Map<String, List<AppItem>>,
+    selectedItems: Set<String>,
+    isMultiSelectMode: Boolean,
+    onAppClick: (AppItem) -> Unit,
+    onAppLongClick: (AppItem) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(4),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = AppDimens.Space.lg, end = AppDimens.Space.lg, bottom = AppDimens.Space.xs)
+    ) {
+        groupedApps.forEach { (group, apps) ->
+            item(span = { GridItemSpan(maxLineSpan) }, key = "header_$group") {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = AppDimens.Space.md, bottom = AppDimens.Space.sm),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = group,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "${apps.size}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(AppDimens.Radius.full))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(horizontal = AppDimens.Space.sm, vertical = AppDimens.Space.xs)
+                    )
+                }
+            }
+
+            items(
+                count = apps.size,
+                key = { index -> apps[index].getPackageName() }
+            ) { index ->
+                val app = apps[index]
+                GridAppItem(
+                    app = app,
+                    isSelected = selectedItems.contains(app.getPackageName()),
                     onClick = { onAppClick(app) },
                     onLongClick = { onAppLongClick(app) }
                 )

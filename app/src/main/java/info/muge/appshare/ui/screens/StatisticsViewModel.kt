@@ -78,6 +78,13 @@ class StatisticsViewModel : ViewModel() {
     private var loadJob: Job? = null
     private val cache = mutableMapOf<StatisticsType, Map<String, List<AppItem>>>()
 
+    // 使用 ThreadLocal 缓存 SimpleDateFormat 避免并发问题和反复创建
+    private val monthFormatter = object : ThreadLocal<SimpleDateFormat>() {
+        override fun initialValue(): SimpleDateFormat {
+            return SimpleDateFormat("yyyy-MM", Locale.getDefault())
+        }
+    }
+
     init {
         loadStatistics(forceRefresh = false)
     }
@@ -357,8 +364,7 @@ class StatisticsViewModel : ViewModel() {
 
     private fun getInstallTimeLabel(installTimeMs: Long): String {
         return try {
-            val sdf = SimpleDateFormat("yyyy-MM", Locale.getDefault())
-            sdf.format(Date(installTimeMs))
+            monthFormatter.get()?.format(Date(installTimeMs)) ?: "未知"
         } catch (_: Exception) {
             "未知"
         }
@@ -396,10 +402,9 @@ class StatisticsViewModel : ViewModel() {
      * 计算安装趋势（按月分组）
      */
     private fun calculateInstallTrend(appList: List<AppItem>): List<InstallTrendPoint> {
-        val sdf = SimpleDateFormat("yyyy-MM", Locale.getDefault())
         val grouped = appList.groupBy { app ->
             try {
-                sdf.format(Date(app.getPackageInfo().firstInstallTime))
+                monthFormatter.get()?.format(Date(app.getPackageInfo().firstInstallTime)) ?: "未知"
             } catch (_: Exception) {
                 "未知"
             }

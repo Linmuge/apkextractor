@@ -51,13 +51,11 @@ fun PrivacyDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(420.dp)
         ) {
             val annotatedString = buildPrivacyText(appName)
 
             Column(
                 modifier = Modifier
-                    .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState())
             ) {
                 ClickableText(

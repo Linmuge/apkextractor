@@ -55,6 +55,7 @@
     <string name="activity_detail_wait_loading">Please wait while the package is being reading, and it may take some time</string>
 
     <string name="activity_detail_signature_head">Signature Info</string>
+    <string name="signature_scheme_title">Signature Scheme</string>
     <string name="activity_detail_signature_issuer">Signature issuer</string>
     <string name="activity_detail_signature_subject">Signature owner</string>
     <string name="activity_detail_signature_serial">Serial number</string>
@@ -264,4 +265,44 @@
     <string name="setting_dynamic_color_desc">Generate theme from wallpaper colors (Material You)</string>
     <string name="invert_selection">Invert</string>
     <string name="deselect_all">Deselect All</string>
+
+    <!-- Statistics screen -->
+    <string name="stats_tab_export">Export</string>
+    <string name="stats_tab_permission">Permissions</string>
+    <string name="stats_sort_by_count">By Count</string>
+    <string name="stats_sort_by_name">By Name</string>
+    <string name="stats_detail_data">Detail Data</string>
+    <string name="stats_no_data">No data for current filter</string>
+    <string name="stats_load_failed">Load failed</string>
+    <string name="stats_partial_data_error">Some data may not be updated</string>
+
+    <!-- Main screen -->
+    <string name="menu_filter">Filter</string>
+    <string name="menu_more">More</string>
+    <string name="menu_group">Group</string>
+    <string name="menu_group_active">Group (%1$s)</string>
+    <string name="menu_switch_to_grid">Switch to Grid</string>
+    <string name="menu_switch_to_list">Switch to List</string>
+    <string name="dialog_select_group_mode">Select Group Mode</string>
+
+    <!-- Export enhancements -->
+    <string name="export_retry">Retry</string>
+    <string name="export_retry_message">Retrying export %1$s (%2$d/%3$d)</string>
+    <string name="export_all_failed">All retries failed</string>
+
+    <!-- Custom App Groups -->
+    <string name="group_manage_title">Manage Groups</string>
+    <string name="group_manage_app_title">Manage groups for \"%1$s\"</string>
+    <string name="group_empty_hint">No groups yet, tap below to create</string>
+    <string name="group_create">Create Group</string>
+    <string name="group_create_title">Create Group</string>
+    <string name="group_edit">Edit</string>
+    <string name="group_edit_title">Edit Group</string>
+    <string name="group_delete">Delete Group</string>
+    <string name="group_delete_title">Delete Group</string>
+    <string name="group_delete_message">Are you sure you want to delete group \"%1$s\"? This cannot be undone.</string>
+    <string name="group_name_label">Group Name</string>
+    <string name="group_color_label">Group Color</string>
+    <string name="group_app_count">%1$d apps</string>
+    <string name="group_filter_label">Custom Groups</string>
 </resources>

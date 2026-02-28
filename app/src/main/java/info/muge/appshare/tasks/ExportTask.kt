@@ -29,11 +29,13 @@ import kotlin.coroutines.coroutineContext
 /**
  * 导出任务（协程版）
  * @param list 要导出的AppItem集合
+ * @param maxRetries 单个文件失败时的最大重试次数
  */
 class ExportTask(
     private val context: Context,
     private val list: List<AppItem>,
-    private var listener: ExportProgressListener?
+    private var listener: ExportProgressListener?,
+    private val maxRetries: Int = 2
 ) {
     private val isExternal: Boolean = SPUtil.getIsSaved2ExternalStorage(context)
 
@@ -48,6 +50,10 @@ class ExportTask(
 
     private val writePaths = ArrayList<FileItem>()
     private val errorMessage = StringBuilder()
+
+    // 记录重试次数
+    private var retryCount = 0
+    private val retryLog = StringBuilder()
 
     fun setExportProgressListener(listener: ExportProgressListener) {
         this.listener = listener
@@ -80,134 +86,160 @@ class ExportTask(
         for (i in list.indices) {
             if (!coroutineContext.isActive) break
 
-            try {
-                val item = list[i]
-                val orderThisLoop = i + 1
+            var success = false
+            var lastException: Exception? = null
+            var currentRetry = 0
 
-                val splits = item.getSplitSourceDirs()
-                val hasSplits = !splits.isNullOrEmpty()
-
-                if (!item.exportData && !item.exportObb && !hasSplits) {
-                    // Export single Base APK
-                    val outputStream: OutputStream
-                    if (isExternal) {
-                        val documentFile = OutputUtil.getWritingDocumentFileForAppItem(context, item, "apk", i + 1)!!
-                        currentWritingFile = FileItem(context, documentFile)
-                        currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
-                        outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
-                    } else {
-                        val writePath = OutputUtil.getAbsoluteWritePath(context, item, "apk", i + 1)
-                        currentWritingFile = FileItem(writePath)
-                        currentWritingPath = writePath
-                        outputStream = FileOutputStream(File(OutputUtil.getAbsoluteWritePath(context, item, "apk", i + 1)))
-                    }
-
+            while (!success && currentRetry <= maxRetries && coroutineContext.isActive) {
+                if (currentRetry > 0) {
+                    retryLog.append("重试 #$currentRetry: ${list[i].getAppName()}\n")
                     postToMain {
-                        listener?.onExportAppItemStarted(orderThisLoop, item, list.size, currentWritingPath.toString())
+                        listener?.onExportRetry(currentRetry, maxRetries, list[i].getAppName())
                     }
-
-                    val inputStream = FileInputStream(item.getSourcePath())
-                    val out = BufferedOutputStream(outputStream)
-
-                    val buffer = ByteArray(1024 * 10)
-                    var byteread: Int
-
-                    while (inputStream.read(buffer).also { byteread = it } != -1 && coroutineContext.isActive) {
-                        out.write(buffer, 0, byteread)
-                        progress += byteread
-                        bytesPerSecond += byteread
-
-                        val endTime = System.currentTimeMillis()
-                        if (endTime - startTime > 1000) {
-                            startTime = endTime
-                            val speed = bytesPerSecond
-                            bytesPerSecond = 0
-                            postToMain {
-                                listener?.onExportSpeedUpdated(speed)
-                            }
-                        }
-
-                        if (progress - progressCheckApk > 100 * 1024) {
-                            progressCheckApk = progress
-                            postToMain {
-                                listener?.onExportProgressUpdated(progress, total, currentWritingPath.toString())
-                            }
-                        }
-                    }
-
-                    out.flush()
-                    inputStream.close()
-                    out.close()
-                    writePaths.add(currentWritingFile!!)
-                    // 记录导出统计
-                    ExportStatsManager.recordExport(context, item.getPackageName(), item.getAppName(), item.getSize())
-                    if (coroutineContext.isActive) currentWritingFile = null
-                } else {
-                    // Export ZIP
-                    val outputStream: OutputStream
-                    val ext = if (hasSplits) "apks" else SPUtil.getCompressingExtensionName(context)
-                    if (isExternal) {
-                        val documentFile = OutputUtil.getWritingDocumentFileForAppItem(context, item, ext, i + 1)!!
-                        currentWritingFile = FileItem(context, documentFile)
-                        currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
-                        outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
-                    } else {
-                        val writePath = OutputUtil.getAbsoluteWritePath(context, item, ext, i + 1)
-                        currentWritingFile = FileItem(writePath)
-                        currentWritingPath = writePath
-                        outputStream = FileOutputStream(File(OutputUtil.getAbsoluteWritePath(context, item, ext, i + 1)))
-                    }
-
-                    postToMain {
-                        listener?.onExportAppItemStarted(orderThisLoop, item, list.size, currentWritingFile!!.getPath())
-                    }
-
-                    val zos = ZipOutputStream(BufferedOutputStream(outputStream))
-                    zos.setComment("Packaged by info.muge.appshare \nhttps://github.com/ghmxr/appshare")
-                    val zipLevel = SPUtil.getGlobalSharedPreferences(context)
-                        .getInt(Constants.PREFERENCE_ZIP_COMPRESS_LEVEL, Constants.PREFERENCE_ZIP_COMPRESS_LEVEL_DEFAULT)
-
-                    if (zipLevel in 0..9) zos.setLevel(zipLevel)
-
-                    if (hasSplits) {
-                        writeZip(File(item.getSourcePath()), "base.apk", zos, zipLevel, true)
-                        for (splitPath in splits!!) {
-                            val splitFile = File(splitPath)
-                            writeZip(splitFile, splitFile.name, zos, zipLevel, true)
-                        }
-                    } else {
-                        writeZipRecursive(File(item.getSourcePath()), "", zos, zipLevel)
-                    }
-
-                    if (item.exportData) {
-                        writeZipRecursive(
-                            File("${StorageUtil.getMainExternalStoragePath()}/android/data/${item.getPackageName()}"),
-                            "Android/data/", zos, zipLevel
-                        )
-                    }
-                    if (item.exportObb) {
-                        writeZipRecursive(
-                            File("${StorageUtil.getMainExternalStoragePath()}/android/obb/${item.getPackageName()}"),
-                            "Android/obb/", zos, zipLevel
-                        )
-                    }
-
-                    zos.flush()
-                    zos.close()
-                    writePaths.add(currentWritingFile!!)
-                    // 记录导出统计
-                    ExportStatsManager.recordExport(context, item.getPackageName(), item.getAppName(), item.getSize())
-                    if (coroutineContext.isActive) currentWritingFile = null
+                    // 重试前等待一小段时间
+                    kotlinx.coroutines.delay(500)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+
+                try {
+                    val item = list[i]
+                    val orderThisLoop = i + 1
+
+                    val splits = item.getSplitSourceDirs()
+                    val hasSplits = !splits.isNullOrEmpty()
+
+                    if (!item.exportData && !item.exportObb && !hasSplits) {
+                        // Export single Base APK
+                        val outputStream: OutputStream
+                        if (isExternal) {
+                            val documentFile = OutputUtil.getWritingDocumentFileForAppItem(context, item, "apk", i + 1)!!
+                            currentWritingFile = FileItem(context, documentFile)
+                            currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
+                            outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
+                        } else {
+                            val writePath = OutputUtil.getAbsoluteWritePath(context, item, "apk", i + 1)
+                            currentWritingFile = FileItem(writePath)
+                            currentWritingPath = writePath
+                            outputStream = FileOutputStream(File(OutputUtil.getAbsoluteWritePath(context, item, "apk", i + 1)))
+                        }
+
+                        postToMain {
+                            listener?.onExportAppItemStarted(orderThisLoop, item, list.size, currentWritingPath.toString())
+                        }
+
+                        val inputStream = FileInputStream(item.getSourcePath())
+                        val out = BufferedOutputStream(outputStream)
+
+                        val buffer = ByteArray(1024 * 10)
+                        var byteread: Int
+
+                        while (inputStream.read(buffer).also { byteread = it } != -1 && coroutineContext.isActive) {
+                            out.write(buffer, 0, byteread)
+                            progress += byteread
+                            bytesPerSecond += byteread
+
+                            val endTime = System.currentTimeMillis()
+                            if (endTime - startTime > 1000) {
+                                startTime = endTime
+                                val speed = bytesPerSecond
+                                bytesPerSecond = 0
+                                postToMain {
+                                    listener?.onExportSpeedUpdated(speed)
+                                }
+                            }
+
+                            if (progress - progressCheckApk > 100 * 1024) {
+                                progressCheckApk = progress
+                                postToMain {
+                                    listener?.onExportProgressUpdated(progress, total, currentWritingPath.toString())
+                                }
+                            }
+                        }
+
+                        out.flush()
+                        inputStream.close()
+                        out.close()
+                        writePaths.add(currentWritingFile!!)
+                        // 记录导出统计
+                        ExportStatsManager.recordExport(context, item.getPackageName(), item.getAppName(), item.getSize())
+                        if (coroutineContext.isActive) currentWritingFile = null
+                        success = true
+                    } else {
+                        // Export ZIP
+                        val outputStream: OutputStream
+                        val ext = if (hasSplits) "apks" else SPUtil.getCompressingExtensionName(context)
+                        if (isExternal) {
+                            val documentFile = OutputUtil.getWritingDocumentFileForAppItem(context, item, ext, i + 1)!!
+                            currentWritingFile = FileItem(context, documentFile)
+                            currentWritingPath = "${SPUtil.getInternalSavePath()}/${documentFile.name}"
+                            outputStream = OutputUtil.getOutputStreamForDocumentFile(context, documentFile)!!
+                        } else {
+                            val writePath = OutputUtil.getAbsoluteWritePath(context, item, ext, i + 1)
+                            currentWritingFile = FileItem(writePath)
+                            currentWritingPath = writePath
+                            outputStream = FileOutputStream(File(OutputUtil.getAbsoluteWritePath(context, item, ext, i + 1)))
+                        }
+
+                        postToMain {
+                            listener?.onExportAppItemStarted(orderThisLoop, item, list.size, currentWritingFile!!.getPath())
+                        }
+
+                        val zos = ZipOutputStream(BufferedOutputStream(outputStream))
+                        zos.setComment("Packaged by info.muge.appshare \nhttps://github.com/ghmxr/appshare")
+                        val zipLevel = SPUtil.getGlobalSharedPreferences(context)
+                            .getInt(Constants.PREFERENCE_ZIP_COMPRESS_LEVEL, Constants.PREFERENCE_ZIP_COMPRESS_LEVEL_DEFAULT)
+
+                        if (zipLevel in 0..9) zos.setLevel(zipLevel)
+
+                        if (hasSplits) {
+                            writeZip(File(item.getSourcePath()), "base.apk", zos, zipLevel, true)
+                            for (splitPath in splits!!) {
+                                val splitFile = File(splitPath)
+                                writeZip(splitFile, splitFile.name, zos, zipLevel, true)
+                            }
+                        } else {
+                            writeZipRecursive(File(item.getSourcePath()), "", zos, zipLevel)
+                        }
+
+                        if (item.exportData) {
+                            writeZipRecursive(
+                                File("${StorageUtil.getMainExternalStoragePath()}/android/data/${item.getPackageName()}"),
+                                "Android/data/", zos, zipLevel
+                            )
+                        }
+                        if (item.exportObb) {
+                            writeZipRecursive(
+                                File("${StorageUtil.getMainExternalStoragePath()}/android/obb/${item.getPackageName()}"),
+                                "Android/obb/", zos, zipLevel
+                            )
+                        }
+
+                        zos.flush()
+                        zos.close()
+                        writePaths.add(currentWritingFile!!)
+                        // 记录导出统计
+                        ExportStatsManager.recordExport(context, item.getPackageName(), item.getAppName(), item.getSize())
+                        if (coroutineContext.isActive) currentWritingFile = null
+                        success = true
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    lastException = e
+                    try {
+                        currentWritingFile?.delete()
+                    } catch (_: Exception) { }
+                    currentRetry++
+                }
+            }
+
+            // 所有重试都失败后记录错误
+            if (!success && lastException != null) {
                 errorMessage.append(currentWritingPath)
                 errorMessage.append(":")
-                errorMessage.append(e.toString())
+                errorMessage.append(lastException.toString())
+                if (currentRetry > 1) {
+                    errorMessage.append(" (重试 $currentRetry 次后失败)")
+                }
                 errorMessage.append("\n\n")
-                try {
-                    currentWritingFile?.delete()
-                } catch (_: Exception) { }
             }
         }
 
@@ -340,6 +372,7 @@ class ExportTask(
         fun onExportProgressUpdated(current: Long, total: Long, write_path: String)
         fun onExportZipProgressUpdated(write_path: String)
         fun onExportSpeedUpdated(speed: Long)
+        fun onExportRetry(currentRetry: Int, maxRetries: Int, appName: String) {}
         fun onExportTaskFinished(write_paths: List<FileItem>, error_message: String)
     }
 }

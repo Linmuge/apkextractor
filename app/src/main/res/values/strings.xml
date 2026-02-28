@@ -56,6 +56,7 @@
     <string name="activity_detail_wait_loading">请等待，压缩包读取中，可能会花费些时间</string>
 
     <string name="activity_detail_signature_head">签名信息</string>
+    <string name="signature_scheme_title">签名方案</string>
     <string name="activity_detail_signature_issuer">证书发行者</string>
     <string name="activity_detail_signature_subject">证书所有者</string>
     <string name="activity_detail_signature_serial">序列号</string>
@@ -295,4 +296,44 @@
     <string name="setting_dynamic_color_desc">使用壁纸颜色生成主题 (Material You)</string>
     <string name="invert_selection">反选</string>
     <string name="deselect_all">取消全选</string>
+
+    <!-- Statistics screen -->
+    <string name="stats_tab_export">导出</string>
+    <string name="stats_tab_permission">权限</string>
+    <string name="stats_sort_by_count">按数量</string>
+    <string name="stats_sort_by_name">按名称</string>
+    <string name="stats_detail_data">详细数据</string>
+    <string name="stats_no_data">当前筛选条件下没有数据</string>
+    <string name="stats_load_failed">加载失败</string>
+    <string name="stats_partial_data_error">部分数据可能未更新</string>
+
+    <!-- Main screen -->
+    <string name="menu_filter">筛选</string>
+    <string name="menu_more">更多</string>
+    <string name="menu_group">分组</string>
+    <string name="menu_group_active">分组（%1$s）</string>
+    <string name="menu_switch_to_grid">切换为网格</string>
+    <string name="menu_switch_to_list">切换为列表</string>
+    <string name="dialog_select_group_mode">选择分组方式</string>
+
+    <!-- Export enhancements -->
+    <string name="export_retry">重试</string>
+    <string name="export_retry_message">正在重试导出 %1$s (%2$d/%3$d)</string>
+    <string name="export_all_failed">所有重试均失败</string>
+
+    <!-- Custom App Groups -->
+    <string name="group_manage_title">管理分组</string>
+    <string name="group_manage_app_title">管理「%1$s」的分组</string>
+    <string name="group_empty_hint">暂无分组，点击下方按钮创建</string>
+    <string name="group_create">新建分组</string>
+    <string name="group_create_title">创建分组</string>
+    <string name="group_edit">编辑</string>
+    <string name="group_edit_title">编辑分组</string>
+    <string name="group_delete">删除分组</string>
+    <string name="group_delete_title">删除分组</string>
+    <string name="group_delete_message">确定要删除分组「%1$s」吗？此操作不可恢复。</string>
+    <string name="group_name_label">分组名称</string>
+    <string name="group_color_label">分组颜色</string>
+    <string name="group_app_count">%1$d 个应用</string>
+    <string name="group_filter_label">自定义分组</string>
 </resources>

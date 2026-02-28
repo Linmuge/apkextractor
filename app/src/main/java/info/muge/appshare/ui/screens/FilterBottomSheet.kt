@@ -50,7 +50,7 @@ fun FilterBottomSheet(
     onApply: (FilterConfig) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var appType by remember { mutableStateOf(currentConfig.appType) }
     var sizeRange by remember { mutableStateOf(currentConfig.sizeRange) }
@@ -93,6 +93,13 @@ fun FilterBottomSheet(
                     appType = AppTypeFilter.ALL
                     sizeRange = SizeRange.ALL
                     selectedInstallers = emptySet()
+                    onApply(
+                        FilterConfig(
+                            appType = AppTypeFilter.ALL,
+                            sizeRange = SizeRange.ALL,
+                            installerSources = emptySet()
+                        )
+                    )
                 }) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
